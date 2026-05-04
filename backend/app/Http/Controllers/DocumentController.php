@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
@@ -11,16 +11,25 @@ class DocumentController extends Controller
 {
     public function index(): JsonResponse
     {
-        $documents = Document::with('client')
-            ->orderBy('id', 'desc')
-            ->paginate(15);
-        return response()->json($documents);
+       $documents = Document::with('client')
+        ->orderBy('id', 'desc')
+        ->get();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $documents,
+            'message' => 'Documents récupérés avec succès'
+        ], 200);
     }
 
     public function show(Document $document): JsonResponse
     {
         $document->load('client', 'documentLines', 'payments');
-        return response()->json($document);
+        return response()->json([
+            'success' => true,
+            'data' => $document,
+            'message' => 'Document récupéré avec succès'
+        ], 200);
     }
 
     public function store(Request $request): JsonResponse
@@ -41,7 +50,11 @@ class DocumentController extends Controller
         ]);
 
         $document = Document::create($data);
-        return response()->json($document, 201);
+        return response()->json([
+            'success' => true,
+            'data' => $document,
+            'message' => 'Document créé avec succès'
+        ], 201);
     }
 
     public function update(Request $request, Document $document): JsonResponse
@@ -62,12 +75,19 @@ class DocumentController extends Controller
         ]);
 
         $document->update($data);
-        return response()->json($document);
+        return response()->json([
+            'success' => true,
+            'data' => $document,
+            'message' => 'Document mis à jour avec succès'
+        ], 200);
     }
 
     public function destroy(Document $document): JsonResponse
     {
         $document->delete();
-        return response()->json(null, 204);
+        return response()->json([
+            'success' => true,
+            'message' => 'Document supprimé avec succès'
+        ], 200);
     }
 }

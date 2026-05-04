@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
@@ -11,13 +11,21 @@ class ClientController extends Controller
 {
     public function index(): JsonResponse
     {
-        $clients = Client::orderBy('id', 'desc')->paginate(15);
-        return response()->json($clients);
+        $clients = Client::all()->sortByDesc('id');
+        return response()->json([
+            'success' => true,
+            'data' => $clients,
+            'message' => 'Clients récupérés avec succès'
+        ], 200);
     }
 
     public function show(Client $client): JsonResponse
     {
-        return response()->json($client);
+        return response()->json([
+            'success' => true,
+            'data' => $client,
+            'message' => 'Client récupéré avec succès'
+        ], 200);
     }
 
     public function store(Request $request): JsonResponse
@@ -31,8 +39,12 @@ class ClientController extends Controller
             'statut' => 'nullable|string|max:50',
         ]);
 
-        $client = Client::create($data);
-        return response()->json($client, 201);
+            $clients = Client::orderBy('id', 'desc')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $client,
+            'message' => 'Client créé avec succès'
+        ], 201);
     }
 
     public function update(Request $request, Client $client): JsonResponse
@@ -47,12 +59,19 @@ class ClientController extends Controller
         ]);
 
         $client->update($data);
-        return response()->json($client);
+        return response()->json([
+            'success' => true,
+            'data' => $client,
+            'message' => 'Client mis à jour avec succès'
+        ], 200);
     }
 
     public function destroy(Client $client): JsonResponse
     {
         $client->delete();
-        return response()->json(null, 204);
+        return response()->json([
+            'success' => true,
+            'message' => 'Client supprimé avec succès'
+        ], 200);
     }
 }

@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,8 +52,7 @@ Route::get('/products/stock/low', [ProductController::class, 'lowStock'])->name(
 // ============================================================================
 // ROUTES CLIENT & DOCUMENT
 // ============================================================================
-use App\Http\Controllers\Api\ClientController;
-use App\Http\Controllers\Api\DocumentController;
+
 
 Route::apiResource('clients', ClientController::class);
 Route::apiResource('documents', DocumentController::class);
