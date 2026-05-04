@@ -12,10 +12,14 @@ class Fournisseur extends Model
 
     protected $fillable = [
         'nom',
+        'ice',
+        'identifiant_fiscal',
+        'contact_nom',
         'description',
         'telephone',
         'email',
         'adresse',
+        'ville',
         'actif',
     ];
 

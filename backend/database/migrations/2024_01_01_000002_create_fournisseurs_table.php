@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->text('description')->nullable();
-            $table->string('telephone')->nullable();
+            $table->string('telephone')->nullable();    
             $table->string('email')->nullable();
             $table->text('adresse')->nullable();
             $table->boolean('actif')->default(true);

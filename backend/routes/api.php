@@ -2,6 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FournisseurController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,10 +21,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
 Route::get('/test', function () {
     return response()->json([
         'message' => 'API is working fine!'
     ]);
 });
+
+Route::apiResource('fournisseurs', FournisseurController::class);
+Route::apiResource('categories', CategoryController::class);
+Route::get('/categories/active/list', [CategoryController::class, 'active'])->name('categories.active');
+Route::get('/categories/with-count', [CategoryController::class, 'withProductCount'])->name('categories.withCount');
+Route::apiResource('products', ProductController::class);
+Route::get('/products/category/{category}', [ProductController::class, 'byCategory'])->name('products.byCategory');
+Route::get('/products/fournisseur/{fournisseur}', [ProductController::class, 'byFournisseur'])->name('products.byFournisseur');
+Route::get('/products/stock/low', [ProductController::class, 'lowStock'])->name('products.lowStock');
 
