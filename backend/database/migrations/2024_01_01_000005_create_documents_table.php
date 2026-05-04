@@ -24,7 +24,10 @@ return new class extends Migration
             $table->string('statut_paiement')->default('non_paye');
             $table->timestamps();
 
-            $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
+            $table->foreign('client_id')->
+            references('id')->on('clients')->
+            onDelete('cascade')  ;
+            
         });
     }
 

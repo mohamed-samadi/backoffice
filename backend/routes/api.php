@@ -25,3 +25,9 @@ Route::get('/test', function () {
     ]);
 });
 
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\DocumentController;
+
+Route::apiResource('clients', ClientController::class);
+Route::apiResource('documents', DocumentController::class);
+
