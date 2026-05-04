@@ -13,6 +13,7 @@ class Document extends Model
 
     protected $fillable = [
         'client_id',
+        'user_id',
         'numero',
         'type',
         'date_creation',
@@ -42,6 +43,11 @@ class Document extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function documentLines(): HasMany

@@ -13,6 +13,7 @@ class Payment extends Model
 
     protected $fillable = [
         'document_id',
+        'user_id',
         'mode_paiement',
         'montant',
         'reference',
@@ -30,6 +31,11 @@ class Payment extends Model
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function cheques(): HasMany

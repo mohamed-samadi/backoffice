@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Client extends Model
 {
@@ -29,13 +30,18 @@ class Client extends Model
         return $this->hasMany(Document::class);
     }
 
-    public function payments(): HasMany
+    public function payments(): HasManyThrough
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasManyThrough(Payment::class, Document::class);
     }
 
     public function credits(): HasMany
     {
         return $this->hasMany(Credit::class);
+    }
+
+    public function cheques(): HasMany
+    {
+        return $this->hasMany(Cheque::class);
     }
 }

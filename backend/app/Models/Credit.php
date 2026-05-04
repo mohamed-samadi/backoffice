@@ -13,6 +13,7 @@ class Credit extends Model
     protected $fillable = [
         'client_id',
         'document_id',
+        'user_id',
         'montant_total',
         'montant_paye',
         'reste',
@@ -34,6 +35,11 @@ class Credit extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function document(): BelongsTo
