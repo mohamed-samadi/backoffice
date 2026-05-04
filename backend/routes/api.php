@@ -27,12 +27,32 @@ Route::get('/test', function () {
     ]);
 });
 
+// ============================================================================
+// ROUTES FOURNISSEUR
+// ============================================================================
 Route::apiResource('fournisseurs', FournisseurController::class);
+
+// ============================================================================
+// ROUTES CATEGORIE
+// ============================================================================
 Route::apiResource('categories', CategoryController::class);
 Route::get('/categories/active/list', [CategoryController::class, 'active'])->name('categories.active');
 Route::get('/categories/with-count', [CategoryController::class, 'withProductCount'])->name('categories.withCount');
+
+// ============================================================================
+// ROUTES PRODUIT
+// ============================================================================
 Route::apiResource('products', ProductController::class);
 Route::get('/products/category/{category}', [ProductController::class, 'byCategory'])->name('products.byCategory');
 Route::get('/products/fournisseur/{fournisseur}', [ProductController::class, 'byFournisseur'])->name('products.byFournisseur');
 Route::get('/products/stock/low', [ProductController::class, 'lowStock'])->name('products.lowStock');
+
+// ============================================================================
+// ROUTES CLIENT & DOCUMENT
+// ============================================================================
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\DocumentController;
+
+Route::apiResource('clients', ClientController::class);
+Route::apiResource('documents', DocumentController::class);
 
