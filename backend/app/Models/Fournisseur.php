@@ -22,7 +22,6 @@ class Fournisseur extends Model
         'ville',
         'actif',
     ];
-
     protected $casts = [
         'actif' => 'boolean',
         'created_at' => 'datetime',

@@ -12,14 +12,19 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'image',
         'category_id',
         'fournisseur_id',
+        'sku',
         'nom',
+        'type',
         'description',
         'prix_unitaire_ht',
         'tva',
         'prix_revient',
         'quantite_stock',
+        'seuil_alerte_stock',
+        'code_barre',
         'actif',
     ];
 
@@ -47,4 +52,12 @@ class Product extends Model
     {
         return $this->hasMany(DocumentLine::class);
     }
+    public function getImageUrlAttribute(): ?string
+        {
+            return $this->image
+                ? asset('storage/' . $this->image)
+                : null;
+        }
+        // Ajouter dans $appends pour l'inclure automatiquement dans les réponses JSON
+        protected $appends = ['image_url'];
 }

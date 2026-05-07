@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"cd backend && php artisan serve\" \"cd frontend && npm run dev\"",
+    "build": "cd frontend && vite build"
+  },
+  "devDependencies": {
+    "axios": "^1.6.4",
+    "concurrently": "^9.2.1",
+    "laravel-vite-plugin": "^1.0.0",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^1.7.0",
+    "react-redux": "^9.2.0"
+  }
+}
