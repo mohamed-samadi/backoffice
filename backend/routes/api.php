@@ -23,11 +23,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'API is working fine!'
-    ]);
-});
 
 // ============================================================================
 // ROUTES FOURNISSEUR
@@ -50,10 +45,17 @@ Route::get('/products/fournisseur/{fournisseur}', [ProductController::class, 'by
 Route::get('/products/stock/low', [ProductController::class, 'lowStock'])->name('products.lowStock');
 
 // ============================================================================
-// ROUTES CLIENT & DOCUMENT
+// ROUTES CLIENT
 // ============================================================================
 
 
 Route::apiResource('clients', ClientController::class);
+
+
+
+
+// ============================================================================
+// ROUTES DOCUMENT
+// ============================================================================
 Route::apiResource('documents', DocumentController::class);
 
