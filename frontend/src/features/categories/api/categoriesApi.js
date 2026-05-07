@@ -21,7 +21,6 @@ export const categoriesApi = {
   // Détails d'une catégorie (avec ses produits + products_count)
   getById: (id) => api.get(`/categories/${id}`),
 
-  // CRUD
   create: (payload) => api.post("/categories", payload),
   update: (id, payload) => api.put(`/categories/${id}`, payload),
   delete: (id) => api.delete(`/categories/${id}`),

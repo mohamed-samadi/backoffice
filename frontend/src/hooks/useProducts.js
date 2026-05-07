@@ -30,7 +30,7 @@ import {
   selectProductFetchByCategoryLoading,
   selectProductFetchByFournisseurLoading,
   selectProductFetchLowStockLoading,
-  selectProductsError,
+  selectProductsError ,
   selectProductsSuccess,
 } from "../features/products/selectors/productsSelectors";
 import {

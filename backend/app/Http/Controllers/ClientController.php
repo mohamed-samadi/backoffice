@@ -42,7 +42,7 @@ class ClientController extends Controller
             $clients = Client::orderBy('id', 'desc')->get();
         return response()->json([
             'success' => true,
-            'data' => $client,
+            'data' => $clients,
             'message' => 'Client créé avec succès'
         ], 201);
     }
@@ -74,4 +74,15 @@ class ClientController extends Controller
             'message' => 'Client supprimé avec succès'
         ], 200);
     }
+   public function active()
+{
+    $clients = Client::where('statut', 'active')
+    ->select('id', 'nom_complet')
+    ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => $clients
+    ], 200);
+}
 }

@@ -92,13 +92,6 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        // ✅ load() pour les produits + loadCount() pour products_count
-        // Évite le ?? et le N+1 de l'accessor
-        $category->load(['products' => fn ($q) =>
-            $q->select('id', 'category_id', 'name', 'sku', 'price', 'stock')
-        ]);
-        $category->loadCount('products');
-
         return response()->json([
             'success' => true,
             'data'    => $category, // products_count est inclus automatiquement

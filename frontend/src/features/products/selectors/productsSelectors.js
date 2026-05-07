@@ -51,7 +51,6 @@ export const selectProductFetchLowStockLoading      = (state) => state?.products
 export const selectProductsLoading = (state) =>
   Object.values(state?.products?.loadingStates || {}).some(Boolean);
 
-// ── Error / Success ───────────────────────────────────────────────────────────
 export const selectProductsError   = (state) => state?.products?.error   || null;
 export const selectProductsSuccess = (state) => state?.products?.success || false;
 
@@ -59,7 +58,6 @@ export const selectProductsSuccess = (state) => state?.products?.success || fals
 export const selectProductById = (state, id) =>
   selectProductsData(state).find((p) => p.id === id) || null;
 
-// ── Aliases ───────────────────────────────────────────────────────────────────
 export const selectProducts       = selectProductsData;
 export const selectProductLoading = selectProductsLoading;
 export const selectProductError   = selectProductsError;

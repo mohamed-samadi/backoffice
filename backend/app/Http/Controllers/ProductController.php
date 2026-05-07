@@ -29,6 +29,7 @@ class ProductController extends Controller
             round(avg(prix_unitaire_ht), 2)             as prix_moyen
         ')->first();
 
+
         // ─── Paramètres ───────────────────────────────────────────────────────
         $perPage   = min((int) $request->get('per_page', 10), 100);
         $search    = $request->get('search');
@@ -53,7 +54,7 @@ class ProductController extends Controller
             $query->where('category_id', (int) $request->category_id);
         }
 
-        // 🏭 Filtre fournisseur
+        // 🏭 Filtre fournisseur  
         if ($request->filled('fournisseur_id')) {
             $query->where('fournisseur_id', (int) $request->fournisseur_id);
         }

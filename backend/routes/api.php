@@ -7,7 +7,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DocumentController;
-
+use App\Http\Controllers\TaskCategoryController;
+use App\Http\Controllers\TaskController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -55,11 +56,18 @@ Route::put('products/{product}',               [ProductController::class, 'updat
 // ✅ except('update') pour éviter la route PUT/PATCH en double
 Route::apiResource('products', ProductController::class)->except(['update']);
 
-// ============================================================================
-// ROUTES CLIENT & DOCUMENT
-// ============================================================================
+// ── TASK CATEGORIES ───────────────────────────────────────────────────────
+Route::get('task-categories/active', [TaskCategoryController::class, 'active']);
+Route::apiResource('task-categories', TaskCategoryController::class);
 
+// ── TASKS ─────────────────────────────────────────────────────────────────
+// ⚠️ Routes custom AVANT apiResource
+Route::get('tasks/overdue',                        [TaskController::class, 'overdue'])->name('tasks.overdue');
+Route::get('tasks/category/{taskCategory}',        [TaskController::class, 'byCategory'])->name('tasks.byCategory');
+Route::patch('tasks/{task}/status',                [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
+Route::apiResource('tasks', TaskController::class);
 
+Route::get('clients/active', [ClientController::class, 'active']);
 Route::apiResource('clients', ClientController::class);
 Route::apiResource('documents', DocumentController::class);
 

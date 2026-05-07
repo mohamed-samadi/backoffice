@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use App\Models\Task;
 
 class Client extends Model
 {
@@ -24,7 +25,10 @@ class Client extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);

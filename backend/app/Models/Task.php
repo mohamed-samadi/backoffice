@@ -3,7 +3,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Models\Client;
+use App\Models\TaskCategory;
 class Task extends Model
 {
     use HasFactory;
@@ -26,7 +27,7 @@ class Task extends Model
     | RELATIONS
     |--------------------------------------------------------------------------
     */
-
+    
     public function client()
     {
         return $this->belongsTo(Client::class);

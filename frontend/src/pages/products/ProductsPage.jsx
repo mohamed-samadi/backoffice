@@ -125,7 +125,7 @@ const COLUMNS = [
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function ProductsPage() {
   const {
-    products, pagination, total, stats,
+    products, pagination, total, stats,error,
     fetchLoading, createLoading, updateLoading, deleteLoading,
     fetchProducts, createProduct, updateProduct, deleteProduct,
   } = useProducts();
@@ -189,8 +189,9 @@ export default function ProductsPage() {
       notify("error", msg, 5000);
     }
   };
-
-  /* ── Delete ───────────────────────────────────────────────────────────── */
+  if (error) {
+    console.log("Error selecting product:", error);
+  }
   const handleDeleteRequest = (row) => setDeleteConfirm(row);
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;

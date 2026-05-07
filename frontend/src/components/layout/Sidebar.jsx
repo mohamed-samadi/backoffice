@@ -22,7 +22,8 @@ const NAV_ITEMS = [
   { label: "Fournisseurs", path: "/fournisseurs", icon: FaTruck },
 
   { label: "", separator: true },
-
+  { label: "Tâches", path: "/tasks", icon: FaFileAlt },
+  {label: "Catégories de tâches", path: "/task-categories", icon: FaTags },
   { label: "Gestion Stock", category: true },
   { label: "products", path: "/products", icon: FaBox },
   { label: "Catégories", path: "/categories", icon: FaTags },
