@@ -24,11 +24,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test', function () {
-    return response()->json([
-        'message' => 'API is working fine!'
-    ]);
-});
 
 // ============================================================================
 // ROUTES FOURNISSEUR
@@ -69,5 +64,14 @@ Route::apiResource('tasks', TaskController::class);
 
 Route::get('clients/active', [ClientController::class, 'active']);
 Route::apiResource('clients', ClientController::class);
-Route::apiResource('documents', DocumentController::class);
+
+
+
+
+// ============================================================================
+// ROUTES DOCUMENT
+// ============================================================================
+Route::get('documents/stats', [DocumentController::class, 'stats'])->withoutMiddleware('throttle:api');
+Route::apiResource('documents', DocumentController::class)
+    ->withoutMiddleware('throttle:api');
 

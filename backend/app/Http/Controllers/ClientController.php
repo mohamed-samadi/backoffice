@@ -9,9 +9,20 @@ use Illuminate\Http\JsonResponse;
 
 class ClientController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request ): JsonResponse
     {
-        $clients = Client::all()->sortByDesc('id');
+        if ($request->has('search')) {
+            $clients = Client::when($request->search, function ($query) use ($request) {
+                $search = $request->search;
+                $query->where('nom_complet', 'like', "%{$search}%")
+                    ->orWhere('nom_entreprise', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'desc')
+            ->get();
+            
+        } else {
+            $clients = Client::orderBy('id', 'desc')->get();
+        }
         return response()->json([
             'success' => true,
             'data' => $clients,
@@ -74,6 +85,7 @@ class ClientController extends Controller
             'message' => 'Client supprimé avec succès'
         ], 200);
     }
+
    public function active()
 {
     $clients = Client::where('statut', 'active')
@@ -85,4 +97,7 @@ class ClientController extends Controller
         'data' => $clients
     ], 200);
 }
+
+ 
+
 }
