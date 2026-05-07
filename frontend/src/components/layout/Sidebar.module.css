@@ -1,0 +1,231 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   SIDEBAR LAYOUT STYLES
+   
+   Utilise les variables CSS du fichier tokens.css
+   Thème : Dark Premium
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@import "../../styles/tokens.css";
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* SIDEBAR CONTAINER                                                          */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar {
+  width: 228px;
+  min-width: 228px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transition:
+    width 0.25s ease-in-out,
+    min-width 0.25s ease-in-out;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* HEADER / LOGO                                                              */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition-base);
+}
+
+.header:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  color: white;
+  flex-shrink: 0;
+  font-weight: var(--font-weight-extrabold);
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.logoTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.logoSubtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* NAVIGATION                                                                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.nav {
+  flex: 1;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text-dim);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  text-align: left;
+  width: 100%;
+  min-height: 36px;
+}
+
+.navItem:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-accent);
+}
+
+.navItem.active {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.navItem.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--color-accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.navIcon {
+  font-size: var(--font-size-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.navLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── SEPARATOR ───────────────────────────────────────────────────────────── */
+
+.separator {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-2) 0;
+  flex-shrink: 0;
+}
+
+/* ─── CATEGORY ────────────────────────────────────────────────────────────── */
+
+.category {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  padding: var(--space-3) var(--space-4);
+  margin-top: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* SCROLLBAR                                                                  */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* RESPONSIVE                                                                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: var(--z-fixed);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ACCESSIBILITY                                                              */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.navItem:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.header:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

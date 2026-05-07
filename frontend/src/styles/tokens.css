@@ -1,0 +1,210 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   TOKENS CSS — Design System Variables
+   
+   Thème : Dark Premium
+   Palette : Accent bleu #4F7FFF + Status colors
+   
+   Structure :
+   - Couleurs (bg, surfaces, text)
+   - Opacités
+   - Arrondis (border-radius)
+   - Espacements
+   - Typographie
+   - Ombres
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ─── COLORS / COULEURS ─────────────────────────────────────────────────── */
+
+  /* Background & Surfaces */
+  --color-bg: #0a0b0f;
+  --color-surface: #111318;
+  --color-surface-hover: #181b22;
+  --color-border: #1e2230;
+
+  /* Accent (Primary) */
+  --color-accent: #4f7fff;
+  --color-accent-soft: rgba(79, 127, 255, 0.08);
+
+  /* Status Colors */
+  --color-green: #22c55e;
+  --color-green-soft: rgba(34, 197, 94, 0.1);
+
+  --color-red: #ef4444;
+  --color-red-soft: rgba(239, 68, 68, 0.1);
+
+  --color-amber: #f59e0b;
+  --color-amber-soft: rgba(245, 158, 11, 0.1);
+
+  --color-purple: #a855f7;
+  --color-purple-soft: rgba(168, 85, 247, 0.1);
+
+  --color-cyan: #06b6d4;
+  --color-cyan-soft: rgba(6, 182, 212, 0.1);
+
+  --color-teal: #14b8a6;
+  --color-teal-soft: rgba(20, 184, 166, 0.1);
+
+  /* Text */
+  --color-text: #f1f5f9;
+  --color-text-muted: #64748b;
+  --color-text-dim: #94a3b8;
+
+  /* WhatsApp Green */
+  --color-whatsapp: #25d366;
+
+  /* Google Drive Blue */
+  --color-drive: #4285f4;
+
+  /* ─── OPACITY / OPACITÉ ─────────────────────────────────────────────────── */
+
+  --opacity-subtle: 0.08; /* 8% — très subtil */
+  --opacity-soft: 0.1; /* 10% — léger */
+  --opacity-medium: 0.2; /* 20% — moyen */
+  --opacity-hover: 0.15; /* 15% — pour hover states */
+  --opacity-disabled: 0.4; /* 40% — disabled state */
+
+  /* ─── BORDER RADIUS / ARRONDIS ──────────────────────────────────────────── */
+
+  --radius-sm: 5px; /* Petits éléments (badges, buttons) */
+  --radius-md: 8px; /* Inputs, selects, petites cartes */
+  --radius-lg: 12px; /* Cartes moyennes, modals */
+  --radius-xl: 14px; /* Grandes cartes, conteneurs */
+  --radius-2xl: 16px; /* Cartes principales, sections */
+
+  /* ─── SPACING / ESPACEMENTS ─────────────────────────────────────────────── */
+
+  /* Padding & Margin scale (4px base) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Gap (flexbox, grid) */
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 12px;
+  --gap-lg: 16px;
+  --gap-xl: 20px;
+  --gap-2xl: 24px;
+
+  /* ─── TYPOGRAPHY / TYPOGRAPHIE ──────────────────────────────────────────── */
+
+  /* Font Family */
+  --font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-mono: "SFMono-Regular", "Courier New", monospace;
+
+  /* Font Size */
+  --font-size-xs: 11px; /* Labels, small text */
+  --font-size-sm: 12px; /* Inputs, table cells */
+  --font-size-base: 13px; /* Body text, regular */
+  --font-size-md: 14px; /* Paragraph, card titles */
+  --font-size-lg: 16px; /* Buttons, larger text */
+  --font-size-xl: 20px; /* Page titles */
+  --font-size-2xl: 22px; /* Main titles */
+  --font-size-3xl: 26px; /* Large headers */
+  --font-size-4xl: 28px; /* Hero titles */
+
+  /* Font Weight */
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* Line Height */
+  --line-height-tight: 1;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.8;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
+  --letter-spacing-wider: 0.08em;
+  --letter-spacing-widest: 0.1em;
+  --letter-spacing-ultra: 0.12em;
+
+  /* ─── SHADOWS / OMBRES ──────────────────────────────────────────────────── */
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.2);
+
+  /* ─── BORDERS / BORDURES ────────────────────────────────────────────────── */
+
+  --border-width: 1px;
+  --border-style: solid;
+  --border: var(--border-width) var(--border-style) var(--color-border);
+  --border-accent: var(--border-width) var(--border-style) var(--color-accent);
+
+  /* ─── TRANSITIONS / ANIMATIONS ──────────────────────────────────────────── */
+
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
+
+  /* ─── Z-INDEX ───────────────────────────────────────────────────────────── */
+
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+
+  /* ─── COMPONENT SPECIFICS ─────────────────────────────────────────────── */
+
+  /* Input States */
+  --input-border-color: var(--color-border);
+  --input-border-color-focus: var(--color-accent);
+  --input-background: var(--color-bg);
+  --input-text-color: var(--color-text);
+  --input-placeholder-color: var(--color-text-muted);
+
+  /* Button Padding */
+  --button-padding-sm: var(--space-2) var(--space-3);
+  --button-padding-md: var(--space-2) var(--space-4);
+  --button-padding-lg: var(--space-3) var(--space-5);
+
+  /* Card Padding */
+  --card-padding: var(--space-5);
+  --card-border-radius: var(--radius-2xl);
+  --card-border: var(--border);
+  --card-background: var(--color-surface);
+
+  /* ─── SIDEBAR SPECIFICS ─────────────────────────────────────────────────── */
+
+  --sidebar-width: 260px;
+  --sidebar-background: var(--color-bg);
+  --sidebar-border: var(--border);
+  --sidebar-item-padding: var(--space-3) var(--space-4);
+  --sidebar-item-hover-bg: var(--color-surface-hover);
+  --sidebar-item-active-bg: var(--color-accent-soft);
+  --sidebar-item-active-border: var(--color-accent);
+  --sidebar-item-icon-size: 18px;
+  --sidebar-item-font-size: var(--font-size-base);
+
+  /* ─── TABLE SPECIFICS ─────────────────────────────────────────────────── */
+
+  --table-header-background: var(--color-surface);
+  --table-header-color: var(--color-text-muted);
+  --table-header-font-size: var(--font-size-xs);
+  --table-row-hover-background: var(--color-surface-hover);
+  --table-cell-padding: var(--space-3) var(--space-4);
+  --table-border-color: var(--color-border);
+}
+
+/* ─── DARK MODE (Default - already defined above) ──────────────────────────── */
+/* If you want to support light mode in the future, add: */
+/* @media (prefers-color-scheme: light) { :root { ... } } */
