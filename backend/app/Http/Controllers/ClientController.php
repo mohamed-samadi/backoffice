@@ -89,7 +89,7 @@ class ClientController extends Controller
    public function active()
 {
     $clients = Client::where('statut', 'active')
-    ->select('id', 'nom_complet')
+    ->select('id', 'nom_complet', 'nom_entreprise', 'email', 'telephone')
     ->get();
 
     return response()->json([

@@ -28,6 +28,32 @@
   background: var(--color-surface-hover);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.editBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
 .contentGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

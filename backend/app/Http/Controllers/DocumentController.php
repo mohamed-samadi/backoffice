@@ -16,6 +16,8 @@ class DocumentController extends Controller
         $perPage = min((int) $request->get('per_page', 10), 100);
         $search = trim((string) $request->get('search', ''));
         $type = trim((string) $request->get('type', ''));
+        $statut = trim((string) $request->get('statut', ''));
+        $statutPaiement = trim((string) $request->get('statut_paiement', ''));
 
         $query = Document::with([
             'client',
@@ -37,6 +39,14 @@ class DocumentController extends Controller
 
         if ($type !== '') {
             $query->where('type', '=', $type);
+        }
+
+        if ($statut !== '') {
+            $query->where('statut', '=', $statut);
+        }
+
+        if ($statutPaiement !== '') {
+            $query->where('statut_paiement', '=', $statutPaiement);
         }
 
         $documents = $query->orderBy('id', 'desc')->paginate($perPage);
@@ -82,8 +92,8 @@ class DocumentController extends Controller
         $factures = (clone $query)->where('type', 'facture')->count();
         $devis = (clone $query)->where('type', 'devis')->count();
         $bon_livraison = (clone $query)->where('type', 'bon_livraison')->count();
-        $payes = (clone $query)->where('statut_paiement', 'payé')->count();
-        $impayes = (clone $query)->where('statut_paiement', '!=', 'payé')->count();
+        $payes = (clone $query)->whereIn('statut_paiement', ['payé', 'paye'])->count();
+        $impayes = (clone $query)->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
         
         $totals = (clone $query)->select(
             DB::raw('SUM(total_ttc) as total_ttc'),
@@ -108,7 +118,7 @@ class DocumentController extends Controller
 
     public function show(Document $document): JsonResponse
     {
-        $document->load('client', 'documentLines', 'payments');
+        $document->load('client', 'documentLines.product', 'payments');
         return response()->json([
             'success' => true,
             'data' => $document,
@@ -210,6 +220,7 @@ public function update(Request $request, $id): JsonResponse
             'date_validite' => 'nullable|date',
             'statut' => 'nullable|string|max:50',
             'montant_paye' => 'nullable|numeric|min:0',
+            'statut_paiement' => 'nullable|string|max:50',
 
             'lines' => 'sometimes|array|min:1',
             'lines.*.product_id' => 'required_with:lines|exists:products,id',
@@ -270,6 +281,10 @@ public function update(Request $request, $id): JsonResponse
                     'total_tva' => $totalTva,
                     'total_ttc' => $totalTtc,
                     'reste_a_payer' => $totalTtc - ($document->montant_paye ?? 0),
+                ]);
+            } elseif (array_key_exists('montant_paye', $data)) {
+                $document->update([
+                    'reste_a_payer' => max((float) ($document->total_ttc ?? 0) - (float) ($document->montant_paye ?? 0), 0),
                 ]);
             }
         });

@@ -15,13 +15,13 @@ return new class extends Migration
             $table->enum('type', ['facture', 'devis', 'bon_livraison']);
             $table->date('date_creation')->nullable();
             $table->date('date_validite')->nullable();
-            $table->string('statut')->default('brouillon');
+            $table->enum('statut' , ['brouillon','envoyé','accepté'])->default('brouillon');
             $table->decimal('total_ht', 12, 2)->default(0);
             $table->decimal('total_tva', 12, 2)->default(0);
             $table->decimal('total_ttc', 12, 2)->default(0);
             $table->decimal('montant_paye', 12, 2)->default(0);
             $table->decimal('reste_a_payer', 12, 2)->default(0);
-            $table->string('statut_paiement')->default('non_paye');
+            $table->enum('statut_paiement' , ['non_paye' , 'paye' , 'partial'])->default('non_paye');
             $table->timestamps();
 
             $table->foreign('client_id')->
