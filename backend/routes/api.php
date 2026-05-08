@@ -9,6 +9,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ChequeController ;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -64,9 +65,13 @@ Route::apiResource('tasks', TaskController::class);
 
 Route::get('clients/active', [ClientController::class, 'active']);
 Route::apiResource('clients', ClientController::class);
+Route::get('/cheques/echeances-proches',      [ChequeController::class, 'echeancesProches']);
+Route::get('/cheques/client/{client}',         [ChequeController::class, 'byClient']);
+Route::patch('/cheques/{cheque}/encaisser',    [ChequeController::class, 'encaisser']);
+Route::patch('/cheques/{cheque}/impaye',       [ChequeController::class, 'marquerImpaye']);
+Route::patch('/cheques/{cheque}/annuler',      [ChequeController::class, 'annuler']);
 
-
-
+Route::apiResource('cheques', ChequeController ::class);
 
 // ============================================================================
 // ROUTES DOCUMENT

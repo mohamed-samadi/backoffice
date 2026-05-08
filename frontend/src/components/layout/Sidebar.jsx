@@ -27,15 +27,14 @@ const NAV_ITEMS = [
   { label: "Gestion Stock", category: true },
   { label: "products", path: "/products", icon: FaBox },
   { label: "Catégories", path: "/categories", icon: FaTags },
-
   { label: "", separator: true },
-
   { label: "Finance", category: true },
   { label: "Documents", path: "/documents", icon: FaFileAlt },
   { label: "Paiements", path: "/payments", icon: FaCreditCard },
+ 
+  { label: "Chèques", path: "/cheques", icon: FaCreditCard },
   { label: "Paramètres", path: "/settings", icon: FaCog },
 ];
-
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();

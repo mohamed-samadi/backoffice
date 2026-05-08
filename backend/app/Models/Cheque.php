@@ -19,6 +19,7 @@ class Cheque extends Model
         'date_emission',
         'date_echeance',
         'montant',
+        'date_encaissement',
         'statut',
         'image',
     ];
@@ -27,6 +28,7 @@ class Cheque extends Model
         'date_emission' => 'date',
         'date_echeance' => 'date',
         'montant' => 'decimal:2',
+        'date_encaissement' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

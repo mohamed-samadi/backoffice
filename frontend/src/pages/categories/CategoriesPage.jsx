@@ -50,6 +50,12 @@ const FILTER_FIELDS = [
       { value: "products_count",label: "Nb produits" },
     ],
   },
+  {key : "sort_order", label: "Ordre",      type: "select",
+    options: [
+      { value: "asc",  label: "Ascendant" },
+      { value: "desc", label: "Descendant" },
+    ],
+  },
   { key: "per_page",  label: "Par page",   type: "select",
     options: [{ value: "10", label: "10" }, { value: "25", label: "25" }, { value: "50", label: "50" }],
   },

@@ -4,6 +4,7 @@ import productsReducer from "../features/products/slice/productsSlice";
 import fournisseurReducer from "../features/fournisseur/slice/fournisseurSlice";
 import tasksReducer from "../features/tasks/slice/tasksSlice";
 import documentsReducer from "../features/documents/slice/documentsSlice";
+import chequesReducer from "../features/cheques/slice/chequesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,7 +13,7 @@ export const store = configureStore({
     fournisseur: fournisseurReducer,
 
     tasks: tasksReducer,
-
+        cheques:    chequesReducer,
     documents: documentsReducer,
   },
   middleware: (getDefaultMiddleware) =>

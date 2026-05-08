@@ -41,7 +41,6 @@ class ProductController extends Controller
         // ─── Query Builder ────────────────────────────────────────────────────
         $query = Product::query()->with(['category:id,name', 'fournisseur:id,nom']);
 
-        // 🔎 Recherche
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('nom', 'like', "%{$search}%")
@@ -195,7 +194,7 @@ class ProductController extends Controller
             'success' => true,
             'data'    => null,
             'message' => 'Produit supprimé avec succès',
-        ], 200);
+        ], 200);    
     }
 
     /**
@@ -281,7 +280,7 @@ class ProductController extends Controller
     public function generateSku(Request $request)
     {
         $type = $request->query('type', 'product');
-        // $type = 'service';
+        // $type = 'service';   
         $prefix = $type === 'service' ? 'SRV' : 'PRD';
 
         $lastProduct = Product::where('sku', 'like', $prefix . '-%')
