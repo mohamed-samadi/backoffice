@@ -16,10 +16,9 @@ const updateInList = (list, updated) =>
 const initialState = {
   // ── Liste principale paginée ──────────────────────────────────────────
   data: [],
-  databyClient: {},
+  databyClient: [],
   meta: { current_page: 1, last_page: 1, total: 0, per_page: 10 },
 
-  // ── Stats retournées par index() ──────────────────────────────────────
   stats: {
     total:           0,
     non_encaisse:    0,
@@ -66,8 +65,7 @@ const chequesSlice = createSlice({
         })
         .addCase(fetchChequesByClient.fulfilled, (state, action) => {
             state.loadingStates.fetch = false;
-            state.databyClient = action.payload?.data || {};
-            // Optionnel : stocker meta/stats par client si nécessaire
+            state.databyClient = action.payload?.data || [];
         })
         .addCase(fetchChequesByClient.rejected,  (state, action) => {
             state.loadingStates.fetch = false;

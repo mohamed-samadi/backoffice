@@ -29,7 +29,6 @@ export const selectChequesTotal = (state) => {
   return metaTotal !== undefined ? metaTotal : selectChequesData(state).length;
 };
 
-// ── Loading granulaire ────────────────────────────────────────────────────
 export const selectChequesLoadingStates      = (state) => state?.cheques?.loadingStates || {};
 export const selectChequeFetchLoading        = (state) => state?.cheques?.loadingStates?.fetch         || false;
 export const selectChequeFetchOneLoading     = (state) => state?.cheques?.loadingStates?.fetchOne      || false;
@@ -41,7 +40,6 @@ export const selectChequeMarquerImpayeLoading= (state) => state?.cheques?.loadin
 export const selectChequeAnnulerLoading      = (state) => state?.cheques?.loadingStates?.annuler       || false;
 export const selectChequeEcheancesLoading    = (state) => state?.cheques?.loadingStates?.echeances     || false;
 
-// ── Global loading ────────────────────────────────────────────────────────
 export const selectChequesLoading = (state) =>
   Object.values(state?.cheques?.loadingStates || {}).some(Boolean);
 

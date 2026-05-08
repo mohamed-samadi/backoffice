@@ -1,20 +1,10 @@
-import axios from "axios";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { "Content-Type": "application/json" },
-});
-
+import api from "../../api/api";
 export const productsApi = {
   // ── Liste paginée avec filtres ─────────────────────────────────────────
   // ?search= ?category_id= ?fournisseur_id= ?actif= ?min_price= ?max_price=
   // ?sort_by= ?sort_order= ?per_page=
   getAll: (params = {}) => api.get("/products", { params }),
 
-  // ── Détail produit (avec category + fournisseur chargés) ──────────────
   getById: (id) => api.get(`/products/${id}`),
 
   // ── CRUD — FormData obligatoire pour l'upload image ───────────────────

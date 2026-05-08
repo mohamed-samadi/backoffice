@@ -294,7 +294,7 @@ class ProductController extends Controller
             $number = $lastNumber + 1;
         }
 
-        $sku = $prefix . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+        $sku = $prefix . '-'.date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
 
         return response()->json([
             'sku' => $sku
