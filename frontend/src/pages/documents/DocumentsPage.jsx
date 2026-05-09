@@ -20,6 +20,13 @@ const EyeIcon = () => (
     </svg>
 );
 
+const EditIcon = () => (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+);
+
 const TrashIcon = () => (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <polyline points="3 6 5 6 21 6" />
@@ -42,8 +49,26 @@ const FILTER_FIELDS = [
             { value: "bon_livraison", label: "Bon de livraison" },
         ],
     },
-    { key: "statut", label: "Statut", type: "text", placeholder: "Ex : brouillon" },
-    { key: "statut_paiement", label: "Paiement", type: "text", placeholder: "Ex : payé" },
+    {
+        key: "statut",
+        label: "Statut",
+        type: "select",
+        options: [
+            { value: "brouillon", label: "Brouillon" },
+            { value: "envoyé", label: "Envoyé" },
+            { value: "accepté", label: "Accepté" },
+        ],
+    },
+    {
+        key: "statut_paiement",
+        label: "Paiement",
+        type: "select",
+        options: [
+            { value: "payé", label: "Payé" },
+            { value: "partiel", label: "Partiel" },
+            { value: "impaye", label: "Impayé" },
+        ],
+    },
     {
         key: "per_page",
         label: "Par page",
@@ -70,9 +95,6 @@ const formatDate = (value) => {
         year: "numeric",
     });
 };
-
-const getClientLabel = (client) =>
-    client?.nom_entreprise || client?.nom_complet || client?.email || "—";
 
 const getClientName = (client) => client?.nom_complet || client?.nom_entreprise || "—";
 
@@ -155,7 +177,6 @@ export default function DocumentsPage() {
         currentPage,
         lastPage,
         totalDocuments,
-        perPage,
     } = useDocuments();
 
     const [filters, setFilters] = useState({ per_page: "10" });
@@ -163,16 +184,13 @@ export default function DocumentsPage() {
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [notification, setNotification] = useState(null);
 
-    // When search, type, or per_page changes, reset to page 1
-    useEffect(() => {
-        setCurrentPageLocal(1);
-    }, [filters.search, filters.type, filters.per_page]);
-
     // Fetch documents when filters or current page changes
     useEffect(() => {
         const params = { page: currentPageLocal };
         if (filters.search) params.search = filters.search;
         if (filters.type) params.type = filters.type;
+        if (filters.statut) params.statut = filters.statut;
+        if (filters.statut_paiement) params.statut_paiement = filters.statut_paiement;
         if (filters.per_page) params.per_page = Number(filters.per_page);
         
         fetchDocuments(params);
@@ -187,6 +205,19 @@ export default function DocumentsPage() {
         fetchStats(statsParams);
     }, [filters.search, filters.type, fetchStats]);
 
+    const handleFilterChange = (nextFilters) => {
+        const shouldResetPage =
+            nextFilters.search !== filters.search ||
+            nextFilters.type !== filters.type ||
+            nextFilters.per_page !== filters.per_page;
+
+        setFilters(nextFilters);
+
+        if (shouldResetPage) {
+            setCurrentPageLocal(1);
+        }
+    };
+
     const notify = (type, message, duration = 3500) => {
         setNotification({ type, message });
         window.setTimeout(() => setNotification(null), duration);
@@ -198,6 +229,12 @@ export default function DocumentsPage() {
             label: "Voir",
             icon: <EyeIcon />,
             onClick: (row) => navigate(`/documents/${row.id}`),
+        },
+        {
+            key: "edit",
+            label: "Modifier",
+            icon: <EditIcon />,
+            onClick: (row) => navigate(`/documents/${row.id}/edit`),
         },
         {
             key: "delete",
@@ -234,7 +271,7 @@ export default function DocumentsPage() {
                 title="Documents"
                 subtitle={`Page ${currentPage} sur ${lastPage} (${totalDocuments} total${totalDocuments !== 1 ? "s" : ""})`}
                 actions={
-                    <button className={styles.createBtn} type="button" disabled>
+                    <button className={styles.createBtn} type="button" onClick={() => navigate("/documents/new") }>
                         <PlusIcon />
                         Nouveau document
                     </button>
@@ -262,8 +299,11 @@ export default function DocumentsPage() {
 
             <FilterPanel
                 filters={filters}
-                onFilterChange={setFilters}
-                onReset={() => setFilters({ per_page: "10" })}
+                onFilterChange={handleFilterChange}
+                onReset={() => {
+                    setFilters({ per_page: "10" });
+                    setCurrentPageLocal(1);
+                }}
                 filterFields={FILTER_FIELDS}
             />
 

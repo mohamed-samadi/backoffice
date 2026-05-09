@@ -280,7 +280,7 @@ class ProductController extends Controller
     public function generateSku(Request $request)
     {
         $type = $request->query('type', 'product');
-        // $type = 'service';
+        // $type = 'service';   
         $prefix = $type === 'service' ? 'SRV' : 'PRD';
 
         $lastProduct = Product::where('sku', 'like', $prefix . '-%')

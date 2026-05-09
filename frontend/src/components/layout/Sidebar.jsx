@@ -29,8 +29,9 @@ const NAV_ITEMS = [
   { label: "Catégories", path: "/categories", icon: FaTags },
   { label: "", separator: true },
   { label: "Finance", category: true },
-  { label: "Documents", path: "/finance/documents", icon: FaFileAlt },
-  { label: "Paiements", path: "/finance/payments", icon: FaCreditCard },
+  { label: "Documents", path: "/documents", icon: FaFileAlt },
+  { label: "Paiements", path: "/payments", icon: FaCreditCard },
+ 
   { label: "Chèques", path: "/cheques", icon: FaCreditCard },
   { label: "Paramètres", path: "/settings", icon: FaCog },
 ];

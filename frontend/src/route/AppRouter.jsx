@@ -26,8 +26,10 @@ const AppRouter = () => {
           <Route path="/task-categories" element={<TaskCategoriesPage />} />
 
           <Route path="/documents" element={<DocumentsPage />} />
-          <Route path="/documents/:id" element={<DocumentDetailPage />} />
-          <Route path="/document/:id" element={<DocumentDetailPage />} />
+          <Route path="/documents/new" element={<DocumentDetailPage mode="create" />} />
+          <Route path="/documents/:id/edit" element={<DocumentDetailPage mode="edit" />} />
+          <Route path="/documents/:id" element={<DocumentDetailPage mode="view" />} />
+          <Route path="/document/:id" element={<DocumentDetailPage mode="view" />} />
         </Route>
       </Routes>
     </Router>
