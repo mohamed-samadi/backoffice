@@ -19,15 +19,17 @@ return new class extends Migration
             $table->decimal('prix_revient', 10, 2);
             $table->integer('quantite_stock')->default(0);
             $table->boolean('actif')->default(true);
+            $table->string('code_barre')->nullable()->unique();
+            $table->string('sku')->nullable()->unique();
+            $table->integer('seuil_alerte_stock')->nullable();
             $table->timestamps();
-       $table->string('image')->nullable()->after('description');
-        $table->enum('type', ['product', 'service'])
-              ->default('product');
+            $table->string('image')->nullable();
+            $table->enum('type', ['product', 'service'])->default('product');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('fournisseur_id')->references('id')->on('fournisseurs')->onDelete('set null');
         });
     }
-
+    
     public function down(): void
     {
         Schema::dropIfExists('products');
