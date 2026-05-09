@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->text('adresse')->nullable();
             $table->boolean('actif')->default(true);
+            $table->string('ice', 15)->nullable()->unique(); 
+            $table->string('identifiant_fiscal')->nullable();
+            $table->string('contact_nom')->nullable(); 
+            $table->string('ville')->default('Tanger');
             $table->timestamps();
         });
     }

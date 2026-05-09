@@ -23,7 +23,8 @@ return new class extends Migration
             $table->decimal('reste_a_payer', 12, 2)->default(0);
             $table->string('statut_paiement')->default('non_paye');
             $table->timestamps();
-
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('client_id')->
             references('id')->on('clients')->
             onDelete('cascade')  ;

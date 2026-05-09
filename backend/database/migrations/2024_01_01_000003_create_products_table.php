@@ -20,7 +20,9 @@ return new class extends Migration
             $table->integer('quantite_stock')->default(0);
             $table->boolean('actif')->default(true);
             $table->timestamps();
-
+       $table->string('image')->nullable()->after('description');
+        $table->enum('type', ['product', 'service'])
+              ->default('product');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('fournisseur_id')->references('id')->on('fournisseurs')->onDelete('set null');
         });

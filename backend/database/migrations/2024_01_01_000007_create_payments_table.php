@@ -17,7 +17,8 @@ return new class extends Migration
             $table->date('date_paiement');
             $table->string('statut')->default('en_attente');
             $table->timestamps();
-
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('document_id')->references('id')->on('documents')->onDelete('cascade');
         });
     }

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->date('date_debut');
             $table->date('date_echeance');
             $table->timestamps();
-
+              $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('document_id')->references('id')->on('documents')->onDelete('set null');
         });

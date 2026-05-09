@@ -9,14 +9,13 @@ class ClientController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        // 1. Calcul des stats (Robuste)
+
         $stats = Client::selectRaw("
             count(*) as total,
             count(case when statut = 'active' then 1 end) as actifs,
             count(case when statut = 'inactive' then 1 end) as inactifs
         ")->first();
 
-        // 2. Construction de la requête filtrable
         $query = Client::query();
 
         if ($request->filled('search')) {

@@ -17,11 +17,16 @@ return new class extends Migration
             $table->string('titulaire');
             $table->date('date_emission');
             $table->date('date_echeance');
+                $table->date('date_encaissement')->nullable();
             $table->decimal('montant', 12, 2);
-            $table->string('statut')->default('non_encaisse');
             $table->string('image')->nullable();
             $table->timestamps();
-
+                    $table->enum('statut', [
+            'non_encaisse',
+            'encaisse',
+            'impaye',
+            'annule',
+        ])->default('non_encaisse');
             $table->foreign('payment_id')->references('id')->on('payments')->onDelete('set null');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('set null');
         });
