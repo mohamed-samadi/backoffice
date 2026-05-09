@@ -78,7 +78,10 @@ Route::apiResource('credits', CreditController::class);
 // ============================================================================
 // ROUTES DOCUMENT
 // ============================================================================
+
+Route::get('/documents/generate-sku', [DocumentController::class, 'generateSku']);
 Route::get('documents/stats', [DocumentController::class, 'stats'])->withoutMiddleware('throttle:api');
 Route::apiResource('documents', DocumentController::class)
     ->withoutMiddleware('throttle:api');
+
 

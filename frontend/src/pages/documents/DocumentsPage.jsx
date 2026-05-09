@@ -154,9 +154,19 @@ const COLUMNS = [
         width: "10%",
         render: (val) => <span className={styles.amount}>{currency(val)}</span>,
     },
+   
     {
         key: "statut",
-        label: "Status",
+        label: "Statut",
+        width: "12%",
+        render: (val) => (
+            <span className={styles.badgeNeutral}>{val || "—"}</span>
+        ),
+    },
+   
+    {
+        key: "statut_paiement",
+        label: "paiement",
         width: "12%",
         render: (val) => (
             <span className={styles.badgeNeutral}>{val || "—"}</span>

@@ -14,6 +14,12 @@ const PAYMENT_STATUS_OPTIONS = [
   { value: "impaye", label: "Impayé" },
 ];
 
+const STATUT_OPTIONS = [
+  { value: "brouillon", label: "Brouillon" },
+  { value: "envoyé", label: "Envoyé" },
+  { value: "accepté", label: "Accepté" },
+];
+
 const currency = (value) =>
   Number(value || 0).toLocaleString("fr-FR", {
     style: "currency",
@@ -52,7 +58,7 @@ const createEmptyForm = () => ({
   date_validite: "",
   statut: "brouillon",
   montant_paye: "0",
-  statut_paiement: "impaye",
+  statut_paiement: "non_paye",
   lines: [createEmptyLine()],
 });
 
@@ -74,7 +80,7 @@ const normalizeForm = (documentData) => ({
   date_validite: toDateInputValue(documentData?.date_validite),
   statut: documentData?.statut ?? "brouillon",
   montant_paye: String(documentData?.montant_paye ?? "0"),
-  statut_paiement: documentData?.statut_paiement ?? "impaye",
+  statut_paiement: documentData?.statut_paiement ?? "non_paye",
   lines: Array.isArray(documentData?.documentLines || documentData?.document_lines)
     ? (documentData.documentLines || documentData.document_lines).map((line, index) =>
         normalizeLine(line, index)
@@ -114,6 +120,7 @@ export default function DocumentForm({
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
+  const [generatingNumero, setGeneratingNumero] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -158,6 +165,27 @@ export default function DocumentForm({
     setErrors({});
     setSubmitError("");
   }, [initialData, mode]);
+
+  // Auto-generate numero when type changes (only for create mode)
+  useEffect(() => {
+    if (!isEdit && !isView && form.type) {
+      const generateNumero = async () => {
+        setGeneratingNumero(true);
+        try {
+          const response = await documentsApi.generateNumero(form.type);
+          if (response.data?.sku) {
+            setForm((previous) => ({ ...previous, numero: response.data.sku }));
+          }
+        } catch (error) {
+          console.error("Erreur lors de la génération du numéro:", error);
+        } finally {
+          setGeneratingNumero(false);
+        }
+      };
+
+      generateNumero();
+    }
+  }, [form.type, isEdit, isView]);
 
   const totals = useMemo(() => {
     return form.lines.reduce(
@@ -448,17 +476,7 @@ export default function DocumentForm({
               {errors.client_id && <span className={styles.error}>{errors.client_id}</span>}
             </label>
 
-            <label className={styles.field}>
-              <span className={styles.label}>Numéro</span>
-              <input
-                className={styles.input}
-                type="text"
-                value={form.numero}
-                onChange={(event) => handleFieldChange("numero", event.target.value)}
-                disabled={saving}
-              />
-              {errors.numero && <span className={styles.error}>{errors.numero}</span>}
-            </label>
+          
 
             <label className={styles.field}>
               <span className={styles.label}>Type</span>
@@ -475,6 +493,19 @@ export default function DocumentForm({
                 ))}
               </select>
               {errors.type && <span className={styles.error}>{errors.type}</span>}
+            </label>
+            
+              <label className={styles.field}>
+              <span className={styles.label}>Numéro {generatingNumero && <span className={styles.sectionHint}>(génération...)</span>}</span>
+              <input
+                className={styles.input}
+                type="text"
+                value={form.numero}
+                onChange={(event) => handleFieldChange("numero", event.target.value)}
+                disabled={saving || generatingNumero}
+                placeholder={generatingNumero ? "Génération en cours..." : ""}
+              />
+              {errors.numero && <span className={styles.error}>{errors.numero}</span>}
             </label>
 
             <label className={styles.field}>
@@ -501,14 +532,18 @@ export default function DocumentForm({
 
             <label className={styles.field}>
               <span className={styles.label}>Statut</span>
-              <input
+              <select
                 className={styles.input}
-                type="text"
                 value={form.statut}
                 onChange={(event) => handleFieldChange("statut", event.target.value)}
                 disabled={saving}
-                placeholder="brouillon"
-              />
+              >
+                {STATUT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label className={styles.field}>
