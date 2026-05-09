@@ -6,5 +6,5 @@ export const clientsApi = {
     create: (payload) => api.post("/clients", payload),
     update: (id, payload) => api.put(`/clients/${id}`, payload),
     delete: (id) => api.delete(`/clients/${id}`),
-    active: () => api.get("/clients/active"),
+    getActive: () => api.get("/clients/active"),
 };

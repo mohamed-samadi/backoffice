@@ -7,6 +7,7 @@ import TaskModal from "./components/TaskModal/TaskModal";
 import TaskStats from "./components/TaskStats/TaskStats";
 import styles from "./TasksPage.module.css";
 import axios from "axios";
+import {useClients }from '../../hooks/useClients'
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const PlusIcon = () => (
@@ -164,31 +165,31 @@ export default function TasksPage() {
   const [modal,         setModal]         = useState({ open: false, mode: null, data: null });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [notification,  setNotification]  = useState(null);
-
   /* ── Charger les catégories pour le filtre ────────────────────────────── */
   useEffect(() => { fetchActiveTaskCategories(); }, []); // eslint-disable-line
   const [clients, setClients] = useState([]);
-
+  const {activeClients ,fetchActiveClients  }= useClients()
+  
 useEffect(() => {
+fetchActiveClients()
+  // async function getClients() {
 
-  async function getClients() {
+  //   try {
 
-    try {
+  //     const response = await axios.get(
+  //       "http://localhost:8000/api/clients/active"
+  //     );
 
-      const response = await axios.get(
-        "http://localhost:8000/api/clients/active"
-      );
+  //     setClients(response.data.data);
 
-      setClients(response.data.data);
+  //   } catch (error) {
 
-    } catch (error) {
+  //     console.log(error);
 
-      console.log(error);
+  //   }
+  // }
 
-    }
-  }
-
-  getClients();
+  // getClients();
 
 }, []);
 
@@ -328,7 +329,7 @@ useEffect(() => {
           mode={modal.mode}
           initialData={modal.data}
           categories={activeCategories}
-          clients={clients}
+          clients={activeClients}
           onClose={closeModal}
           onSubmit={handleSubmit}
           loading={modal.mode === "create" ? createLoading : updateLoading}

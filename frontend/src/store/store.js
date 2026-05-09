@@ -5,13 +5,13 @@ import fournisseurReducer from "../features/fournisseur/slice/fournisseurSlice";
 import tasksReducer from "../features/tasks/slice/tasksSlice";
 import documentsReducer from "../features/documents/slice/documentsSlice";
 import chequesReducer from "../features/cheques/slice/chequesSlice";
-
+import clientsReducer from "../features/clients/slice/clientsSlice";
 export const store = configureStore({
   reducer: {
     categories: categoriesReducer,
     products: productsReducer,
     fournisseur: fournisseurReducer,
-
+    clients: clientsReducer,
     tasks: tasksReducer,
         cheques:    chequesReducer,
     documents: documentsReducer,

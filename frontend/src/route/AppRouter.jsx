@@ -11,6 +11,7 @@ import TaskCategoriesPage from "../pages/tasks/TaskCategoriesPage";
 import DocumentsPage from "../pages/documents/DocumentsPage";
 import DocumentDetailPage from "../pages/documents/DocumentDetailPage";
 import ChequesPage from "../pages/cheques/ChequesPage";
+import ClientsPage from "../pages/clients/ClientsPage";
 const AppRouter = () => {
   return (
     <Router>
@@ -21,7 +22,7 @@ const AppRouter = () => {
           <Route path="/fournisseurs" element={<FournisseurPage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/cheques" element={<ChequesPage />} />
-
+          <Route path="/clients" element={<ClientsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/task-categories" element={<TaskCategoriesPage />} />
 
