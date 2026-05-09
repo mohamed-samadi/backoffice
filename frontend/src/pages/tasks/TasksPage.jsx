@@ -6,7 +6,6 @@ import FilterPanel from "../../components/common/FilterPanel";
 import TaskModal from "./components/TaskModal/TaskModal";
 import TaskStats from "./components/TaskStats/TaskStats";
 import styles from "./TasksPage.module.css";
-import axios from "axios";
 import {useClients }from '../../hooks/useClients'
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
@@ -167,30 +166,10 @@ export default function TasksPage() {
   const [notification,  setNotification]  = useState(null);
   /* ── Charger les catégories pour le filtre ────────────────────────────── */
   useEffect(() => { fetchActiveTaskCategories(); }, []); // eslint-disable-line
-  const [clients, setClients] = useState([]);
   const {activeClients ,fetchActiveClients  }= useClients()
   
 useEffect(() => {
 fetchActiveClients()
-  // async function getClients() {
-
-  //   try {
-
-  //     const response = await axios.get(
-  //       "http://localhost:8000/api/clients/active"
-  //     );
-
-  //     setClients(response.data.data);
-
-  //   } catch (error) {
-
-  //     console.log(error);
-
-  //   }
-  // }
-
-  // getClients();
-
 }, []);
 
   /* ── Injecter les catégories dans les filtres ─────────────────────────── */

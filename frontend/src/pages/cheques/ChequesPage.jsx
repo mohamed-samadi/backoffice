@@ -6,7 +6,7 @@ import FilterPanel from "../../components/common/FilterPanel";
 import ChequeModal from "./components/ChequeModal/ChequeModal";
 import ChequeStats from "./components/ChequeStats/ChequeStats";
 import styles from "./ChequesPage.module.css";
-
+import {useClients }from '../../hooks/useClients'
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -56,8 +56,7 @@ const STATUT_META = {
   impaye:       { label: "Impayé",       color: "red"    },
   annule:       { label: "Annulé",       color: "amber"  },
 };
-
-const FILTER_FIELDS = [
+const FILTER_FIELDS_BASE  = [
   { key: "search",    label: "Recherche",  type: "text",   placeholder: "N° chèque, banque, titulaire…" },
   { key: "statut",    label: "Statut",     type: "select",
     options: [
@@ -136,6 +135,7 @@ const COLUMNS = [
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function ChequesPage() {
+   const { activeClients, fetchActiveClients } = useClients();
   const {
     cheques, pagination, total, stats,
     fetchLoading, createLoading, updateLoading, deleteLoading,
@@ -143,7 +143,15 @@ export default function ChequesPage() {
     fetchCheques, createCheque, updateCheque, deleteCheque,
     encaisserCheque, marquerImpayeCheque, annulerCheque,
   } = useCheques();
-
+  const filterFields = [
+    ...FILTER_FIELDS_BASE,
+    {
+      key: "client_id",
+      label: "Client",
+      type: "select",
+      options: activeClients.map((c) => ({ value: String(c.id), label: c.nom_complet })),
+    },
+  ];
   const [filters,       setFilters]       = useState({ per_page: "10", sort_by: "created_at" });
   const [modal,         setModal]         = useState({ open: false, mode: null, data: null });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -156,7 +164,7 @@ export default function ChequesPage() {
     [filters] // eslint-disable-line
   );
   useEffect(() => { load(1); }, [filters]); // eslint-disable-line
-
+  useEffect(() => { fetchActiveClients(); }, []); // eslint-disable-line
   /* ── Notification ─────────────────────────────────────────────────────── */
   const notify = useCallback((type, message, duration = 3500) => {
     setNotification({ type, message });
@@ -298,7 +306,7 @@ export default function ChequesPage() {
         filters={filters}
         onFilterChange={setFilters}
         onReset={() => setFilters({ per_page: "10", sort_by: "created_at" })}
-        filterFields={FILTER_FIELDS}
+        filterFields={filterFields}
       />
 
       <div className={styles.tableSection}>
@@ -315,7 +323,7 @@ export default function ChequesPage() {
         <ChequeModal
           mode={modal.mode}
           initialData={modal.data}
-          clients={[]}
+          clients={activeClients}
           onClose={closeModal}
           onSubmit={handleSubmit}
           loading={modal.mode === "create" ? createLoading : updateLoading}

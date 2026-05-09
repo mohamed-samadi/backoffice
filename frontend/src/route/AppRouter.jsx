@@ -25,7 +25,6 @@ const AppRouter = () => {
           <Route path="/clients" element={<ClientsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/task-categories" element={<TaskCategoriesPage />} />
-
           <Route path="/documents" element={<DocumentsPage />} />
           <Route path="/documents/new" element={<DocumentDetailPage mode="create" />} />
           <Route path="/documents/:id/edit" element={<DocumentDetailPage mode="edit" />} />
