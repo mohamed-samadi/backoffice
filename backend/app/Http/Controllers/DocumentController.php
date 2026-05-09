@@ -315,5 +315,39 @@ public function update(Request $request, $id): JsonResponse
             'message' => 'Document supprimé avec succès'
         ], 200);
     }
+    public function generateSku(Request $request): JsonResponse
+    {
+        $type = trim((string) $request->get('type', ''));
+        if (!in_array($type, ['facture', 'devis', 'bon_livraison'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Type de document invalide'
+            ], 400);
+        }
+
+        $prefix = strtoupper(substr($type, 0, 3));
+        $currentYear = date('Y');
+
+        $lastDocument = Document::where('type', $type)
+            ->whereYear('created_at', $currentYear)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastDocument) {
+            $lastNumber = (int) substr($lastDocument->numero, -6);
+            $number = $lastNumber + 1;
+        } else {
+             $number = 1;
+        }
+
+        $sku = $prefix . '-'.date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+
+        return response()->json([
+            'success' => true,
+            'sku' => $sku,
+            'message' => 'SKU généré avec succès'
+        ], 200);
+
+    }
     
 }

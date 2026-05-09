@@ -13,6 +13,7 @@ export const documentsApi = {
         ...params,
       },
     }),
+  generateNumero: (type) => api.get("/documents/generate-sku", { params: { type } }),
   getById: (id) => api.get(`/documents/${id}`),
   create: (payload) => api.post("/documents", payload),
   update: (id, payload) => api.put(`/documents/${id}`, payload),
