@@ -26,7 +26,6 @@ class StoreDocumentRequest extends FormRequest
             'montant_paye' => 'nullable|numeric|min:0',
             'reste_a_payer' => 'nullable|numeric|min:0',
             'statut_paiement' => 'nullable|string|max:50',
-            'conditions_paiement' => 'nullable|string',
             'lines' => 'required|array|min:1',
             'lines.*.product_id' => 'required|exists:products,id',
             'lines.*.description' => 'nullable|string',
