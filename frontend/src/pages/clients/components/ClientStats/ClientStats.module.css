@@ -5,6 +5,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--gap-lg);
 }
+
 @media (max-width: 768px) { .statsBar { grid-template-columns: repeat(1, 1fr); } }
 
 .stat {

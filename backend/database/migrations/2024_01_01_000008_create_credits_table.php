@@ -10,16 +10,24 @@ return new class extends Migration
     {
         Schema::create('credits', function (Blueprint $table) {
             $table->id();
+            $table->string('numero_credit')->unique()->nullable();
             $table->unsignedBigInteger('client_id');
             $table->unsignedBigInteger('document_id')->nullable();
             $table->decimal('montant_total', 12, 2);
             $table->decimal('montant_paye', 12, 2)->default(0);
             $table->decimal('reste', 12, 2);
-            $table->string('statut')->default('actif');
+          $table->enum('statut', [
+                'en_attente', 
+                'actif', 
+                'en_retard', 
+                'impaye', 
+                'solde', 
+                'annule'
+            ])->default('actif');
             $table->date('date_debut');
             $table->date('date_echeance');
             $table->timestamps();
-              $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('client_id')->references('id')->on('clients')->onDelete('cascade');
             $table->foreign('document_id')->references('id')->on('documents')->onDelete('set null');

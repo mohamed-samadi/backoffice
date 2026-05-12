@@ -1,14 +1,9 @@
-@import "../../../../styles/tokens.css";
+@import "../../../styles/tokens.css";
 
 .statsBar {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--gap-lg);
-}
-@media (max-width: 1200px) {
-  .statsBar {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 @media (max-width: 768px) {
   .statsBar {
@@ -18,7 +13,7 @@
 
 .stat {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--gap-md);
   padding: var(--space-4) var(--space-5);
   background: var(--color-surface);
@@ -47,6 +42,9 @@
 .stat--accent {
   color: var(--color-accent);
 }
+.stat--purple {
+  color: var(--color-purple);
+}
 .stat--green {
   color: var(--color-green);
 }
@@ -56,15 +54,12 @@
 .stat--amber {
   color: var(--color-amber);
 }
-.stat--purple {
-  color: var(--color-purple);
-}
-.stat--cyan {
-  color: var(--color-cyan);
-}
 
 .stat--accent .statIcon {
   background: var(--color-accent-soft);
+}
+.stat--purple .statIcon {
+  background: var(--color-purple-soft);
 }
 .stat--green .statIcon {
   background: var(--color-green-soft);
@@ -74,12 +69,6 @@
 }
 .stat--amber .statIcon {
   background: var(--color-amber-soft);
-}
-.stat--purple .statIcon {
-  background: var(--color-purple-soft);
-}
-.stat--cyan .statIcon {
-  background: var(--color-cyan-soft);
 }
 
 .statIcon {
@@ -96,9 +85,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 .statValue {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: inherit;
   line-height: var(--line-height-tight);
@@ -110,4 +100,16 @@
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-widest);
   font-weight: var(--font-weight-medium);
+}
+.statSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.statSubLabel {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
 }

@@ -12,17 +12,20 @@ import DocumentsPage from "../pages/documents/DocumentsPage";
 import DocumentDetailPage from "../pages/documents/DocumentDetailPage";
 import ChequesPage from "../pages/cheques/ChequesPage";
 import ClientsPage from "../pages/clients/ClientsPage";
+import CreditsPage from "../pages/credits/CreditsPage";
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
+
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/fournisseurs" element={<FournisseurPage />} />
           <Route path="/products" element={<ProductPage />} />
           <Route path="/cheques" element={<ChequesPage />} />
           <Route path="/clients" element={<ClientsPage />} />
+          <Route path="/credits" element={<CreditsPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/task-categories" element={<TaskCategoriesPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
