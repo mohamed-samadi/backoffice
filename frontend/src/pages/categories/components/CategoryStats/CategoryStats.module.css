@@ -1,4 +1,4 @@
-@import "../../../../styles/tokens.css";
+@import "../../../../styles/shared.module.css";
 
 .statsBar {
   display: grid;
@@ -7,7 +7,9 @@
 }
 
 @media (max-width: 768px) {
-  .statsBar { grid-template-columns: repeat(2, 1fr); }
+  .statsBar {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .stat {
@@ -38,15 +40,31 @@
   transform: translateY(-1px);
 }
 
-.stat--accent { color: var(--color-accent); }
-.stat--green  { color: var(--color-green);  }
-.stat--red    { color: var(--color-red);    }
-.stat--cyan   { color: var(--color-cyan);   }
+.stat--accent {
+  color: var(--color-accent);
+}
+.stat--green {
+  color: var(--color-green);
+}
+.stat--red {
+  color: var(--color-red);
+}
+.stat--cyan {
+  color: var(--color-cyan);
+}
 
-.stat--accent .statIcon { background: var(--color-accent-soft); }
-.stat--green  .statIcon { background: var(--color-green-soft);  }
-.stat--red    .statIcon { background: var(--color-red-soft);    }
-.stat--cyan   .statIcon { background: var(--color-cyan-soft);   }
+.stat--accent .statIcon {
+  background: var(--color-accent-soft);
+}
+.stat--green .statIcon {
+  background: var(--color-green-soft);
+}
+.stat--red .statIcon {
+  background: var(--color-red-soft);
+}
+.stat--cyan .statIcon {
+  background: var(--color-cyan-soft);
+}
 
 .statIcon {
   width: 36px;
