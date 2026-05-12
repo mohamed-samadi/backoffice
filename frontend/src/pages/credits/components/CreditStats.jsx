@@ -1,4 +1,4 @@
-import styles from "./CreditStats.mxodule.css";
+import styles from "./CreditStats.module.css";
 const CreditCardIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
