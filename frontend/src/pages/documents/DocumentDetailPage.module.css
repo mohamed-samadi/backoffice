@@ -54,6 +54,26 @@
   transform: translateY(-1px);
 }
 
+.pdfBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color, rgba(0,0,0,0.08));
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pdfBtn:hover {
+  background: var(--color-surface-hover);
+  transform: translateY(-1px);
+}
+
 .contentGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);

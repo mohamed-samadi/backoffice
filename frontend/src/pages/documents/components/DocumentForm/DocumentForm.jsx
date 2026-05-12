@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { documentsApi } from "../../../../features/documents/api/documentsApi";
 import styles from "./DocumentForm.module.css";
 
@@ -10,8 +10,8 @@ const DOCUMENT_TYPES = [
 
 const PAYMENT_STATUS_OPTIONS = [
   { value: "payé", label: "Payé" },
-  { value: "partiel", label: "Partiel" },
-  { value: "impaye", label: "Impayé" },
+  { value: "partial", label: "Partiel" },
+  { value: "non_paye", label: "Impayé" },
 ];
 
 const STATUT_OPTIONS = [
@@ -121,6 +121,12 @@ export default function DocumentForm({
   const [products, setProducts] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [generatingNumero, setGeneratingNumero] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clientDropdownOpen, setClientDropdownOpen] = useState(false);
+  const clientDropdownRef = useRef(null);
+  const [productDropdownOpenIndex, setProductDropdownOpenIndex] = useState(null);
+  const [productSearchByLine, setProductSearchByLine] = useState({});
+  const productDropdownRefs = useRef([]);
 
   useEffect(() => {
     let active = true;
@@ -165,6 +171,47 @@ export default function DocumentForm({
     setErrors({});
     setSubmitError("");
   }, [initialData, mode]);
+
+  useEffect(() => {
+    const selectedClient = clients.find((client) => String(client.id) === String(form.client_id));
+    setClientSearch(selectedClient ? getClientLabel(selectedClient) : "");
+  }, [clients, form.client_id]);
+
+  useEffect(() => {
+    setProductSearchByLine((previous) => {
+      const next = {};
+      form.lines.forEach((line, index) => {
+        const product = products.find((item) => String(item.id) === String(line.product_id));
+        next[index] = product ? getProductLabel(product) : previous[index] || "";
+      });
+      return next;
+    });
+  }, [form.lines, products]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (clientDropdownRef.current && !clientDropdownRef.current.contains(event.target)) {
+        setClientDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const activeProductDropdown = productDropdownRefs.current[productDropdownOpenIndex];
+      if (activeProductDropdown && !activeProductDropdown.contains(event.target)) {
+        setProductDropdownOpenIndex(null);
+      }
+    };
+
+    if (productDropdownOpenIndex === null) return undefined;
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [productDropdownOpenIndex]);
 
   // Auto-generate numero when type changes (only for create mode)
   useEffect(() => {
@@ -214,6 +261,33 @@ export default function DocumentForm({
   }, [form.lines]);
 
   const selectedClient = clients.find((client) => String(client.id) === String(form.client_id));
+  const filteredClients = useMemo(() => {
+    const query = clientSearch.trim().toLowerCase();
+    const match = (client) => {
+      if (!query) return true;
+
+      return [
+        getClientLabel(client),
+        client?.email,
+        client?.telephone,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query));
+    };
+
+    const results = clients.filter(match);
+    return query ? results : results.slice(0, 8);
+  }, [clients, clientSearch]);
+
+  const handleClientSelect = (client) => {
+    setForm((previous) => ({ ...previous, client_id: String(client.id) }));
+    setClientSearch(getClientLabel(client));
+    setClientDropdownOpen(false);
+    if (errors.client_id) {
+      setErrors((previous) => ({ ...previous, client_id: null }));
+    }
+    setSubmitError("");
+  };
 
   const handleFieldChange = (field, value) => {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -245,6 +319,52 @@ export default function DocumentForm({
     setSubmitError("");
   };
 
+  const handleProductSelect = (index, product) => {
+    setForm((previous) => {
+      const lines = [...previous.lines];
+      lines[index] = {
+        ...lines[index],
+        product_id: String(product.id),
+        prix_unitaire_ht: String(product.prix_unitaire_ht ?? ""),
+        tva: String(product.tva ?? 20),
+        description: lines[index].description || product.description || product.nom || "",
+      };
+      return { ...previous, lines };
+    });
+    setProductSearchByLine((previous) => ({
+      ...previous,
+      [index]: getProductLabel(product),
+    }));
+    setProductDropdownOpenIndex(null);
+    setSubmitError("");
+  };
+
+  const handleProductSearchChange = (index, value) => {
+    setProductSearchByLine((previous) => ({ ...previous, [index]: value }));
+    if (productDropdownOpenIndex !== index) {
+      setProductDropdownOpenIndex(index);
+    }
+  };
+
+  const getFilteredProducts = (index) => {
+    const query = String(productSearchByLine[index] || "").trim().toLowerCase();
+    const results = products.filter((product) => {
+      if (!query) return true;
+
+      return [
+        product?.nom,
+        product?.sku,
+        product?.description,
+        product?.category?.name,
+        product?.fournisseur?.nom,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query));
+    });
+
+    return query ? results : results.slice(0, 8);
+  };
+
   const addLine = () => {
     setForm((previous) => ({
       ...previous,
@@ -259,6 +379,16 @@ export default function DocumentForm({
         ...previous,
         lines: lines.length > 0 ? lines : [createEmptyLine()],
       };
+    });
+    setProductDropdownOpenIndex(null);
+    setProductSearchByLine((previous) => {
+      const next = {};
+      Object.keys(previous).forEach((key) => {
+        const currentIndex = Number(key);
+        if (currentIndex === index) return;
+        next[currentIndex > index ? currentIndex - 1 : currentIndex] = previous[key];
+      });
+      return next;
     });
   };
 
@@ -460,19 +590,63 @@ export default function DocumentForm({
           <div className={styles.fieldsGrid}>
             <label className={styles.field}>
               <span className={styles.label}>Client</span>
-              <select
-                className={styles.input}
-                value={form.client_id}
-                onChange={(event) => handleFieldChange("client_id", event.target.value)}
-                disabled={saving || optionsLoading}
-              >
-                <option value="">Choisir un client</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {getClientLabel(client)}
-                  </option>
-                ))}
-              </select>
+              <div className={styles.clientDropdown} ref={clientDropdownRef}>
+                <button
+                  type="button"
+                  className={`${styles.clientDropdownTrigger} ${errors.client_id ? styles.clientDropdownTriggerError : ""}`}
+                  onClick={() => setClientDropdownOpen((previous) => !previous)}
+                  disabled={saving || optionsLoading}
+                  aria-haspopup="listbox"
+                  aria-expanded={clientDropdownOpen}
+                >
+                  <span className={selectedClient ? styles.clientDropdownValue : styles.clientDropdownPlaceholder}>
+                    {selectedClient ? getClientLabel(selectedClient) : "Choisir un client"}
+                  </span>
+                  <span className={styles.clientDropdownChevron}>▾</span>
+                </button>
+
+                {clientDropdownOpen && (
+                  <div className={styles.clientDropdownMenu}>
+                    <input
+                      className={styles.clientDropdownSearch}
+                      type="search"
+                      value={clientSearch}
+                      onChange={(event) => setClientSearch(event.target.value)}
+                      placeholder="Rechercher un client , par nom, email ou téléphone"
+                      autoFocus
+                      disabled={saving || optionsLoading}
+                    />
+
+                    <div className={styles.clientPicker} role="listbox">
+                      {filteredClients.length > 0 ? (
+                        filteredClients.map((client) => {
+                          const isSelected = String(client.id) === String(form.client_id);
+
+                          return (
+                            <button
+                              key={client.id}
+                              type="button"
+                              className={`${styles.clientOption} ${isSelected ? styles.clientOptionSelected : ""}`}
+                              onClick={() => handleClientSelect(client)}
+                              disabled={saving || optionsLoading}
+                              role="option"
+                              aria-selected={isSelected}
+                            >
+                              <span className={styles.clientOptionTitle}>{getClientLabel(client)}</span>
+                              <span className={styles.clientOptionMeta}>
+                                {[client.email, client.telephone].filter(Boolean).join(" · ") || "Client actif"}
+                              </span>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <div className={styles.clientPickerEmpty}>Aucun client trouvé.</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {selectedClient && <div className={styles.clientSelectedHint}>Client sélectionné : <strong>{getClientLabel(selectedClient)}</strong></div>}
               {errors.client_id && <span className={styles.error}>{errors.client_id}</span>}
             </label>
 
@@ -612,19 +786,79 @@ export default function DocumentForm({
                   <div className={styles.lineFieldsGrid}>
                     <label className={styles.field}>
                       <span className={styles.label}>Produit</span>
-                      <select
-                        className={styles.input}
-                        value={line.product_id}
-                        onChange={(event) => handleLineChange(index, "product_id", event.target.value)}
-                        disabled={saving || optionsLoading}
+                      <div
+                        className={styles.productDropdown}
+                        ref={(element) => {
+                          productDropdownRefs.current[index] = element;
+                        }}
                       >
-                        <option value="">Choisir un produit</option>
-                        {products.map((product) => (
-                          <option key={product.id} value={product.id}>
-                            {getProductLabel(product)}
-                          </option>
-                        ))}
-                      </select>
+                        <button
+                          type="button"
+                          className={`${styles.productDropdownTrigger} ${
+                            errors[`line-${index}-product_id`] ? styles.productDropdownTriggerError : ""
+                          }`}
+                          onClick={() =>
+                            setProductDropdownOpenIndex((previous) => (previous === index ? null : index))
+                          }
+                          disabled={saving || optionsLoading}
+                          aria-haspopup="listbox"
+                          aria-expanded={productDropdownOpenIndex === index}
+                        >
+                          <span
+                            className={line.product_id ? styles.productDropdownValue : styles.productDropdownPlaceholder}
+                          >
+                            {line.product_id
+                              ? productSearchByLine[index] || "Choisir un produit"
+                              : "Choisir un produit"}
+                          </span>
+                          <span className={styles.productDropdownChevron}>▾</span>
+                        </button>
+
+                        {productDropdownOpenIndex === index && (
+                          <div className={styles.productDropdownMenu}>
+                            <input
+                              className={styles.productDropdownSearch}
+                              type="search"
+                              value={productSearchByLine[index] || ""}
+                              onChange={(event) => handleProductSearchChange(index, event.target.value)}
+                              placeholder="Rechercher un produit"
+                              autoFocus
+                              disabled={saving || optionsLoading}
+                            />
+
+                            <div className={styles.productPicker} role="listbox">
+                              {getFilteredProducts(index).length > 0 ? (
+                                getFilteredProducts(index).map((product) => {
+                                  const isSelected = String(product.id) === String(line.product_id);
+
+                                  return (
+                                    <button
+                                      key={product.id}
+                                      type="button"
+                                      className={`${styles.productOption} ${
+                                        isSelected ? styles.productOptionSelected : ""
+                                      }`}
+                                      onClick={() => handleProductSelect(index, product)}
+                                      disabled={saving || optionsLoading}
+                                      role="option"
+                                      aria-selected={isSelected}
+                                    >
+                                      <span className={styles.productOptionTitle}>{getProductLabel(product)}</span>
+                                      <span className={styles.productOptionMeta}>
+                                        {[product.sku, product.category?.name, product.fournisseur?.nom]
+                                          .filter(Boolean)
+                                          .join(" · ") || "Produit actif"}
+                                      </span>
+                                    </button>
+                                  );
+                                })
+                              ) : (
+                                <div className={styles.productPickerEmpty}>Aucun produit trouvé.</div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       {errors[`line-${index}-product_id`] && (
                         <span className={styles.error}>{errors[`line-${index}-product_id`]}</span>
                       )}
