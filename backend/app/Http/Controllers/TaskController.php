@@ -41,7 +41,6 @@ class TaskController extends Controller
             'user:id,name',
         ]);
 
-        // 🔎 Recherche
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")

@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('nom_entreprise')->nullable();
             $table->string('telephone')->nullable();
             $table->string('email')->nullable();
+            $table->string('ice', 15)->nullable()->unique(); 
+            $table->string('identifiant_fiscal')->nullable();
             $table->text('adresse')->nullable();
             $table->string('statut')->default('actif');
             $table->timestamps();

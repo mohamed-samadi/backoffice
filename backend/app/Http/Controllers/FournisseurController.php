@@ -39,8 +39,8 @@ $stats = [
     }
 
     // 4. Filtrage par ville (Optionnel, utile pour ton contexte à Tanger)
-    if ($request->has('ville')) {
-        $query->where('ville', $request->input('ville'));
+    if ($request->has('ville_filter')) {
+        $query->where('ville', $request->input('ville_filter'));
     }
 
     // 5. Pagination (10 par défaut, ou dynamique via le front)
@@ -125,4 +125,14 @@ $stats = [
             'message' => 'Fournisseurs actifs récupérés avec succès'
         ], 200);
     }
+    public function villes()
+{
+    $villes = Fournisseur::select('ville')
+        ->distinct()
+        ->whereNotNull('ville')
+        ->orderBy('ville')
+        ->pluck('ville');
+
+    return response()->json($villes);
+}
 }

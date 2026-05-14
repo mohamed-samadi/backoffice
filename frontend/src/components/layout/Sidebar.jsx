@@ -33,6 +33,8 @@ const NAV_ITEMS = [
   { label: "Paiements", path: "/payments", icon: FaCreditCard },
  
   { label: "Chèques", path: "/cheques", icon: FaCreditCard },
+  {label : "Crédits", path: "/credits", icon: FaCreditCard },
+  { label: "", separator: true },
   { label: "Paramètres", path: "/settings", icon: FaCog },
 ];
 const Sidebar = () => {

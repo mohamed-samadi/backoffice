@@ -2,7 +2,7 @@ import api from "../../api/api";
 export const fournisseurApi = {
   // Récupérer tous les fournisseurs avec filtres/pagination
   getAll: (params = {}) => api.get("/fournisseurs", { params }),
-
+  
   // Recherche rapide (backend-side)
   search: (query) => api.get("/fournisseurs/search", { params: { q: query } }),
 
@@ -10,6 +10,9 @@ export const fournisseurApi = {
   getById: (id) => api.get(`/fournisseurs/${id}`),
 
   getActive: () => api.get("/fournisseurs/active"),
+
+  // Récupérer les villes des fournisseurs
+  getVilles: () => api.get("/fournisseurs/villes"),
 
   // Créer un fournisseur
   create: (payload) => api.post("/fournisseurs", payload),

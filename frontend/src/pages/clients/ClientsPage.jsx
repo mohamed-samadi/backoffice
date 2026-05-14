@@ -95,6 +95,14 @@ const COLUMNS = [
       </span>
     ),
   },
+    {
+      key: "ice", label: "ICE", width: "13%",
+      render: (val) =>
+        val
+          ? <code className={styles.iceCode}>{val}</code>
+          : <span className={styles.empty}>—</span>,
+    },
+
   {
     key: "created_at", label: "Créé le", width: "14%",
     render: (val) => val

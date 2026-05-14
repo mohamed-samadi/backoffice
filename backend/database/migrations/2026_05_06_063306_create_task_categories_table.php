@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->string('name')->unique();
 
             $table->string('color')->nullable(); 
-            // مثال: #ff0000 أو "red"
 
             $table->text('description')->nullable();
 
@@ -24,6 +23,7 @@ return new class extends Migration {
 
             $table->index('is_active');
         });
+        
     }
 
     public function down(): void

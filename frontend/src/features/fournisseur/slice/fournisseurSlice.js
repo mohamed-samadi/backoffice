@@ -5,34 +5,51 @@ import {
   createFournisseur,
   updateFournisseur,
   deleteFournisseur,
-  searchFournisseurs,
   fetchActiveFournisseurs,
+  fetchFournisseurVilles,
 } from "../thunk/fournisseurThunk";
+
+// ✅ searchFournisseurs supprimé — la recherche passe par fetchFournisseurs({ search })
+//    Le controller n'a pas de route /search séparée
+
 const initialState = {
+  // ─── Liste paginée principale ──────────────────────────────────────────
   data: [],
   meta: {
     current_page: 1,
-    last_page: 1,
-    total: 0,
-    per_page: 10,
+    last_page:    1,
+    total:        0,
+    per_page:     10,
   },
-  globalStats : {
-    total: 0,
-    active: 0,
+
+  // ─── Stats retournées par index() ─────────────────────────────────────
+  globalStats: {
+    total:    0,
+    active:   0,
     inactive: 0,
-    ville: 0,
+    ville:    0,
   },
+
+  // ─── Listes secondaires — ne touchent pas state.data ──────────────────
+  activeList:          [], // fetchActiveFournisseurs → dropdowns
+  villesfournisseurs:  [], // fetchFournisseurVilles  → filtre ville
+
+  // ─── Fournisseur courant ───────────────────────────────────────────────
   current: null,
+
+  // ─── Loading granulaire ────────────────────────────────────────────────
+  // ✅ Un flag par opération — évite les conflits entre opérations simultanées
   loadingStates: {
-    fetch: false,
-    fetchOne: false,
-    create: false,
-    update: false,
-    delete: false,
-    search: false,
+    fetch:         false,
+    fetchOne:      false,
+    create:        false,
+    update:        false,
+    delete:        false,
+    fetchActive:   false, // ✅ Séparé de fetch — évite le conflit avec fetchFournisseurs
+    fetchVilles:   false, // ✅ Séparé de fetch — évite le conflit
   },
-  activeList : [],
-  error: null,
+
+  error:   null,
   success: false,
 };
 
@@ -40,18 +57,13 @@ const fournisseurSlice = createSlice({
   name: "fournisseur",
   initialState,
   reducers: {
-    clearError: (state) => {
-      state.error = null;
-    },
-    clearSuccess: (state) => {
-      state.success = false;
-    },
-    resetCurrent: (state) => {
-      state.current = null;
-    },
+    clearError:   (state) => { state.error = null; },
+    clearSuccess: (state) => { state.success = false; },
+    resetCurrent: (state) => { state.current = null; },
   },
   extraReducers: (builder) => {
-    // ─── Fetch Fournisseurs ───────────────────────────────────────────────
+
+    // ─── fetchFournisseurs ────────────────────────────────────────────────
     builder
       .addCase(fetchFournisseurs.pending, (state) => {
         state.loadingStates.fetch = true;
@@ -60,19 +72,15 @@ const fournisseurSlice = createSlice({
       .addCase(fetchFournisseurs.fulfilled, (state, action) => {
         state.loadingStates.fetch = false;
         state.data = action.payload?.data || [];
-        if (action.payload?.meta) {
-          state.meta = action.payload.meta;
-        }
-        if (action.payload?.stats) {
-          state.globalStats = action.payload.stats;
-        }
+        if (action.payload?.meta)  state.meta        = action.payload.meta;
+        if (action.payload?.stats) state.globalStats = action.payload.stats;
       })
       .addCase(fetchFournisseurs.rejected, (state, action) => {
         state.loadingStates.fetch = false;
         state.error = action.payload;
       });
 
-    // ─── Fetch Fournisseur By ID ──────────────────────────────────────────
+    // ─── fetchFournisseurById ─────────────────────────────────────────────
     builder
       .addCase(fetchFournisseurById.pending, (state) => {
         state.loadingStates.fetchOne = true;
@@ -87,17 +95,19 @@ const fournisseurSlice = createSlice({
         state.error = action.payload;
       });
 
-    // ─── Create Fournisseur ───────────────────────────────────────────────
+    // ─── createFournisseur ────────────────────────────────────────────────
     builder
       .addCase(createFournisseur.pending, (state) => {
         state.loadingStates.create = true;
         state.error = null;
       })
-      .addCase(createFournisseur.fulfilled, (state, action) => {
+      .addCase(createFournisseur.fulfilled, (state) => {
         state.loadingStates.create = false;
-        // ✅ On incrémente juste le total; le refetch sera fait par le composant
-        // pour respecter la pagination (évite le push hors-ordre)
+        // ✅ Pas de push — incohérent avec la pagination
+        // Le composant refetch après création
         state.meta.total += 1;
+        state.globalStats.total  += 1;
+        state.globalStats.active += 1;
         state.success = true;
       })
       .addCase(createFournisseur.rejected, (state, action) => {
@@ -105,7 +115,7 @@ const fournisseurSlice = createSlice({
         state.error = action.payload;
       });
 
-    // ─── Update Fournisseur ───────────────────────────────────────────────
+    // ─── updateFournisseur ────────────────────────────────────────────────
     builder
       .addCase(updateFournisseur.pending, (state) => {
         state.loadingStates.update = true;
@@ -114,9 +124,7 @@ const fournisseurSlice = createSlice({
       .addCase(updateFournisseur.fulfilled, (state, action) => {
         state.loadingStates.update = false;
         const index = state.data.findIndex((f) => f.id === action.payload.id);
-        if (index !== -1) {
-          state.data[index] = action.payload;
-        }
+        if (index !== -1) state.data[index] = action.payload;
         state.current = action.payload;
         state.success = true;
       })
@@ -125,7 +133,7 @@ const fournisseurSlice = createSlice({
         state.error = action.payload;
       });
 
-    // ─── Delete Fournisseur ───────────────────────────────────────────────
+    // ─── deleteFournisseur ────────────────────────────────────────────────
     builder
       .addCase(deleteFournisseur.pending, (state) => {
         state.loadingStates.delete = true;
@@ -133,9 +141,15 @@ const fournisseurSlice = createSlice({
       })
       .addCase(deleteFournisseur.fulfilled, (state, action) => {
         state.loadingStates.delete = false;
+        const removed = state.data.find((f) => f.id === action.payload);
         state.data = state.data.filter((f) => f.id !== action.payload);
-        // ✅ Décrémenter le total pour rester cohérent avec la pagination
         state.meta.total = Math.max(0, state.meta.total - 1);
+        // ✅ Mettre à jour les stats selon le statut du fournisseur supprimé
+        if (removed) {
+          state.globalStats.total = Math.max(0, state.globalStats.total - 1);
+          if (removed.actif) state.globalStats.active   = Math.max(0, state.globalStats.active   - 1);
+          else               state.globalStats.inactive = Math.max(0, state.globalStats.inactive - 1);
+        }
         state.success = true;
       })
       .addCase(deleteFournisseur.rejected, (state, action) => {
@@ -143,35 +157,37 @@ const fournisseurSlice = createSlice({
         state.error = action.payload;
       });
 
-    // ─── Search Fournisseurs ──────────────────────────────────────────────
-    builder
-      .addCase(searchFournisseurs.pending, (state) => {
-        state.loadingStates.search = true;
-        state.error = null;
-      })
-      .addCase(searchFournisseurs.fulfilled, (state, action) => {
-        state.loadingStates.search = false;
-        state.data = action.payload?.data || [];
-        if (action.payload?.meta) {
-          state.meta = action.payload.meta;
-        }
-      })
-      .addCase(searchFournisseurs.rejected, (state, action) => {
-        state.loadingStates.search = false;
-        state.error = action.payload;
-      });
-    // ─── Fetch Active Fournisseurs ───────────────────────────────────────
+    // ─── fetchActiveFournisseurs ──────────────────────────────────────────
     builder
       .addCase(fetchActiveFournisseurs.pending, (state) => {
-        state.loadingStates.fetch = true;
+        // ✅ fetchActive — flag séparé, n'interfère pas avec fetchLoading
+        state.loadingStates.fetchActive = true;
         state.error = null;
       })
       .addCase(fetchActiveFournisseurs.fulfilled, (state, action) => {
-        state.loadingStates.fetch = false;  
+        state.loadingStates.fetchActive = false;
+        // ✅ activeList — ne touche pas state.data
         state.activeList = action.payload || [];
       })
       .addCase(fetchActiveFournisseurs.rejected, (state, action) => {
-        state.loadingStates.fetch = false;
+        state.loadingStates.fetchActive = false;
+        state.error = action.payload;
+      });
+
+    // ─── fetchFournisseurVilles ───────────────────────────────────────────
+    builder
+      .addCase(fetchFournisseurVilles.pending, (state) => {
+        // ✅ fetchVilles — flag séparé
+        state.loadingStates.fetchVilles = true;
+        state.error = null;
+      })
+      .addCase(fetchFournisseurVilles.fulfilled, (state, action) => {
+        state.loadingStates.fetchVilles = false;
+        // ✅ villesfournisseurs — ne touche pas state.data
+        state.villesfournisseurs = action.payload || [];
+      })
+      .addCase(fetchFournisseurVilles.rejected, (state, action) => {
+        state.loadingStates.fetchVilles = false;
         state.error = action.payload;
       });
   },

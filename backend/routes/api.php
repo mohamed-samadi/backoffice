@@ -10,6 +10,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ChequeController ;
+use App\Http\Controllers\CreditController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,11 +31,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // ROUTES FOURNISSEUR
 // ============================================================================
 Route::get('/fournisseurs/active', [FournisseurController::class, 'active']);
+Route::get('/fournisseurs/villes', [FournisseurController::class, 'villes']);
 Route::apiResource('fournisseurs', FournisseurController::class);
 
-// ============================================================================
-// ROUTES CATEGORIE
-// ============================================================================
+
 Route::get('/categories/active', [CategoryController::class, 'active']);
 Route::get('/categories/with-count', [CategoryController::class, 'withProductCount']);
 Route::post('/categories/bulk-status', [CategoryController::class, 'bulkUpdateStatus']);
@@ -56,8 +56,6 @@ Route::apiResource('products', ProductController::class)->except(['update']);
 Route::get('task-categories/active', [TaskCategoryController::class, 'active']);
 Route::apiResource('task-categories', TaskCategoryController::class);
 
-// ── TASKS ─────────────────────────────────────────────────────────────────
-// ⚠️ Routes custom AVANT apiResource
 Route::get('tasks/overdue',                        [TaskController::class, 'overdue'])->name('tasks.overdue');
 Route::get('tasks/category/{taskCategory}',        [TaskController::class, 'byCategory'])->name('tasks.byCategory');
 Route::patch('tasks/{task}/status',                [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
@@ -72,6 +70,11 @@ Route::patch('/cheques/{cheque}/impaye',       [ChequeController::class, 'marque
 Route::patch('/cheques/{cheque}/annuler',      [ChequeController::class, 'annuler']);
 
 Route::apiResource('cheques', ChequeController ::class);
+Route::get('/credits/en-retard',                    [CreditController::class, 'enRetard']);
+Route::get('/credits/client/{clientId}',            [CreditController::class, 'byClient']);
+Route::get('/credits/generate-numero',              [CreditController::class, 'generateNumero']);
+Route::post('/credits/{credit}/paiement',           [CreditController::class, 'enregistrerPaiement']);
+Route::apiResource('credits', CreditController::class);
 
 // ============================================================================
 // ROUTES DOCUMENT

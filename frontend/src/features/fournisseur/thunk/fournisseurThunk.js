@@ -77,7 +77,6 @@ export const deleteFournisseur = createAsyncThunk(
   }
 );
 
-// ─── Search (backend) ────────────────────────────────────────────────────────
 export const searchFournisseurs = createAsyncThunk(
   "fournisseur/searchFournisseurs",
   async (query, { rejectWithValue }) => {
@@ -85,6 +84,18 @@ export const searchFournisseurs = createAsyncThunk(
       const response = await fournisseurApi.search(query);
       return response.data;
     } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+export const fetchFournisseurVilles = createAsyncThunk(
+  "fournisseur/fetchFournisseurVilles",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fournisseurApi.getVilles();
+      return response.data; // Supposant que les villes sont dans data.data
+    }
+      catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
   }

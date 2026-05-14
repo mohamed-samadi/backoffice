@@ -7,8 +7,11 @@
   background: var(--color-surface);
 }
 
+
+
 .table {
   width: 100%;
+  min-width: 640px;        /* ← empêche le tableau de se compresser */
   border-collapse: collapse;
 }
 
@@ -58,6 +61,7 @@
 }
 
 .actionBtn {
+
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -140,3 +144,12 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
+.tableWrapper {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;        /* ← était "overflow: hidden" */
+  overflow-y: hidden;      /* ← on garde hidden vertical */
+  background: var(--color-surface);
+  -webkit-overflow-scrolling: touch; /* ← scroll fluide sur iOS */
+}
+

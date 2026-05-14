@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: app_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app_network
+    # ✅ Pas de port exposé en prod — accès interne uniquement
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+
+  backend:
+    # ✅ Image depuis Docker Hub
+    image: ${DOCKER_USERNAME}/app-backend:${IMAGE_TAG:-latest}
+    container_name: app_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: ${APP_KEY}
+      APP_URL: ${APP_URL}
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      FILESYSTEM_DISK: public
+    volumes:
+      - storage_data:/var/www/html/storage/app/public
+    # ✅ Pas de volume de code source en prod — image immuable
+    ports:
+      - "8000:80"
+    networks:
+      - app_network
+
+  frontend:
+    # ✅ Image depuis Docker Hub
+    image: ${DOCKER_USERNAME}/app-frontend:${IMAGE_TAG:-latest}
+    container_name: app_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - app_network
+
+volumes:
+  db_data:
+  storage_data:
+
+networks:
+  app_network:
+    driver: bridge

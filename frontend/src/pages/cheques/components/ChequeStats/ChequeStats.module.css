@@ -1,56 +1,17 @@
-@import "../../../../styles/tokens.css";
+@import "../../../../styles/shared.module.css";
 
 .statsBar {
-  display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: var(--gap-lg);
 }
-@media (max-width: 1200px) { .statsBar { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 768px)  { .statsBar { grid-template-columns: repeat(2, 1fr); } }
 
-.stat {
-  display: flex; align-items: center; gap: var(--gap-md);
-  padding: var(--space-4) var(--space-5);
-  background: var(--color-surface); border: var(--border);
-  border-radius: var(--radius-xl);
-  transition: all var(--transition-base);
-  position: relative; overflow: hidden;
+@media (max-width: 1200px) {
+  .statsBar {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
-.stat::before {
-  content: ""; position: absolute;
-  left: 0; top: 20%; bottom: 20%; width: 2px;
-  border-radius: 0 2px 2px 0;
-  background: currentColor; opacity: 0.5;
-}
-.stat:hover { border-color: currentColor; transform: translateY(-1px); }
 
-.stat--accent { color: var(--color-accent); }
-.stat--green  { color: var(--color-green);  }
-.stat--red    { color: var(--color-red);    }
-.stat--amber  { color: var(--color-amber);  }
-.stat--purple { color: var(--color-purple); }
-.stat--cyan   { color: var(--color-cyan);   }
-
-.stat--accent .statIcon { background: var(--color-accent-soft); }
-.stat--green  .statIcon { background: var(--color-green-soft);  }
-.stat--red    .statIcon { background: var(--color-red-soft);    }
-.stat--amber  .statIcon { background: var(--color-amber-soft);  }
-.stat--purple .statIcon { background: var(--color-purple-soft); }
-.stat--cyan   .statIcon { background: var(--color-cyan-soft);   }
-
-.statIcon {
-  width: 36px; height: 36px; border-radius: var(--radius-md);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; color: inherit;
-}
-.statBody  { display: flex; flex-direction: column; gap: 2px; }
-.statValue {
-  font-size: var(--font-size-xl); font-weight: var(--font-weight-bold);
-  color: inherit; line-height: var(--line-height-tight);
-  font-variant-numeric: tabular-nums;
-}
-.statLabel {
-  font-size: var(--font-size-xs); color: var(--color-text-muted);
-  text-transform: uppercase; letter-spacing: var(--letter-spacing-widest);
-  font-weight: var(--font-weight-medium);
+@media (max-width: 768px) {
+  .statsBar {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

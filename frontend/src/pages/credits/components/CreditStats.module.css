@@ -1,0 +1,25 @@
+@import "../../../styles/shared.module.css";
+
+.statsBar {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .statsBar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.statSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-dim);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statSubLabel {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}

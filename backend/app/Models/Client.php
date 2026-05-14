@@ -18,6 +18,8 @@ class Client extends Model
         'telephone',
         'email',
         'adresse',
+        'ice',
+        'identifiant_fiscal',
         'statut',
     ];
 
