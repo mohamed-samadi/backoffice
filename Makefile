@@ -146,8 +146,31 @@ prod-ps: ## 📊 Statut production
 # 🐳 Docker Hub & Deployment
 # ─────────────────────────────────────────────────────────────────────────
 
-build-and-push: ## 🐳 Build & Push Docker Hub (usage: make build-and-push cmd="v1.0.0")
-	@bash build-and-push.sh $(cmd)
+deliver: ## 📦 Livrer vers Docker Hub (usage: make deliver version=1.0.0 stage=main)
+	@bash deliver.sh $(version) $(stage)
+
+docker-hub-setup: ## 🔧 Configuration initiale Docker Hub
+	@bash setup-docker-hub.sh
+
+docker-login: ## 🔑 Se connecter à Docker Hub
+	docker login
+
+docker-pull-prod: ## 📥 Télécharger les images prod
+	docker compose -f $(COMPOSE_PROD) pull
+
+docker-build-local: ## 🔨 Build local les images
+	docker compose build
+
+docker-build-prod: ## 🔨 Build images de production
+	docker build -f backend/Dockerfile -t bizos-backend:latest .
+	docker build -f frontend/Dockerfile -t bizos-frontend:latest .
+
+# ─────────────────────────────────────────────────────────────────────────
+# 📚 Documentation
+# ─────────────────────────────────────────────────────────────────────────
+
+docs-docker-hub: ## 📖 Afficher la documentation Docker Hub
+	@cat DOCKER_HUB_SETUP.md
 
 release: ## 🏷️  Créer une release (usage: make release cmd="v1.0.0")
 	@bash release.sh $(cmd)

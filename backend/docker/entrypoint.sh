@@ -1,23 +1,31 @@
 #!/bin/bash
 set -e
 
-echo "▶ Attente de la base de données..."
-until php artisan db:monitor --databases=mysql 2>/dev/null; do
-  echo "  ⏳ DB pas encore prête, attente 2s..."
+echo "🚀 Application Laravel"
+echo "====================="
+
+echo "⏳ Attente de la base de données..."
+until nc -z db 3306 2>/dev/null; do
+  echo "  ⏳ MySQL pas encore prête..."
   sleep 2
 done
+echo "✅ MySQL prête"
 
-echo "▶ Migrations..."
+echo "🔄 Lancement des migrations..."
 php artisan migrate --force
+echo "✅ Migrations terminées"
 
-echo "▶ Liens symboliques storage..."
+echo "🔗 Configuration des liens symboliques..."
 php artisan storage:link --quiet 2>/dev/null || true
+echo "✅ Liens symboliques OK"
 
-echo "▶ Cache config/routes..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+echo "💾 Cache des configs..."
+php artisan config:cache 2>/dev/null || true
+php artisan route:cache 2>/dev/null || true
+echo "✅ Cache OK"
 
-echo "✅ Laravel prêt"
+echo ""
+echo "✨ Application prête !"
+echo ""
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

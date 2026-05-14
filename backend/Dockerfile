@@ -1,37 +1,40 @@
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
-# Extensions PHP nécessaires
-RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev \
-    libzip-dev zip unzip nginx supervisor \
-    && docker-php-ext-install pdo_mysql mbstring \
-       exif pcntl bcmath gd zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install required PHP extensions and dependencies
+RUN apk add --no-cache \
+    git curl zip unzip netcat-openbsd \
+    libpng-dev oniguruma-dev libxml2-dev libzip-dev \
+    nginx supervisor \
+    && docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip
 
-# Composer
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copier les fichiers Laravel
+# Copy project files
 COPY . .
 
-# Installer les dépendances
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Set permissions for Laravel
+RUN chmod -R 775 storage bootstrap/cache \
+    && mkdir -p storage/app/public \
+    && chown -R www-data:www-data /var/www/html
 
-# Config Nginx
-COPY backend/docker/nginx.conf /etc/nginx/sites-available/default
+# Copy Docker configuration
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/entrypoint.sh /entrypoint.sh
 
-# Config Supervisor (nginx + php-fpm ensemble)
-COPY backend/docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Entrypoint script
-COPY backend/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
