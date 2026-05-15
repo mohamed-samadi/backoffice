@@ -26,12 +26,12 @@ function buildPdfHtml(doc, companyInfo = {}) {
   const payments = doc.payments || [];
 
   const co = {
-    name:       companyInfo.name       || "-----------",
+    name:       companyInfo.nom || companyInfo.name || "-----------",
     ice:        companyInfo.ice        || "------------",
-    if_:        companyInfo.if_        || "------------",
-    rc:         companyInfo.rc         || "------",
-    address:    companyInfo.address    || "------------------",
-    phone:      companyInfo.phone      || "+212 6 XX XX XX XX",
+    if_:        companyInfo.identifiant_fiscal || companyInfo.if_ || "------------",
+    rc:         companyInfo.registre_commerce || companyInfo.rc || "------",
+    address:    companyInfo.adresse || companyInfo.address || "------------------",
+    phone:      companyInfo.telephone || companyInfo.phone || "+212 6 XX XX XX XX",
     email:      companyInfo.email      || "contact@monentreprise.ma",
     bank:       companyInfo.bank       || "Attijariwafa Bank",
     iban:       companyInfo.iban       || "MA64 -------------------",
@@ -508,10 +508,20 @@ export default function GeneratePdfButton({ document: doc, companyInfo, classNam
 GeneratePdfButton.propTypes = {
   document:    PropTypes.object,
   companyInfo: PropTypes.shape({
-    name: PropTypes.string, ice: PropTypes.string, if_: PropTypes.string,
-    rc: PropTypes.string, address: PropTypes.string, phone: PropTypes.string,
-    email: PropTypes.string, bank: PropTypes.string, iban: PropTypes.string,
-   
+    nom: PropTypes.string,
+    name: PropTypes.string,
+    ice: PropTypes.string,
+    if_: PropTypes.string,
+    identifiant_fiscal: PropTypes.string,
+    rc: PropTypes.string,
+    registre_commerce: PropTypes.string,
+    address: PropTypes.string,
+    adresse: PropTypes.string,
+    phone: PropTypes.string,
+    telephone: PropTypes.string,
+    email: PropTypes.string,
+    bank: PropTypes.string,
+    iban: PropTypes.string,
   }),
   className: PropTypes.string,
   children:  PropTypes.node,

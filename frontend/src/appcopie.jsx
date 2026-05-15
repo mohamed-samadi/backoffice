@@ -1076,8 +1076,13 @@ tbody td{padding:9px 10px;font-size:12px;color:#333;border-bottom:1px solid #eee
 @media print{.page{padding:12mm 14mm}}
 </style></head><body><div class="page">
 <div class="header">
-  <div><div class="co-name">${company.name}</div>
-  <div class="co-info">ICE : ${company.ice} | IF : ${company.if_} | RC : ${company.rc}<br/>${company.address}<br/>Tél : ${company.phone} | ${company.email}</div></div>
+  <div><div class="co-name">${company.nom || company.name}</div>
+  <div class="co-info">ICE : ${company.ice || company.ice}
+    | IF : ${company.identifiant_fiscal || company.if_ || ""}
+    | RC : ${company.registre_commerce || company.rc || ""}<br/>
+    ${company.adresse || company.address || ""}<br/>
+    Tél : ${company.telephone || company.phone || ""} | ${company.email || ""}
+  </div></div>
   <div class="doc-title">
     <div class="doc-type">${doc.type}</div>
     <div class="doc-num">N° ${doc.number}</div>
@@ -1087,7 +1092,7 @@ tbody td{padding:9px 10px;font-size:12px;color:#333;border-bottom:1px solid #eee
   </div>
 </div>
 <div class="billing">
-  <div class="bill-block"><div class="bill-lbl">Émetteur</div><div class="bill-name">${company.name}</div><div class="bill-info">${company.address}<br/>${company.phone} · ${company.email}<br/>${company.bank}</div></div>
+  <div class="bill-block"><div class="bill-lbl">Émetteur</div><div class="bill-name">${company.nom || company.name}</div><div class="bill-info">${company.adresse || company.address}<br/>${company.telephone || company.phone} · ${company.email}<br/>${company.bank}</div></div>
   <div class="bill-block"><div class="bill-lbl">Client</div><div class="bill-name">${doc.clientName}${doc.clientBusiness?` — ${doc.clientBusiness}`:""}</div><div class="bill-info">${doc.clientAddress||""}<br/>${doc.clientPhone} · ${doc.clientEmail}</div></div>
 </div>
 <table>

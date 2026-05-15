@@ -16,19 +16,18 @@ class StoreCompanyRequest extends FormRequest
         return [
             'nom' => 'required|string|max:191',
             'nom_commercial' => 'nullable|string|max:191',
+            'email' => 'nullable|email|max:191|unique:companies,email',
+            'telephone' => 'nullable|string|max:30',
             'adresse' => 'nullable|string|max:255',
             'ville' => 'nullable|string|max:100',
             'code_postal' => 'nullable|string|max:20',
             'pays' => 'nullable|string|max:100',
-            'telephone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:191',
-            'ice' => 'nullable|string|max:100',
-            'registre_commerce' => 'nullable|string|max:100',
-            'devise' => 'nullable|string|max:10',
-            'langue' => 'nullable|string|max:10',
+            'ice' => 'nullable|string|max:50|unique:companies,ice',
+            'registre_commerce' => 'nullable|string|max:50|unique:companies,registre_commerce',
+            'identifiant_fiscal' => 'nullable|string|max:50|unique:companies,identifiant_fiscal',
             'logo_path' => 'nullable|string|max:255',
-            'settings' => 'nullable|array',
-            'is_active' => 'nullable|boolean',
+            'is_active' => 'boolean',   
+            
         ];
     }
 }

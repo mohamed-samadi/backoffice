@@ -18,18 +18,26 @@ class Company extends Model
     protected $fillable = [
         'nom',
         'nom_commercial',
+
+        // Contact
+        'email',
+        'telephone',
+
+        // Address
         'adresse',
         'ville',
         'code_postal',
         'pays',
-        'telephone',
-        'email',
+
+        // Legal info
         'ice',
         'registre_commerce',
-        'devise',
-        'langue',
+        'identifiant_fiscal',
+
+        // Branding
         'logo_path',
-        'settings',
+
+        // Status
         'is_active',
     ];
 

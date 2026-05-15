@@ -13,6 +13,7 @@ import DocumentDetailPage from "../pages/documents/DocumentDetailPage";
 import ChequesPage from "../pages/cheques/ChequesPage";
 import ClientsPage from "../pages/clients/ClientsPage";
 import CreditsPage from "../pages/credits/CreditsPage";
+import CompanyPage from "../pages/companies/CompanyPage";
 const AppRouter = () => {
   return (
     <Router>
@@ -33,6 +34,7 @@ const AppRouter = () => {
           <Route path="/documents/:id/edit" element={<DocumentDetailPage mode="edit" />} />
           <Route path="/documents/:id" element={<DocumentDetailPage mode="view" />} />
           <Route path="/document/:id" element={<DocumentDetailPage mode="view" />} />
+          <Route path="/companies" element={<CompanyPage />} />
         </Route>
       </Routes>
     </Router>
