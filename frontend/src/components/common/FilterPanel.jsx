@@ -22,8 +22,8 @@ const FilterPanel = memo(
     return (
       <div className={styles.filterPanel}>
         <div className={styles.filterContent}>
-          {filterFields.map((field) => (
-            <div key={field.key} className={styles.filterGroup}>
+          {filterFields.map((field ,index) => (
+            <div key={index} className={styles.filterGroup}>
               <label htmlFor={field.key}>{field.label}</label>
                     {field.type === "text" && (
                 <input
@@ -53,8 +53,8 @@ const FilterPanel = memo(
                   className={styles.select}
                 >
                   <option value="">Tous</option>
-                  {field.options?.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
+                  {field.options?.map((opt,index) => (
+                    <option key={index} value={opt.value}>
                       {opt.label}
                     </option>
                   ))}

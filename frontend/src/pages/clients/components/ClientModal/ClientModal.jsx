@@ -283,7 +283,7 @@ export default function ClientModal({
                 <ViewValue>
                   {form.telephone ? (
                     <a
-                      href={`tel:${form.telephone}`}
+                      href={`${form.telephone}`}
                       className={styles.contactLink}
                     >
                       {form.telephone}

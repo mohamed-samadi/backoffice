@@ -8,6 +8,27 @@
 
 /* ─── Create button ─────────────────────────────────────────────────────── */
 .cellCredit   { display: flex; align-items: center; gap: var(--gap-md); }
+.statutBar {
+  width: 3px;
+  height: 32px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.bar--purple {
+  background: var(--color-purple);
+}
+.bar--green {
+  background: var(--color-green);
+}
+.bar--red {
+  background: var(--color-red);
+}
+.bar--amber {
+  background: var(--color-amber);
+}
+.bar--accent {
+  background: var(--color-accent);
+}
 .createBtn {
   display: flex; align-items: center; gap: var(--gap-sm);
   padding: var(--space-2) var(--space-5);

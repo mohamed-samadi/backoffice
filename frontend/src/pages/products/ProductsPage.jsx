@@ -40,7 +40,7 @@ const FILTER_FIELDS = [
   { key: "category_id",   label: "Catégorie",    type: "select", options: [] }, // injecté dynamiquement
   {key: "type",          label: "Type",         type: "select",
     options: [
-      { value: "product", label: "Produit" },
+      {  value: "product", label: "Produit" },
       { value: "service", label: "Service" },
     ]
   },

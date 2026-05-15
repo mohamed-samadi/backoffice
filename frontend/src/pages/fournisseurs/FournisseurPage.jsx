@@ -217,7 +217,7 @@ export default function FournisseurPage() {
 
   useEffect(() => {
     fetchFournisseurVilles();
-  }, [deleteFournisseur,updateFournisseur,createFournisseur]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Notification ─────────────────────────────────────────────────────── */
   const notify = useCallback((type, message, duration = 3500) => {
