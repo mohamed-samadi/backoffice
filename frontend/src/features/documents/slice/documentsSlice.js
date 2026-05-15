@@ -111,8 +111,9 @@ const documentsSlice = createSlice({
       })
       .addCase(createDocument.fulfilled, (state, action) => {
         state.loadingStates.create = false;
-        if (action.payload?.id) {
-          state.data.unshift(action.payload);
+        const document = action.payload.data || action.payload;
+        if (document?.id) {
+          state.data.unshift(document);
         }
         state.success = true;
       })
@@ -128,11 +129,12 @@ const documentsSlice = createSlice({
       })
       .addCase(updateDocument.fulfilled, (state, action) => {
         state.loadingStates.update = false;
-        const index = state.data.findIndex((document) => document.id === action.payload.id);
+        const document = action.payload.data || action.payload;
+        const index = state.data.findIndex((doc) => doc.id === document.id);
         if (index !== -1) {
-          state.data[index] = action.payload;
+          state.data[index] = document;
         }
-        state.current = action.payload;
+        state.current = document;
         state.success = true;
       })
       .addCase(updateDocument.rejected, (state, action) => {

@@ -99,3 +99,52 @@
 .deleteBtn { flex: 1; padding: var(--space-2) var(--space-4); background: var(--color-red); border: none; border-radius: var(--radius-md); color: #fff; font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); cursor: pointer; transition: all var(--transition-fast); }
 .deleteBtn:hover:not(:disabled) { opacity: .85; }
 .deleteBtn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+@import "../../styles/shared.module.css";
+
+/* ─── Cell: Client ───────────────────────────────────────────────────────── */
+.cellClient {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+}
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+.avatarActive {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border: 1px solid rgba(79, 127, 255, 0.2);
+}
+.avatarInactive {
+  background: var(--color-red-soft);
+  color: var(--color-red);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.clientName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+.clientSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Cell: Contact links ────────────────────────────────────────────────── */
+.contactLink {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.contactLink:hover {
+  text-decoration: underline;
+}

@@ -141,7 +141,7 @@ export default function CreditModal({
     en_retard:  { color: "amber",  label: "En retard"  },
     impaye:     { color: "red",    label: "Impayé"     },
     solde:      { color: "green",  label: "Soldé"      },
-    annule:     { color: "red",    label: "Annulé"     },
+    annule:     { color: "red",    label: "Annulé"       },
   };
   const meta = statutMeta[form.statut] || { color: "accent", label: form.statut };
 

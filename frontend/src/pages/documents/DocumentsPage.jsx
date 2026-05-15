@@ -65,8 +65,8 @@ const FILTER_FIELDS = [
         type: "select",
         options: [
             { value: "payé", label: "Payé" },
-            { value: "partiel", label: "Partiel" },
-            { value: "impaye", label: "Impayé" },
+            { value: "partial", label: "Partiel" },
+            { value: "non_paye", label: "Impayé" },
         ],
     },
     {
@@ -154,13 +154,35 @@ const COLUMNS = [
         width: "10%",
         render: (val) => <span className={styles.amount}>{currency(val)}</span>,
     },
+   
     {
         key: "statut",
-        label: "Status",
+        label: "Statut",
         width: "12%",
-        render: (val) => (
-            <span className={styles.badgeNeutral}>{val || "—"}</span>
-        ),
+        // statut column
+                render: (val) => {
+                const map = {
+                    "brouillon" : styles.badgeBrouillon,
+                    "envoyé":  styles.badgeEnvoye,
+                    "accepté": styles.badgeAccepte,
+                };
+                return <span className={map[val] || styles.badgeNeutral}>{val || "—"}</span>;
+                },
+    },
+   
+    {
+        key: "statut_paiement",
+        label: "paiement",
+        width: "12%",
+      // statut_paiement column
+            render: (val) => {
+            const map = {
+                "paye":   styles.badgePaye,
+                "partiel":  styles.badgePartiel,
+                "non_paye": styles.badgeImpaye,
+            };
+            return <span className={map[val] || styles.badgeNeutral}>{val || "—"}</span>;
+            },
     },
 ];
 

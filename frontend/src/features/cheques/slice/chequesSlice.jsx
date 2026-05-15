@@ -5,6 +5,7 @@ import {
   encaisserCheque, marquerImpayeCheque, annulerCheque,
   fetchEcheancesProches,
   fetchChequesByClient,
+  fetchbanques  
 } from "../thunk/chequesThunk";
 
 
@@ -17,6 +18,7 @@ const initialState = {
   // ── Liste principale paginée ──────────────────────────────────────────
   data: [],
   databyClient: [],
+  banques: [],
   meta: { current_page: 1, last_page: 1, total: 0, per_page: 10 },
 
   stats: {
@@ -58,6 +60,20 @@ const chequesSlice = createSlice({
     resetEcheances:    (state) => { state.echeancesProches = []; state.echeancesProchesCount = 0; },
   },
   extraReducers: (builder) => {
+    builder
+      .addCase(fetchbanques.pending,   (state) => {
+        state.loadingStates.fetchBanques = true;
+        state.error = null;
+      })
+      .addCase(fetchbanques.fulfilled, (state, action) => {
+        state.loadingStates.fetchBanques = false;
+        state.banques = action.payload?.data || [];
+      })
+      .addCase(fetchbanques.rejected,  (state, action) => {
+        state.loadingStates.fetchBanques = false;
+        state.error = action.payload;
+      });
+
     builder
       .addCase(fetchChequesByClient.pending,   (state) => {
         state.loadingStates.fetch = true;

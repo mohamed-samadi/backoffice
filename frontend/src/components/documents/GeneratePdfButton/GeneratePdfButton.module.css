@@ -1,0 +1,290 @@
+@import "../../../styles/tokens.css";
+
+/* ─── Backdrop ───────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .75);
+  backdrop-filter: blur(6px);
+  z-index: var(--z-modal-backdrop);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--space-4);
+  animation: fadeIn .18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Modal shell ────────────────────────────────────────────────────────── */
+.modal {
+  display: flex;
+  width: 100%; max-width: 940px;
+  height: 88vh;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, .6);
+  animation: scaleIn .22s cubic-bezier(.16, 1, .3, 1);
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(.96) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)  translateY(0); }
+}
+
+/* ─── Left pane: iframe preview ─────────────────────────────────────────── */
+.previewPane {
+  flex: 1 1 0;
+  min-width: 0;
+
+/* ensure modal and its interactive children can receive pointer events */
+.modal {
+  pointer-events: auto;
+  z-index: calc(var(--z-modal-backdrop) + 1);
+}
+
+.modal button,
+.modal input,
+.modal select {
+  pointer-events: auto !important;
+}
+  background: #c8ccd4;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+/* fake browser chrome bar */
+.previewBar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  padding: 0 14px;
+  height: 38px;
+  background: #3c3c3c;
+  flex-shrink: 0;
+}
+
+.previewDots { display: flex; align-items: center; gap: 5px; }
+.dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #6b7280;
+}
+.dot:nth-child(1) { background: #ef4444; }
+.dot:nth-child(2) { background: #f59e0b; }
+.dot:nth-child(3) { background: #22c55e; }
+
+.previewBarTitle {
+  font-size: 11px; color: #d1d5db;
+  font-family: var(--font-family, Arial, sans-serif);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.previewScroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 20px;
+  display: flex; justify-content: center;
+  scrollbar-width: thin; scrollbar-color: #9ca3af transparent;
+}
+
+.previewIframe {
+  width: 100%;
+  max-width: 580px;
+  height: 100%;
+  min-height: 600px;
+  border: none;
+  border-radius: 3px;
+  box-shadow: 0 4px 28px rgba(0, 0, 0, .22);
+  background: #fff;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ─── Right pane: controls (dark — mirrors browser print dialog) ─────────── */
+.controlPane {
+  width: 256px;
+  flex-shrink: 0;
+  background: #292929;
+  display: flex; flex-direction: column;
+  color: #e5e7eb;
+}
+
+.controlPane {
+  pointer-events: auto;
+}
+
+.controlHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 18px 14px;
+  flex-shrink: 0;
+}
+
+.controlTitle {
+  font-size: 15px; font-weight: 600; color: #f3f4f6;
+  font-family: var(--font-family, Arial, sans-serif);
+}
+
+.closeBtn {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid #3f3f3f;
+  color: #9ca3af; cursor: pointer;
+  transition: all .15s ease;
+}
+.closeBtn:hover { background: #3f3f3f; color: #f3f4f6; }
+
+.controlDivider { border: none; border-top: 1px solid #3a3a3a; flex-shrink: 0; }
+
+/* ─── Document summary card ──────────────────────────────────────────────── */
+.docSummary {
+  margin: 14px 18px 0;
+  padding: 13px 14px;
+  background: #333;
+  border: 1px solid #424242;
+  border-radius: 8px;
+}
+
+.summaryType {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+  text-transform: uppercase; color: #60a5fa; margin-bottom: 5px;
+}
+.summaryNum {
+  font-size: 15px; font-weight: 700; color: #f3f4f6;
+  letter-spacing: -.3px; margin-bottom: 5px;
+}
+.summaryMeta {
+  font-size: 10.5px; color: #9ca3af; line-height: 1.55;
+}
+.summaryTotal {
+  margin-top: 9px; padding-top: 9px;
+  border-top: 1px solid #424242;
+  font-size: 13px; font-weight: 700; color: #93c5fd;
+}
+
+/* ─── Settings rows ──────────────────────────────────────────────────────── */
+.controlBody {
+  flex: 1; overflow-y: auto;
+  padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+  scrollbar-width: thin; scrollbar-color: #3f3f3f transparent;
+}
+
+.controlRow { display: flex; flex-direction: column; gap: 5px; }
+
+.controlLabel {
+  font-size: 10.5px; color: #9ca3af; font-weight: 500;
+}
+
+.controlSelect {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 10px;
+  background: #333; border: 1px solid #424242;
+  border-radius: 6px;
+  font-size: 11.5px; color: #e5e7eb;
+  cursor: default;
+}
+.controlSelect span { flex: 1; }
+.chevron { color: #6b7280; flex-shrink: 0; margin-left: auto; }
+
+.controlRowCollapse {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px;
+  background: #333; border: 1px solid #424242;
+  border-radius: 6px;
+  font-size: 11.5px; color: #e5e7eb;
+  cursor: pointer;
+  transition: background .12s ease;
+  user-select: none;
+}
+.controlRowCollapse:hover { background: #3a3a3a; }
+
+/* ─── Error banner ───────────────────────────────────────────────────────── */
+.errorBanner {
+  display: flex; align-items: flex-start; gap: 7px;
+  padding: 9px 11px;
+  background: rgba(239, 68, 68, .12);
+  border: 1px solid rgba(239, 68, 68, .3);
+  border-radius: 6px;
+  font-size: 11px; color: #fca5a5; line-height: 1.45;
+}
+.errorBanner svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ─── Footer buttons ─────────────────────────────────────────────────────── */
+.controlFooter {
+  padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 8px;
+  flex-shrink: 0;
+}
+
+.controlFooter {
+  pointer-events: auto;
+}
+
+/* primary: download PDF */
+.pdfBtn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; padding: 9px 12px;
+  background: #1d4ed8; border: none; border-radius: 7px;
+  color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .15s ease;
+  letter-spacing: .2px;
+}
+.pdfBtn:hover:not(:disabled) { background: #1e40af; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(29, 78, 216, .4); }
+.pdfBtn:disabled { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* secondary: browser print */
+.printBtn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  width: 100%; padding: 8px 12px;
+  background: transparent; border: 1px solid #4a4a4a; border-radius: 7px;
+  color: #d1d5db; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .15s ease;
+}
+.printBtn { pointer-events: auto; }
+.printBtn:hover:not(:disabled) { background: #383838; color: #f3f4f6; border-color: #606060; }
+.printBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* cancel */
+.cancelBtn {
+  width: 100%; padding: 7px 12px;
+  background: transparent; border: none; border-radius: 7px;
+  color: #6b7280; font-size: 11.5px;
+  cursor: pointer; transition: color .12s ease;
+}
+.cancelBtn { pointer-events: auto; }
+.cancelBtn:hover { color: #9ca3af; }
+
+/* ─── Spinner ────────────────────────────────────────────────────────────── */
+.spinner {
+  width: 13px; height: 13px; flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, .25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  display: inline-block;
+}
+.primaryBtn{
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-sm);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    border: none;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.primaryBtn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .modal { flex-direction: column; height: 96vh; max-width: 100%; }
+  .controlPane { width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .controlHeader { padding: 12px 14px 10px; }
+  .controlBody { flex-direction: row; flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .controlRow { flex: 1 1 140px; }
+  .controlFooter { flex-direction: row; padding: 10px 14px; }
+  .pdfBtn, .printBtn, .cancelBtn { flex: 1; }
+  .previewPane { min-height: 0; flex: 1; }
+}

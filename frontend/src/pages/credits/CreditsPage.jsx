@@ -21,6 +21,7 @@ const PlusIcon = () => (
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
+
 const EditIcon = () => (
   <svg
     width="13"
@@ -34,6 +35,7 @@ const EditIcon = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
   </svg>
 );
+
 const TrashIcon = () => (
   <svg
     width="13"
@@ -64,6 +66,7 @@ const EyeIcon = () => (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
+
 const STATUT_META = {
   en_attente: { label: "En attente", color: "purple" },
   actif: { label: "Actif", color: "accent" },
@@ -84,9 +87,9 @@ const FILTER_FIELDS_BASE = [
     key: "statut",
     label: "Statut",
     type: "select",
-    options: Object.entries(STATUT_META).map(([v, m]) => ({
-      value: v,
-      label: m.label,
+    options: Object.entries(STATUT_META).map(([value, meta]) => ({
+      value,
+      label: meta.label,
     })),
   },
   {
@@ -125,8 +128,9 @@ const COLUMNS = [
     render: (val, row) => (
       <div className={styles.cellCredit}>
         <div
-          className={styles.priorityBar}
-          style={{ background: STATUT_META[row.statut]?.color }}
+          className={`${styles.statutBar} ${
+            styles[`bar--${STATUT_META[row.statut]?.color}`]
+          }`}
         />
         <code className={styles.creditNum}>{val}</code>
       </div>
@@ -147,7 +151,9 @@ const COLUMNS = [
     key: "montant_total",
     label: "Total",
     width: "13%",
-    render: (val) => <span className={styles.montantText}>{fmt(val)}</span>,
+    render: (val) => (
+      <span className={styles.montantText}>{fmt(val)}</span>
+    ),
   },
   {
     key: "reste",
@@ -164,10 +170,16 @@ const COLUMNS = [
     label: "Statut",
     width: "14%",
     render: (val) => {
-      const meta = STATUT_META[val] || { label: val, color: "accent" };
+      const meta = STATUT_META[val] || {
+        label: val,
+        color: "accent",
+      };
+
       return (
         <span
-          className={`${styles.statutBadge} ${styles[`statut--${meta.color}`]}`}
+          className={`${styles.statutBadge} ${
+            styles[`statut--${meta.color}`]
+          }`}
         >
           <span className={styles.dot} />
           {meta.label}
@@ -180,8 +192,13 @@ const COLUMNS = [
     label: "Échéance",
     width: "14%",
     render: (val, row) => {
-      if (!val) return <span className={styles.empty}>—</span>;
-      const overdue = new Date(val) < new Date() && row.statut !== "solde";
+      if (!val) {
+        return <span className={styles.empty}>—</span>;
+      }
+
+      const overdue =
+        new Date(val) < new Date() && row.statut !== "solde";
+
       return (
         <span className={overdue ? styles.dateOverdue : styles.dateNormal}>
           {new Date(val).toLocaleDateString("fr-FR", {
@@ -195,7 +212,8 @@ const COLUMNS = [
   },
 ];
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════════ */
+
 export default function CreditsPage() {
   const {
     credits,
@@ -216,8 +234,9 @@ export default function CreditsPage() {
     enregistrerPaiement,
     generateNumeroCredit,
   } = useCredits();
-  console.log(credits);
+
   const { activeClients, fetchActiveClients } = useClients();
+
   useEffect(() => {
     fetchActiveClients();
   }, []);
@@ -226,7 +245,13 @@ export default function CreditsPage() {
     per_page: "10",
     sort_by: "created_at",
   });
-  const [modal, setModal] = useState({ open: false, mode: null, data: null });
+
+  const [modal, setModal] = useState({
+    open: false,
+    mode: null,
+    data: null,
+  });
+
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [notification, setNotification] = useState(null);
 
@@ -243,34 +268,64 @@ export default function CreditsPage() {
     },
   ];
 
-  /* ── Fetch ────────────────────────────────────────────────────────────── */
+  /* ── Fetch ─────────────────────────────────────────────────────────── */
+
   const load = useCallback(
     (page = 1) => fetchCredits({ ...filters, page }),
-    [filters], // eslint-disable-line
+    [filters] // eslint-disable-line
   );
 
   useEffect(() => {
     load(1);
   }, [filters]); // eslint-disable-line
 
-  /* ── Générer numéro à l'ouverture du modal create ─────────────────────── */
+  /* ── Générer numéro à l'ouverture du modal create ─────────────────── */
+
   useEffect(() => {
     if (modal.open && modal.mode === "create") {
       generateNumeroCredit().catch(() => {});
     }
   }, [modal.open, modal.mode]); // eslint-disable-line
 
-  /* ── Notification ─────────────────────────────────────────────────────── */
+  /* ── Notification ──────────────────────────────────────────────────── */
+
   const notify = useCallback((type, message, duration = 3500) => {
     setNotification({ type, message });
-    setTimeout(() => setNotification(null), duration);
+
+    setTimeout(() => {
+      setNotification(null);
+    }, duration);
   }, []);
 
-  /* ── Modal ────────────────────────────────────────────────────────────── */
-  const openCreate = () => setModal({ open: true, mode: "create", data: null });
-  const openEdit = (row) => setModal({ open: true, mode: "edit", data: row });
-  const openView = (row) => setModal({ open: true, mode: "view", data: row });
-  const closeModal = () => setModal({ open: false, mode: null, data: null });
+  /* ── Modal ─────────────────────────────────────────────────────────── */
+
+  const openCreate = () =>
+    setModal({
+      open: true,
+      mode: "create",
+      data: null,
+    });
+
+  const openEdit = (row) =>
+    setModal({
+      open: true,
+      mode: "edit",
+      data: row,
+    });
+
+  const openView = (row) =>
+    setModal({
+      open: true,
+      mode: "view",
+      data: row,
+    });
+
+  const closeModal = () =>
+    setModal({
+      open: false,
+      mode: null,
+      data: null,
+    });
 
   const handleSubmit = async (payload) => {
     try {
@@ -281,55 +336,102 @@ export default function CreditsPage() {
         await updateCredit(modal.data.id, payload);
         notify("success", "Crédit mis à jour avec succès.");
       }
+
       closeModal();
       await load(pagination.currentPage);
     } catch (err) {
       const msg = err?.errors
         ? Object.values(err.errors).flat().join(" — ")
         : err?.message || "Une erreur est survenue.";
+
       notify("error", msg, 5000);
     }
   };
 
+  /* ── Paiement partiel ──────────────────────────────────────────────── */
+
   const handlePaiement = async (montant) => {
     if (!modal.data) return;
+
     try {
       await enregistrerPaiement(modal.data.id, montant);
+
       notify("success", "Paiement enregistré avec succès.");
 
-      // Récupérer les données fraîches du crédit
+      // Rafraîchir le crédit affiché dans le modal
       const updatedCredit = await fetchCreditById(modal.data.id);
-      setModal((prev) => ({ ...prev, data: updatedCredit }));
 
-      // Recharger aussi la liste
+      setModal((prev) => ({
+        ...prev,
+        data: updatedCredit,
+      }));
+
+      // Rafraîchir la liste
       await load(pagination.currentPage);
     } catch (err) {
-      notify("error", err?.message || "Erreur lors du paiement.", 5000);
+      notify(
+        "error",
+        err?.message || "Erreur lors du paiement.",
+        5000
+      );
     }
   };
 
-  /* ── Delete ───────────────────────────────────────────────────────────── */
+  /* ── Delete ────────────────────────────────────────────────────────── */
+
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
+
     try {
       await deleteCredit(deleteConfirm.id);
+
       setDeleteConfirm(null);
-      notify("success", `Crédit ${deleteConfirm.numero_credit} supprimé.`);
+
+      notify(
+        "success",
+        `Crédit ${deleteConfirm.numero_credit} supprimé.`
+      );
+
       const newTotal = total - 1;
       const perPage = Number(filters.per_page) || 10;
-      const maxPage = Math.max(1, Math.ceil(newTotal / perPage));
-      const targetPage = Math.min(pagination.currentPage, maxPage);
+
+      const maxPage = Math.max(
+        1,
+        Math.ceil(newTotal / perPage)
+      );
+
+      const targetPage = Math.min(
+        pagination.currentPage,
+        maxPage
+      );
+
       await load(targetPage);
     } catch (err) {
       setDeleteConfirm(null);
-      notify("error", err?.message || "Erreur lors de la suppression.", 5000);
+
+      notify(
+        "error",
+        err?.message || "Erreur lors de la suppression.",
+        5000
+      );
     }
   };
 
-  /* ── Table ────────────────────────────────────────────────────────────── */
+  /* ── Table ─────────────────────────────────────────────────────────── */
+
   const tableActions = [
-    { key: "view", label: "Voir", icon: <EyeIcon />, onClick: openView },
-    { key: "edit", label: "Modifier", icon: <EditIcon />, onClick: openEdit },
+    {
+      key: "view",
+      label: "Voir",
+      icon: <EyeIcon />,
+      onClick: openView,
+    },
+    {
+      key: "edit",
+      label: "Modifier",
+      icon: <EditIcon />,
+      onClick: openEdit,
+    },
     {
       key: "delete",
       label: "Supprimer",
@@ -347,12 +449,15 @@ export default function CreditsPage() {
     onNext: () => load(pagination.currentPage + 1),
   };
 
-  /* ── Render ───────────────────────────────────────────────────────────── */
+  /* ── Render ────────────────────────────────────────────────────────── */
+
   return (
     <div className={styles.page}>
       {notification && (
         <div
-          className={`${styles.toast} ${styles[`toast--${notification.type}`]}`}
+          className={`${styles.toast} ${
+            styles[`toast--${notification.type}`]
+          }`}
         >
           <span className={styles.toastDot} />
           {notification.message}
@@ -361,14 +466,17 @@ export default function CreditsPage() {
 
       <PageHeader
         title="Crédits"
-        subtitle={`${total} crédit${total !== 1 ? "s" : ""} enregistré${total !== 1 ? "s" : ""}`}
+        subtitle={`${total} crédit${
+          total !== 1 ? "s" : ""
+        } enregistré${total !== 1 ? "s" : ""}`}
         actions={
           <button
             className={styles.createBtn}
             onClick={openCreate}
             disabled={createLoading}
           >
-            <PlusIcon /> Nouveau crédit
+            <PlusIcon />
+            Nouveau crédit
           </button>
         }
       />
@@ -378,7 +486,12 @@ export default function CreditsPage() {
       <FilterPanel
         filters={filters}
         onFilterChange={setFilters}
-        onReset={() => setFilters({ per_page: "10", sort_by: "created_at" })}
+        onReset={() =>
+          setFilters({
+            per_page: "10",
+            sort_by: "created_at",
+          })
+        }
         filterFields={filterFields}
       />
 
@@ -401,7 +514,11 @@ export default function CreditsPage() {
           onClose={closeModal}
           onSubmit={handleSubmit}
           onPaiement={handlePaiement}
-          loading={modal.mode === "create" ? createLoading : updateLoading}
+          loading={
+            modal.mode === "create"
+              ? createLoading
+              : updateLoading
+          }
           paiementLoading={paiementLoading}
         />
       )}
@@ -413,17 +530,25 @@ export default function CreditsPage() {
             <div className={styles.deleteIcon}>
               <TrashIcon />
             </div>
-            <h3 className={styles.deleteTitle}>Confirmer la suppression</h3>
+
+            <h3 className={styles.deleteTitle}>
+              Confirmer la suppression
+            </h3>
+
             <p className={styles.deleteMsg}>
               Voulez-vous vraiment supprimer le crédit{" "}
               <strong>{deleteConfirm.numero_credit}</strong> ?
+
               {Number(deleteConfirm.reste) > 0 && (
                 <span className={styles.deleteWarning}>
-                  <br />⚠ Ce crédit a encore{" "}
-                  <strong>{fmt(deleteConfirm.reste)}</strong> de reste dû.
+                  <br />
+                  ⚠ Ce crédit a encore{" "}
+                  <strong>{fmt(deleteConfirm.reste)}</strong>{" "}
+                  de reste dû.
                 </span>
               )}
             </p>
+
             <div className={styles.deleteActions}>
               <button
                 className={styles.cancelBtn}
@@ -432,12 +557,15 @@ export default function CreditsPage() {
               >
                 Annuler
               </button>
+
               <button
                 className={styles.deleteBtn}
                 onClick={handleDeleteConfirm}
                 disabled={deleteLoading}
               >
-                {deleteLoading ? "Suppression…" : "Supprimer"}
+                {deleteLoading
+                  ? "Suppression…"
+                  : "Supprimer"}
               </button>
             </div>
           </div>

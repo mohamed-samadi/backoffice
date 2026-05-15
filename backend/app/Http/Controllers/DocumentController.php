@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\StoreDocumentRequest;
+use App\Http\Requests\UpdateDocumentRequest;
 
 class DocumentController extends Controller
 {
@@ -126,30 +128,9 @@ class DocumentController extends Controller
         ], 200);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreDocumentRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'numero' => 'required|string|unique:documents,numero',
-            'type' => 'required|in:facture,devis,bon_livraison',
-            'date_creation' => 'nullable|date',
-            'date_validite' => 'nullable|date',
-            'statut' => 'nullable|string|max:50',
-            'total_ht' => 'nullable|numeric|min:0',
-            'total_tva' => 'nullable|numeric|min:0',
-            'total_ttc' => 'nullable|numeric|min:0',
-            'montant_paye' => 'nullable|numeric|min:0',
-            'reste_a_payer' => 'nullable|numeric|min:0',
-            'statut_paiement' => 'nullable|string|max:50',
-            'lines' => 'required|array|min:1',
-            'lines.*.product_id' => 'required|exists:products,id',
-            'lines.*.description' => 'nullable|string',
-            'lines.*.quantite' => 'required|numeric|min:0.01',
-            'lines.*.prix_unitaire_ht' => 'required|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0',
-            'lines.*.tva' => 'nullable|numeric|min:0',
-            'lines.*.ordre' => 'nullable|integer',
-        ]);
+        $data = $request->validated();
 
         $lines = $data['lines'];
         $document = DB::transaction(function () use ($data, $lines) {
@@ -207,30 +188,10 @@ class DocumentController extends Controller
         ], 201);
     }
 
-public function update(Request $request, $id): JsonResponse
+public function update(UpdateDocumentRequest $request, Document $document): JsonResponse
 {
     try {
-        $document = Document::findOrFail($id);
-
-        $data = $request->validate([
-            'client_id' => 'sometimes|required|exists:clients,id',
-            'numero' => 'sometimes|required|string|unique:documents,numero,' . $document->id,
-            'type' => 'sometimes|required|in:facture,devis,bon_livraison',
-            'date_creation' => 'nullable|date',
-            'date_validite' => 'nullable|date',
-            'statut' => 'nullable|string|max:50',
-            'montant_paye' => 'nullable|numeric|min:0',
-            'statut_paiement' => 'nullable|string|max:50',
-
-            'lines' => 'sometimes|array|min:1',
-            'lines.*.product_id' => 'required_with:lines|exists:products,id',
-            'lines.*.description' => 'nullable|string',
-            'lines.*.quantite' => 'required_with:lines|numeric|min:0.01',
-            'lines.*.prix_unitaire_ht' => 'required_with:lines|numeric|min:0',
-            'lines.*.remise' => 'nullable|numeric|min:0',
-            'lines.*.tva' => 'nullable|numeric|min:0',
-            'lines.*.ordre' => 'nullable|integer',
-        ]);
+        $data = $request->validated();
 
         $lines = $data['lines'] ?? null;
         if ($lines) {
@@ -298,7 +259,7 @@ public function update(Request $request, $id): JsonResponse
         ], 200);
 
     } catch (\Exception $e) {
-        Log::error('Document update failed', ['id' => $id, 'error' => $e->getMessage()]);
+        Log::error('Document update failed', ['id' => $document->id ?? null, 'error' => $e->getMessage()]);
 
         return response()->json([
             'success' => false,
@@ -314,6 +275,40 @@ public function update(Request $request, $id): JsonResponse
             'success' => true,
             'message' => 'Document supprimé avec succès'
         ], 200);
+    }
+    public function generateSku(Request $request): JsonResponse
+    {
+        $type = trim((string) $request->get('type', ''));
+        if (!in_array($type, ['facture', 'devis', 'bon_livraison'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Type de document invalide'
+            ], 400);
+        }
+
+        $prefix = strtoupper(substr($type, 0, 3));
+        $currentYear = date('Y');
+
+        $lastDocument = Document::where('type', $type)
+            ->whereYear('created_at', $currentYear)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastDocument) {
+            $lastNumber = (int) substr($lastDocument->numero, -6);
+            $number = $lastNumber + 1;
+        } else {
+             $number = 1;
+        }
+
+        $sku = $prefix . '-'.date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+
+        return response()->json([
+            'success' => true,
+            'sku' => $sku,
+            'message' => 'SKU généré avec succès'
+        ], 200);
+
     }
     
 }

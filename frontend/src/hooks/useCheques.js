@@ -4,6 +4,7 @@ import {
   createCheque, updateCheque, deleteCheque,
   encaisserCheque, marquerImpayeCheque, annulerCheque,
   fetchEcheancesProches,
+  fetchbanques,
 } from "../features/cheques/thunk/chequesThunk";
 import {
   selectChequesData, selectCurrentCheque,
@@ -17,6 +18,7 @@ import {
   selectChequeEcheancesLoading,
   selectChequesError, selectChequesSuccess,
   selectChequesNonEncaisses, selectChequesEncaisses, selectChequesImpayes,
+  selectBanquesOptions,
 } from "../features/cheques/selectors/chequesSelectors";
 import {
   clearError, clearSuccess, resetCurrent, resetEcheances,
@@ -30,6 +32,7 @@ export const useCheques = () => {
 
   return {
     // ── Data ────────────────────────────────────────────────────────────
+    banques:              useSelector(selectBanquesOptions),
     cheques:               useSelector(selectChequesData),
     current:               useSelector(selectCurrentCheque),
     echeancesProches:      useSelector(selectEcheancesProches),
@@ -71,7 +74,8 @@ export const useCheques = () => {
 
     // ── Route spéciale ────────────────────────────────────────────────────
     fetchEcheancesProches: (jours)     => dispatch(fetchEcheancesProches(jours)).unwrap(),
-
+    fetchBanques:          ()          => dispatch(fetchbanques()).unwrap(),
+    fetchbanquesOptions:     ()          => dispatch(fetchbanques()).unwrap(), // alias pour clarté dans les composants
     // ── Reset helpers ─────────────────────────────────────────────────────
     clearError:       () => dispatch(clearError()),
     clearSuccess:     () => dispatch(clearSuccess()),
