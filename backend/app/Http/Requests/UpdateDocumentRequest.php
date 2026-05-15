@@ -31,6 +31,7 @@ class UpdateDocumentRequest extends FormRequest
             'statut' => 'nullable|string|max:50',
             'montant_paye' => 'nullable|numeric|min:0',
             'statut_paiement' => 'nullable|string|max:50',
+            'conditions_paiement' => 'nullable|string',
 
             'lines' => 'sometimes|array|min:1',
             'lines.*.product_id' => 'required_with:lines|exists:products,id',

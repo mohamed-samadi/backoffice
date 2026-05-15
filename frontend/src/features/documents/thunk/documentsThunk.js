@@ -46,7 +46,11 @@ export const createDocument = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await documentsApi.create(payload);
-      return response.data?.data || response.data;
+      const document = response.data?.data || response.data;
+      return {
+        data: document,
+        message: response.data?.message || "Document créé avec succès."
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
@@ -58,7 +62,11 @@ export const updateDocument = createAsyncThunk(
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const response = await documentsApi.update(id, data);
-      return response.data?.data || response.data;
+      const document = response.data?.data || response.data;
+      return {
+        data: document,
+        message: response.data?.message || "Document mis à jour avec succès."
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }

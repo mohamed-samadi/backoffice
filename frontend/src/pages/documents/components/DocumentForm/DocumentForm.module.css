@@ -746,6 +746,49 @@
   display: inline-block;
 }
 
+/* ─── Toast notifications ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-tooltip);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  backdrop-filter: blur(12px);
+  animation: slideInToast 0.25s ease-out;
+  box-shadow: var(--shadow-xl);
+}
+
+.toast--success {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--color-green);
+}
+
+.toast--error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-red);
+}
+
+.toastDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(-8px) translateX(8px); }
+  to   { opacity: 1; transform: translateY(0) translateX(0); }
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 1120px) {
   .summaryBar { grid-template-columns: repeat(2, minmax(0, 1fr)); }

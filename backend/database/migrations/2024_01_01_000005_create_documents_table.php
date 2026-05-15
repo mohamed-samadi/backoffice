@@ -22,6 +22,7 @@ return new class extends Migration
             $table->decimal('montant_paye', 12, 2)->default(0);
             $table->decimal('reste_a_payer', 12, 2)->default(0);
             $table->enum('statut_paiement' , ['non_paye' , 'paye' , 'partial'])->default('non_paye');
+            $table->text('conditions_paiement')->nullable();
             $table->timestamps();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');

@@ -25,7 +25,8 @@ class Document extends Model
         'montant_paye',
         'reste_a_payer',
         'statut_paiement',
-    ];
+        "conditions_paiement" ,
+     ];
 
     protected $casts = [
         'type' => 'string',

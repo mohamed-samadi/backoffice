@@ -14,6 +14,14 @@ const PAYMENT_STATUS_OPTIONS = [
   { value: "non_paye", label: "Impayé" },
 ];
 
+const PAYMENT_CONDITIONS_OPTIONS = [
+  { value: "comptant", label: "Comptant" },
+  { value: "net_7", label: "Net 7 jours" },
+  { value: "net_15", label: "Net 15 jours" },
+  { value: "net_30", label: "Net 30 jours" },
+  { value: "fin_de_mois", label: "Fin de mois" },
+];
+
 const STATUT_OPTIONS = [
   { value: "brouillon", label: "Brouillon" },
   { value: "envoyé", label: "Envoyé" },
@@ -40,14 +48,14 @@ const toDateInputValue = (value) => {
   return String(value).split("T")[0];
 };
 
-const createEmptyLine = () => ({
+const createEmptyLine = (order = 1) => ({
   product_id: "",
   description: "",
   quantite: "1",
   prix_unitaire_ht: "",
   remise: "0",
   tva: "20",
-  ordre: "0",
+  ordre: String(order),
 });
 
 const createEmptyForm = () => ({
@@ -59,7 +67,8 @@ const createEmptyForm = () => ({
   statut: "brouillon",
   montant_paye: "0",
   statut_paiement: "non_paye",
-  lines: [createEmptyLine()],
+  conditions_paiement: "",
+  lines: [createEmptyLine(1)],
 });
 
 const normalizeLine = (line, index = 0) => ({
@@ -81,11 +90,12 @@ const normalizeForm = (documentData) => ({
   statut: documentData?.statut ?? "brouillon",
   montant_paye: String(documentData?.montant_paye ?? "0"),
   statut_paiement: documentData?.statut_paiement ?? "non_paye",
+  conditions_paiement: documentData?.conditions_paiement ?? "",
   lines: Array.isArray(documentData?.documentLines || documentData?.document_lines)
     ? (documentData.documentLines || documentData.document_lines).map((line, index) =>
         normalizeLine(line, index)
       )
-    : [createEmptyLine()],
+    : [createEmptyLine(1)],
 });
 
 const getClientLabel = (client) =>
@@ -102,6 +112,11 @@ const formatPaymentLabel = (value) => {
   return value || "—";
 };
 
+const formatPaymentConditionLabel = (value) => {
+  const match = PAYMENT_CONDITIONS_OPTIONS.find((option) => option.value === value);
+  return match ? match.label : value || "—";
+};
+
 export default function DocumentForm({
   mode = "view",
   initialData = null,
@@ -110,13 +125,14 @@ export default function DocumentForm({
   onSubmit,
   onCancel,
   onEdit,
+  onSuccess,
 }) {
   const isView = mode === "view";
   const isEdit = mode === "edit";
 
   const [form, setForm] = useState(createEmptyForm);
   const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState("");
+  const [notification, setNotification] = useState(null);
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -169,7 +185,7 @@ export default function DocumentForm({
       setForm(createEmptyForm());
     }
     setErrors({});
-    setSubmitError("");
+    setNotification(null);
   }, [initialData, mode]);
 
   useEffect(() => {
@@ -336,7 +352,7 @@ export default function DocumentForm({
       [index]: getProductLabel(product),
     }));
     setProductDropdownOpenIndex(null);
-    setSubmitError("");
+    setNotification(null);
   };
 
   const handleProductSearchChange = (index, value) => {
@@ -348,7 +364,17 @@ export default function DocumentForm({
 
   const getFilteredProducts = (index) => {
     const query = String(productSearchByLine[index] || "").trim().toLowerCase();
+    const selectedProductIds = new Set(
+      form.lines
+        .map((line, currentIndex) => (currentIndex === index ? null : String(line.product_id || "")))
+        .filter(Boolean)
+    );
+
     const results = products.filter((product) => {
+      if (selectedProductIds.has(String(product.id))) {
+        return false;
+      }
+
       if (!query) return true;
 
       return [
@@ -368,16 +394,21 @@ export default function DocumentForm({
   const addLine = () => {
     setForm((previous) => ({
       ...previous,
-      lines: [...previous.lines, createEmptyLine()],
+      lines: [...previous.lines, createEmptyLine(previous.lines.length + 1)],
     }));
   };
 
   const removeLine = (index) => {
     setForm((previous) => {
-      const lines = previous.lines.filter((_, currentIndex) => currentIndex !== index);
+      const lines = previous.lines
+        .filter((_, currentIndex) => currentIndex !== index)
+        .map((line, currentIndex) => ({
+          ...line,
+          ordre: String(currentIndex + 1),
+        }));
       return {
         ...previous,
-        lines: lines.length > 0 ? lines : [createEmptyLine()],
+        lines: lines.length > 0 ? lines : [createEmptyLine(1)],
       };
     });
     setProductDropdownOpenIndex(null);
@@ -414,12 +445,18 @@ export default function DocumentForm({
     return nextErrors;
   };
 
+  const notify = (type, message, duration = 3500) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), duration);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const nextErrors = validate();
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
+      notify("error", "Tous les champs obligatoires doivent être remplis et les valeurs doivent être valides.", 5000);
       return;
     }
 
@@ -432,6 +469,7 @@ export default function DocumentForm({
       statut: form.statut || null,
       montant_paye: Number(form.montant_paye || 0),
       statut_paiement: form.statut_paiement,
+      conditions_paiement: form.conditions_paiement || null,
       lines: form.lines.map((line, index) => ({
         product_id: Number(line.product_id),
         description: line.description?.trim() || null,
@@ -444,9 +482,20 @@ export default function DocumentForm({
     };
 
     try {
-      await onSubmit(payload);
+      const result = await onSubmit(payload);
+      // Use message from backend API response
+      const successMessage = result?.message || (mode === "create" ? "Document créé avec succès." : "Document mis à jour avec succès.");
+      notify("success", successMessage);
+      
+      // Call onSuccess callback with documentId to trigger navigation
+      if (onSuccess && result?.documentId) {
+        setTimeout(() => onSuccess(result.documentId), 500);
+      }
     } catch (error) {
-      setSubmitError(error?.message || "Une erreur est survenue pendant l'enregistrement.");
+      const msg = error?.errors
+        ? Object.values(error.errors).flat().join(" — ")
+        : error?.message || "Une erreur est survenue pendant l'enregistrement.";
+      notify("error", msg, 5000);
     }
   };
 
@@ -495,6 +544,12 @@ export default function DocumentForm({
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>Statut paiement</span>
             <strong className={styles.summaryValue}>{formatPaymentLabel(initialData.statut_paiement)}</strong>
+          </div>
+          <div className={styles.summaryCard}>
+            <span className={styles.summaryLabel}>Conditions de paiement</span>
+            <strong className={styles.summaryValue}>
+              {formatPaymentConditionLabel(initialData.conditions_paiement)}
+            </strong>
           </div>
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>HT</span>
@@ -577,8 +632,14 @@ export default function DocumentForm({
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      {submitError && <div className={styles.alert}>{submitError}</div>}
+    <>
+      {notification && (
+        <div className={`${styles.toast} ${styles[`toast--${notification.type}`]}`}>
+          <span className={styles.toastDot} />
+          {notification.message}
+        </div>
+      )}
+      <form className={styles.form} onSubmit={handleSubmit}>
 
       <div className={styles.formGrid}>
         <section className={styles.sectionCard}>
@@ -748,6 +809,24 @@ export default function DocumentForm({
                 ))}
               </select>
               {errors.statut_paiement && <span className={styles.error}>{errors.statut_paiement}</span>}
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.label}>Conditions de paiement</span>
+              <input
+                className={styles.input}
+                type="text"
+                list="payment-conditions-options"
+                value={form.conditions_paiement}
+                onChange={(event) => handleFieldChange("conditions_paiement", event.target.value)}
+                disabled={saving}
+                placeholder="Choisir ou saisir une condition"
+              />
+              <datalist id="payment-conditions-options">
+                {PAYMENT_CONDITIONS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.label} />
+                ))}
+              </datalist>
             </label>
           </div>
         </section>
@@ -988,6 +1067,7 @@ export default function DocumentForm({
           {isEdit ? "Mettre à jour" : "Créer le document"}
         </button>
       </div>
-    </form>
+      </form>
+    </>
   );
 }

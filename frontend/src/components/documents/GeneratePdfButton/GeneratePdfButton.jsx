@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import styles from "./GeneratePdfButton.module.css";
 
@@ -20,20 +20,23 @@ const getClientLabel = (c) =>
 
 /* ─── PDF HTML builder ───────────────────────────────────────────────────── */
 function buildPdfHtml(doc, companyInfo = {}) {
+  // ensure companyInfo is always an object (caller may pass null)
+  companyInfo = companyInfo || {};
   const lines    = doc.documentLines || doc.document_lines || [];
   const payments = doc.payments || [];
 
   const co = {
-    name:       companyInfo.name       || "Mon Entreprise SARL",
-    ice:        companyInfo.ice        || "001234567000012",
-    if_:        companyInfo.if_        || "12345678",
-    rc:         companyInfo.rc         || "123456",
-    address:    companyInfo.address    || "123 Rue Hassan II, Tanger, Maroc",
+    name:       companyInfo.name       || "-----------",
+    ice:        companyInfo.ice        || "------------",
+    if_:        companyInfo.if_        || "------------",
+    rc:         companyInfo.rc         || "------",
+    address:    companyInfo.address    || "------------------",
     phone:      companyInfo.phone      || "+212 6 XX XX XX XX",
     email:      companyInfo.email      || "contact@monentreprise.ma",
     bank:       companyInfo.bank       || "Attijariwafa Bank",
-    iban:       companyInfo.iban       || "MA64 0001 2345 6789 0123 4567",
-    conditions: companyInfo.conditions || "Paiement sous 15 jours après livraison.",
+    iban:       companyInfo.iban       || "MA64 -------------------",
+    // Use document-level `conditions_paiement` if company doesn't provide them
+    conditions: companyInfo.conditions || doc.conditions_paiement || doc.conditions || "",
   };
 
   const typeLabel = (doc.type || "document").toUpperCase().replace(/_/g, " ");
@@ -429,6 +432,51 @@ PrintPreviewModal.propTypes = {
 /* ─── Main export ────────────────────────────────────────────────────────── */
 export default function GeneratePdfButton({ document: doc, companyInfo, className, children }) {
   const [showModal, setShowModal] = useState(false);
+  const [fetchedCompany, setFetchedCompany] = useState(null);
+  const [companyError, setCompanyError] = useState(null);
+
+  useEffect(() => {
+    // if companyInfo prop is provided, no need to fetch
+    if (companyInfo) return;
+
+    let active = true;
+    const fetchCompany = async () => {
+      try {
+        const res = await fetch('/api/companies');
+        if (!active) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+        // API returns { success: true, data: { ... } }
+        const data = payload?.data || payload;
+
+        // Normalize backend company shape to the keys used by buildPdfHtml
+        const mapped = data
+          ? {
+              name: data.nom || data.name || data.nom_commercial || "Mon Entreprise SARL",
+              ice: data.ice || "",
+              // fiscal id (IF) may be stored in settings JSON or not present
+              if_: (data.settings && (data.settings.if || data.settings.if_)) || data.if || "",
+              // registre_commerce -> rc
+              rc: data.registre_commerce || data.rc || "",
+              address: [data.adresse, data.ville, data.code_postal, data.pays].filter(Boolean).join(", ") || "",
+              phone: data.telephone || data.phone || "",
+              email: data.email || "",
+              bank: data.settings?.bank || data.bank || "",
+              iban: data.settings?.iban || data.iban || "",
+              conditions: data.settings?.conditions || data.conditions || "",
+            }
+          : null;
+
+        setFetchedCompany(mapped);
+      } catch (err) {
+        console.error('Failed to load company info', err);
+        setCompanyError('Impossible de charger les informations de la société');
+      }
+    };
+
+    fetchCompany();
+    return () => { active = false; };
+  }, [companyInfo]);
   if (!doc) return null;
 
   return (
@@ -449,7 +497,7 @@ export default function GeneratePdfButton({ document: doc, companyInfo, classNam
       {showModal && (
         <PrintPreviewModal
           doc={doc}
-          companyInfo={companyInfo}
+          companyInfo={companyInfo || fetchedCompany}
           onClose={() => setShowModal(false)}
         />
       )}
@@ -463,7 +511,7 @@ GeneratePdfButton.propTypes = {
     name: PropTypes.string, ice: PropTypes.string, if_: PropTypes.string,
     rc: PropTypes.string, address: PropTypes.string, phone: PropTypes.string,
     email: PropTypes.string, bank: PropTypes.string, iban: PropTypes.string,
-    conditions: PropTypes.string,
+   
   }),
   className: PropTypes.string,
   children:  PropTypes.node,

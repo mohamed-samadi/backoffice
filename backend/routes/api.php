@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ChequeController ;
 use App\Http\Controllers\CreditController;
+use App\Http\Controllers\CompanyController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -84,4 +85,7 @@ Route::get('documents/stats', [DocumentController::class, 'stats'])->withoutMidd
 Route::apiResource('documents', DocumentController::class)
     ->withoutMiddleware('throttle:api');
 
-
+// ============================================================================
+// ROUTES COMPANY
+// ============================================================================
+Route::apiResource('/companies', CompanyController::class);

@@ -65,8 +65,8 @@ const FILTER_FIELDS = [
         type: "select",
         options: [
             { value: "payé", label: "Payé" },
-            { value: "partiel", label: "Partiel" },
-            { value: "impaye", label: "Impayé" },
+            { value: "partial", label: "Partiel" },
+            { value: "non_paye", label: "Impayé" },
         ],
     },
     {
