@@ -278,4 +278,17 @@ public function byClient(Client $client): JsonResponse
         'message' => "Chèques du client {$client->nom_complet}",
     ], 200);
 }
+    public function banqueOptions(): JsonResponse
+    {
+        $banques = Cheque::select('banque')
+            ->distinct()
+            ->whereNotNull('banque')
+            ->pluck('banque');
+
+        return response()->json([
+            'success' => true,
+            'data'    => $banques,
+            'message' => 'Liste des banques récupérée avec succès',
+        ], 200);    
+    }
 }

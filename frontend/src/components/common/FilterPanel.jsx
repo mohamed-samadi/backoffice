@@ -25,10 +25,20 @@ const FilterPanel = memo(
           {filterFields.map((field) => (
             <div key={field.key} className={styles.filterGroup}>
               <label htmlFor={field.key}>{field.label}</label>
-              {field.type === "text" && (
+                    {field.type === "text" && (
                 <input
                   id={field.key}
                   type="text"
+                  placeholder={field.placeholder}
+                  value={filters[field.key] || ""}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
+                  className={styles.input}
+                />
+              )}
+              {field.type === "datee" && (
+                <input
+                  id={field.key}
+                  type="date"
                   placeholder={field.placeholder}
                   value={filters[field.key] || ""}
                   onChange={(e) => handleChange(field.key, e.target.value)}

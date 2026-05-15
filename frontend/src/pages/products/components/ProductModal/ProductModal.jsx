@@ -48,7 +48,6 @@ const EMPTY_FORM = {
 const TYPE_OPTIONS = [
   { value: "product",      label: "Produit" },
   { value: "service",      label: "Service" },
-  { value: "consommable",  label: "Consommable" },
 ];
 
 const STORAGE_URL = import.meta.env.VITE_STORAGE_URL || "http://localhost:8000/storage";

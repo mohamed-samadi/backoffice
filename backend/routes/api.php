@@ -11,7 +11,9 @@ use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ChequeController ;
 use App\Http\Controllers\CreditController;
+
 use App\Http\Controllers\CompanyController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,6 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // ROUTES FOURNISSEUR
 // ============================================================================
 Route::get('/fournisseurs/active', [FournisseurController::class, 'active']);
+Route::get('/fournisseurs/villes', [FournisseurController::class, 'villes']);
 Route::apiResource('fournisseurs', FournisseurController::class);
 
 
@@ -68,7 +71,7 @@ Route::get('/cheques/client/{client}',         [ChequeController::class, 'byClie
 Route::patch('/cheques/{cheque}/encaisser',    [ChequeController::class, 'encaisser']);
 Route::patch('/cheques/{cheque}/impaye',       [ChequeController::class, 'marquerImpaye']);
 Route::patch('/cheques/{cheque}/annuler',      [ChequeController::class, 'annuler']);
-
+Route::get('/cheques/banques', [ChequeController::class, 'banqueOptions']);
 Route::apiResource('cheques', ChequeController ::class);
 Route::get('/credits/en-retard',                    [CreditController::class, 'enRetard']);
 Route::get('/credits/client/{clientId}',            [CreditController::class, 'byClient']);

@@ -3,7 +3,6 @@ import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
-
   plugins: [react()],
 
   resolve: {
@@ -18,12 +17,10 @@ export default defineConfig({
         target: "http://localhost:8000",
         changeOrigin: true,
       },
-      '/storage': {
+      "/storage": {
         target: "http://localhost:8000",
         changeOrigin: true,
       },
-
     },
   },
-
 });

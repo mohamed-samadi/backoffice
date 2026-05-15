@@ -23,6 +23,7 @@
     min-width 0.25s ease-in-out;
   overflow: hidden;
   height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
@@ -35,7 +36,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 .header {
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-3);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -50,14 +51,14 @@
 }
 
 .logo {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   background-color: var(--color-accent);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-sm);
   color: white;
   flex-shrink: 0;
   font-weight: var(--font-weight-extrabold);
@@ -66,20 +67,21 @@
 .logoText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 }
 
 .logoTitle {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-extrabold);
   color: var(--color-text);
   line-height: 1;
 }
 
 .logoSubtitle {
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: 0px;
+  line-height: 1;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -88,10 +90,10 @@
 
 .nav {
   flex: 1;
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-2);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -99,13 +101,13 @@
 .navItem {
   display: flex;
   align-items: center;
-  gap: var(--gap-md);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   color: var(--color-text-dim);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -113,7 +115,7 @@
   white-space: nowrap;
   text-align: left;
   width: 100%;
-  min-height: 36px;
+  min-height: 32px;
 }
 
 .navItem:hover {
@@ -140,18 +142,19 @@
 }
 
 .navIcon {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 20px;
+  width: 18px;
 }
 
 .navLabel {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1;
 }
 
 /* ─── SEPARATOR ───────────────────────────────────────────────────────────── */
@@ -159,20 +162,20 @@
 .separator {
   height: 1px;
   background-color: var(--color-border);
-  margin: var(--space-2) 0;
+  margin: var(--space-1) 0;
   flex-shrink: 0;
 }
 
 /* ─── CATEGORY ────────────────────────────────────────────────────────────── */
 
 .category {
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-muted);
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
-  padding: var(--space-3) var(--space-4);
-  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-1);
   flex-shrink: 0;
 }
 

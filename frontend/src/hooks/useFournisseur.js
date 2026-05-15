@@ -5,8 +5,8 @@ import {
   createFournisseur,
   updateFournisseur,
   deleteFournisseur,
-  searchFournisseurs,
   fetchActiveFournisseurs,
+  fetchFournisseurVilles,
 } from "../features/fournisseur/thunk/fournisseurThunk";
 import {
   selectFournisseursData,
@@ -15,7 +15,8 @@ import {
   selectFournisseurCreateLoading,
   selectFournisseurUpdateLoading,
   selectFournisseurDeleteLoading,
-  selectFournisseurSearchLoading,
+  selectFournisseurActiveLoading,
+  selectFournisseurVillesLoading,
   selectFournisseursError,
   selectFournisseursSuccess,
   selectFournisseurPagination,
@@ -23,6 +24,7 @@ import {
   selectCurrentFournisseur,
   selectGlobalStats,
   selectActiveFournisseurs,
+  selectFournisseurVilles,
 } from "../features/fournisseur/selectors/fournisseurSelectors";
 import {
   clearError,
@@ -37,24 +39,27 @@ export const useFournisseur = () => {
   const dispatch = useDispatch();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const fournisseurs = useSelector(selectFournisseursData);
-  const current      = useSelector(selectCurrentFournisseur);
-  const pagination   = useSelector(selectFournisseurPagination);
-  const total        = useSelector(selectFournisseursCount);
-  const error        = useSelector(selectFournisseursError);
-  const success      = useSelector(selectFournisseursSuccess);
+  const fournisseurs  = useSelector(selectFournisseursData);
+  const current       = useSelector(selectCurrentFournisseur);
+  const pagination    = useSelector(selectFournisseurPagination);
+  const total         = useSelector(selectFournisseursCount);
+  const error         = useSelector(selectFournisseursError);
+  const success       = useSelector(selectFournisseursSuccess);
   const activeList    = useSelector(selectActiveFournisseurs);
+  const villes        = useSelector(selectFournisseurVilles);
+  const globalstats   = useSelector(selectGlobalStats);
+
   // ── Loading granulaire ─────────────────────────────────────────────────────
-  const loading       = useSelector(selectFournisseursLoading);
-  const fetchLoading  = useSelector(selectFournisseurFetchLoading);
-  const createLoading = useSelector(selectFournisseurCreateLoading);
-  const updateLoading = useSelector(selectFournisseurUpdateLoading);
-  const deleteLoading = useSelector(selectFournisseurDeleteLoading);
-  const searchLoading = useSelector(selectFournisseurSearchLoading);
-const globalstats = useSelector(selectGlobalStats);
+  const loading             = useSelector(selectFournisseursLoading);
+  const fetchLoading        = useSelector(selectFournisseurFetchLoading);
+  const createLoading       = useSelector(selectFournisseurCreateLoading);
+  const updateLoading       = useSelector(selectFournisseurUpdateLoading);
+  const deleteLoading       = useSelector(selectFournisseurDeleteLoading);
+  const fetchActiveLoading  = useSelector(selectFournisseurActiveLoading);
+  const fetchVillesLoading  = useSelector(selectFournisseurVillesLoading);
+
   return {
     // Data
-    globalstats,
     fournisseurs,
     current,
     pagination,
@@ -62,26 +67,27 @@ const globalstats = useSelector(selectGlobalStats);
     error,
     success,
     activeList,
+    villes,
+    globalstats,
+
     // Loading
     loading,
     fetchLoading,
     createLoading,
     updateLoading,
     deleteLoading,
-    searchLoading,
+    fetchActiveLoading,
+    fetchVillesLoading,
 
-    // ✅ .unwrap() : expose la vraie Promise du thunk
-    //    resolve  → retourne la data de fulfilled
-    //    reject   → throw l'erreur de rejected (catchable en try/catch)
-    //    Sans unwrap, dispatch retourne toujours une Promise résolue,
-    //    donc les erreurs sont silencieuses et await ne bloque pas correctement.
-    fetchFournisseurs:    (params)      => dispatch(fetchFournisseurs(params)).unwrap(),
-    fetchFournisseurById: (id)          => dispatch(fetchFournisseurById(id)).unwrap(),
-    createFournisseur:    (payload)     => dispatch(createFournisseur(payload)).unwrap(),
-    updateFournisseur:    (id, payload) => dispatch(updateFournisseur({ id, data: payload })).unwrap(),
-    deleteFournisseur:    (id)          => dispatch(deleteFournisseur(id)).unwrap(),
-    searchFournisseurs:   (query)       => dispatch(searchFournisseurs(query)).unwrap(),
-    fetchActiveFournisseurs: () => dispatch(fetchActiveFournisseurs()).unwrap(),
+    // ✅ .unwrap() sur tous les thunks — try/catch réel dans les composants
+    fetchFournisseurs:       (params)      => dispatch(fetchFournisseurs(params)).unwrap(),
+    fetchFournisseurById:    (id)          => dispatch(fetchFournisseurById(id)).unwrap(),
+    createFournisseur:       (payload)     => dispatch(createFournisseur(payload)).unwrap(),
+    updateFournisseur:       (id, payload) => dispatch(updateFournisseur({ id, data: payload })).unwrap(),
+    deleteFournisseur:       (id)          => dispatch(deleteFournisseur(id)).unwrap(),
+    fetchActiveFournisseurs: ()            => dispatch(fetchActiveFournisseurs()).unwrap(),
+    fetchFournisseurVilles:  ()            => dispatch(fetchFournisseurVilles()).unwrap(),
+
     // Reset helpers
     clearError:   () => dispatch(clearError()),
     clearSuccess: () => dispatch(clearSuccess()),

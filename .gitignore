@@ -1,6 +1,43 @@
 node_modules/
 vendor/
 .env
+.env.*
 
 frontend/node_modules/
 backend/vendor/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Laravel
+/backend/storage/logs
+/backend/storage/framework/cache
+/backend/storage/framework/sessions
+/backend/storage/framework/views
+/backend/bootstrap/cache/
+.rr
+.rr.yaml
+
+# Build
+/frontend/dist
+/build
+
+# Testing
+coverage/
+.phpunit.result.cache
+
+# Backups & Secrets
+backup_*.sql
+*.key
+*.pem
+secrets/

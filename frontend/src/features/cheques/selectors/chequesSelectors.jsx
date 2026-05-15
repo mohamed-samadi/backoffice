@@ -15,7 +15,7 @@ export const selectChequesStats = (state) => state?.cheques?.stats || {
   total: 0, non_encaisse: 0, encaisse: 0,
   impaye: 0, annule: 0, echeance_proche: 0,
 };
-
+export const selectBanquesOptions = (state) => state?.cheques?.banques || [];
 // ── Pagination ────────────────────────────────────────────────────────────
 export const selectChequesPagination = (state) => ({
   currentPage: state?.cheques?.meta?.current_page || 1,

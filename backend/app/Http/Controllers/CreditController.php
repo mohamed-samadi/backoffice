@@ -119,7 +119,15 @@ class CreditController extends Controller
      * ✅ refresh() après update() pour recharger les attributs en mémoire
      */
     public function update(UpdateCreditRequest $request, Credit $credit): JsonResponse
+
     {
+
+        if($request->statut === 'solde' && $credit->reste > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de marquer comme payé : il reste un montant dû',
+            ], 422);
+        }
         $credit->update($request->validated());
 
         return response()->json([

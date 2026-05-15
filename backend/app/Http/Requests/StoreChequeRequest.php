@@ -24,7 +24,7 @@ class StoreChequeRequest extends FormRequest
         return [
             'client_id' => ['nullable', 'exists:clients,id'],
             'payment_id' => ['nullable', 'exists:payments,id'],
-            'numero_cheque' => ['required', 'string', 'max:255'],
+            'numero_cheque' => ['required','unique:cheques,numero_cheque', 'string', 'max:255'],
             'banque' => ['required', 'string', 'max:255'],
             'titulaire' => ['required', 'string', 'max:255'],
             'date_emission' => ['required', 'date'],
@@ -40,6 +40,7 @@ class StoreChequeRequest extends FormRequest
             'client_id.exists' => 'Le client spécifié n\'existe pas.',
             'payment_id.exists' => 'Le paiement spécifié n\'existe pas.',
             'numero_cheque.required' => 'Le numéro de chèque est requis.',
+            'numero_cheque.unique' => 'Le numéro de chèque est déjà utilisé.',
             'banque.required' => 'La banque est requise.',
             'titulaire.required' => 'Le titulaire est requis.',
             'date_emission.required' => 'La date d\'émission est requise.',

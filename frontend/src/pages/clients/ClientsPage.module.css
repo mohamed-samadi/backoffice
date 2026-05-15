@@ -28,3 +28,11 @@
 .contactLink:hover {
   text-decoration: underline;
 }
+.iceCode {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-cyan);
+  background: var(--color-cyan-soft);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+}

@@ -15,6 +15,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         // ✅ 1 seule requête pour les stats au lieu de 3
+        
         $stats = Category::selectRaw('
             count(*) as total,
             sum(is_active = 1) as actifs,

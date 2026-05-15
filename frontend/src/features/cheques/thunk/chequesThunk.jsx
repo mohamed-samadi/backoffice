@@ -11,10 +11,20 @@ export const fetchCheques = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
-
+export const fetchbanques = createAsyncThunk(
+  "cheques/fetchbanques",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await chequesApi.getbanque();
+      return response.data; // { success, data }
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  },
+);
 // ── Détail ────────────────────────────────────────────────────────────────
 export const fetchChequeById = createAsyncThunk(
   "cheques/fetchChequeById",
@@ -25,7 +35,7 @@ export const fetchChequeById = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // ── Create ────────────────────────────────────────────────────────────────
@@ -38,7 +48,7 @@ export const createCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // ── Update ────────────────────────────────────────────────────────────────
@@ -51,7 +61,7 @@ export const updateCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // ── Delete ────────────────────────────────────────────────────────────────
@@ -64,7 +74,7 @@ export const deleteCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 // ── Actions métier ────────────────────────────────────────────────────────
@@ -77,7 +87,7 @@ export const encaisserCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const marquerImpayeCheque = createAsyncThunk(
@@ -89,7 +99,7 @@ export const marquerImpayeCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const annulerCheque = createAsyncThunk(
@@ -101,7 +111,7 @@ export const annulerCheque = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 
 export const fetchEcheancesProches = createAsyncThunk(
@@ -113,7 +123,7 @@ export const fetchEcheancesProches = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
     }
-  }
+  },
 );
 export const fetchChequesByClient = createAsyncThunk(
   "cheques/fetchChequesByClient",
@@ -123,6 +133,6 @@ export const fetchChequesByClient = createAsyncThunk(
       return response.data; // { success, stats, data, meta }
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
-    } 
-  }
+    }
+  },
 );

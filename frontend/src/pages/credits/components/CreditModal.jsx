@@ -64,22 +64,22 @@ export default function CreditModal({
   const [errors,        setErrors]       = useState({});
   const [paiementForm,  setPaiementForm] = useState({ montant: "", show: false });
 
-  // ─── Init ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (initialData) {
-      setForm({
-        ...EMPTY_FORM,
-        ...initialData,
-        client_id:   initialData.client?.id ?? initialData.client_id ?? "",
-        date_debut:  initialData.date_debut?.split("T")[0]   || initialData.date_debut   || "",
-        date_echeance: initialData.date_echeance?.split("T")[0] || initialData.date_echeance || "",
-      });
-    } else {
-      setForm({ ...EMPTY_FORM, numero_credit: numeroPreview });
-    }
-    setErrors({});
-    setPaiementForm({ montant: "", show: false });
-  }, [initialData, numeroPreview]);
+        setForm({
+          ...EMPTY_FORM,
+          ...initialData,
+          client_id:   initialData.client?.id ?? initialData.client_id ?? "",
+          date_debut:  initialData.date_debut?.split("T")[0]   || initialData.date_debut   || "",
+          date_echeance: initialData.date_echeance?.split("T")[0] || initialData.date_echeance || "",
+        });
+      } else {
+        setForm({ ...EMPTY_FORM, numero_credit: numeroPreview });
+      }
+      setErrors({});
+      setPaiementForm({ montant: "", show: false });
+
+  }, [initialData, numeroPreview ,]);
 
   // ─── Escape ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -125,6 +125,7 @@ export default function CreditModal({
     if (montant > reste)             { setPaiementForm((p) => ({ ...p, erreur: `Max : ${fmt(reste)}` })); return; }
     onPaiement(montant);
     setPaiementForm({ montant: "", show: false });
+    
   };
 
   // ─── View helpers ──────────────────────────────────────────────────────────
@@ -140,7 +141,7 @@ export default function CreditModal({
     en_retard:  { color: "amber",  label: "En retard"  },
     impaye:     { color: "red",    label: "Impayé"     },
     solde:      { color: "green",  label: "Soldé"      },
-    annule:     { color: "red",    label: "Annulé"     },
+    annule:     { color: "red",    label: "Annulé"       },
   };
   const meta = statutMeta[form.statut] || { color: "accent", label: form.statut };
 
@@ -266,7 +267,7 @@ export default function CreditModal({
             {/* Client */}
             <div className={styles.fieldGroup}>
               <label className={styles.label} htmlFor="client">Client *</label>
-              {isView ? (
+              {isView || isEdit ? (
                 <ViewValue>{form.client?.nom_complet || clients.find((c) => c.id === Number(form.client_id))?.nom_complet}</ViewValue>
               ) : (
                 <>

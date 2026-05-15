@@ -385,7 +385,7 @@ export default function ChequeModal({
 
           <div className={styles.fieldGroup}>
             <label className={styles.label} htmlFor="client">Client associé</label>
-            {isView ? (
+            {isView || isEdit ? (
               <ViewValue>
                 {form.client?.nom_complet
                   || clients.find((c) => c.id === Number(form.client_id))?.nom_complet

@@ -15,6 +15,7 @@ export const chequesApi = {
     api.post(`/cheques/${id}`, payload, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+  getbanque : () => api.get(`/cheques/banques`),
 
   delete: (id) => api.delete(`/cheques/${id}`),
 

@@ -1,4 +1,29 @@
+
+
+@import "../../styles/tokens.css";
 @import "../../styles/shared.module.css";
+
+.page {
+  display: flex; flex-direction: column; gap: var(--space-6);
+  padding: var(--space-6); min-height: 100vh;
+  background: var(--color-bg); position: relative;
+}
+.createBtn {
+  display: flex; align-items: center; gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-accent); color: #fff;
+  border: none; border-radius: var(--radius-md);
+  font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+  cursor: pointer; transition: all var(--transition-fast);
+  letter-spacing: var(--letter-spacing-wide); white-space: nowrap;
+}
+.createBtn:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(79,127,255,.35); }
+.createBtn:disabled { opacity: var(--opacity-disabled); cursor: not-allowed; }
+
+.tableSection {
+  background: var(--color-surface); border: var(--border);
+  border-radius: var(--radius-2xl); overflow: hidden;
+}
 
 /* ─── Cell: Name ─────────────────────────────────────────────────────────── */
 .cellName {
