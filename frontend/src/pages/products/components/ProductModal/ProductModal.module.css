@@ -103,6 +103,7 @@
 .fileInputHidden { display: none; }
 
 .imagePreviewWrapper {
+  height: 180px;
   position: relative; display: inline-block;
   border-radius: var(--radius-lg); overflow: hidden;
   border: var(--border);

@@ -105,6 +105,8 @@ const XIcon = () => (
 );
 
 /* ── Constantes ──────────────────────────────────────────────────────────── */
+const STORAGE_URL = import.meta.env.VITE_STORAGE_URL || "http://localhost:8000/storage";
+
 const STATUT_META = {
   non_encaisse: { label: "Non encaissé", color: "purple" },
   encaisse: { label: "Encaissé", color: "green" },
@@ -152,6 +154,20 @@ const FILTER_FIELDS_BASE = [
 ];
 
 const COLUMNS = [
+  {
+  
+      key: "image", label: "image", width: "28%",
+      render: (val, row) => (
+
+          <div className={styles.avatar}>
+            {row.image
+              ? <img src={`${STORAGE_URL}/${row.image}`} alt={val} className={styles.avatarImg} />
+              : val?.charAt(0)?.toUpperCase() || "?"}
+  
+     
+        </div>
+      ),
+    },
   {
     key: "numero_cheque",
     label: "Chèque",
@@ -265,6 +281,7 @@ export default function ChequesPage() {
     marquerImpayeCheque,
     annulerCheque,
   } = useCheques();
+  
   const filterFields = [
     ...FILTER_FIELDS_BASE,
     {
@@ -304,6 +321,7 @@ export default function ChequesPage() {
   useEffect(() => {
     fetchBanques();
   }, []); // eslint-disable-line
+  console.log(cheques)
   /* ── Notification ─────────────────────────────────────────────────────── */
   const notify = useCallback((type, message, duration = 3500) => {
     setNotification({ type, message });

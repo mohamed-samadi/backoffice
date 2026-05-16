@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-
+use App\Models\Client;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 class TaskController extends Controller
 {
     /**
@@ -40,7 +43,6 @@ class TaskController extends Controller
             'client:id,nom_complet',
             'user:id,name',
         ]);
-
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
