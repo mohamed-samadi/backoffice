@@ -238,3 +238,47 @@
   border-radius: 50%; animation: spin .6s linear infinite; display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+/* ─── Image view wrapper + expand btn ───────────────────────────────────── */
+.imageViewWrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: var(--border);
+}
+
+.imageViewOnly {
+  width: 100%; max-height: 220px;
+  object-fit: cover; display: block;
+  transition: filter var(--transition-fast);
+}
+
+.imageViewWrapper:hover .imageViewOnly {
+  filter: brightness(0.82);
+}
+
+.expandBtn {
+  position: absolute; bottom: var(--space-2); right: var(--space-2);
+  display: flex; align-items: center; gap: var(--gap-xs);
+  padding: 5px var(--space-3);
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+  cursor: pointer; transition: all var(--transition-fast);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+}
+
+/* Apparaît au hover du wrapper */
+.imageViewWrapper:hover .expandBtn {
+  opacity: 1;
+}
+
+.expandBtn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}

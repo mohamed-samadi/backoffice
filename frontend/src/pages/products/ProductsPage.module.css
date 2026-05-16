@@ -1,6 +1,5 @@
 @import "../../styles/shared.module.css";
 
-/* Propriétés spécifiques à ProductsPage */
 .cellName {
   display: flex;
   align-items: center;

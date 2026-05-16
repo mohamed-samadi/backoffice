@@ -7,6 +7,7 @@ import TaskModal from "./components/TaskModal/TaskModal";
 import TaskStats from "./components/TaskStats/TaskStats";
 import styles from "./TasksPage.module.css";
 import { useClients } from "../../hooks/useClients";
+import { useNotifications } from "../../hooks/useNotifications";
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const PlusIcon = () => (
@@ -288,6 +289,7 @@ export default function TasksPage() {
     fetchActiveTaskCategories();
   }, []); // eslint-disable-line
   const { activeClients, fetchActiveClients } = useClients();
+  const { fetchNotificationsCount } = useNotifications();
 
   useEffect(() => {
     fetchActiveClients();
@@ -338,6 +340,7 @@ export default function TasksPage() {
       }
       closeModal();
       await load(pagination.currentPage);
+      await fetchNotificationsCount();
     } catch (err) {
       const msg = err?.errors
         ? Object.values(err.errors).flat().join(" — ")
@@ -352,6 +355,7 @@ export default function TasksPage() {
       await updateTaskStatus(row.id, newStatus);
       notify("success", "Statut mis à jour.");
       await load(pagination.currentPage);
+      await fetchNotificationsCount();
     } catch {
       notify("error", "Erreur lors de la mise à jour du statut.", 4000);
     }
@@ -369,6 +373,7 @@ export default function TasksPage() {
       const maxPage = Math.max(1, Math.ceil(newTotal / perPage));
       const targetPage = Math.min(pagination.currentPage, maxPage);
       await load(targetPage);
+      await fetchNotificationsCount();
     } catch (err) {
       setDeleteConfirm(null);
       notify("error", err?.message || "Erreur lors de la suppression.", 5000);

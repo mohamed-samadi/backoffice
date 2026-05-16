@@ -13,6 +13,7 @@ import DocumentDetailPage from "../pages/documents/DocumentDetailPage";
 import ChequesPage from "../pages/cheques/ChequesPage";
 import ClientsPage from "../pages/clients/ClientsPage";
 import CreditsPage from "../pages/credits/CreditsPage";
+import NotificationsPage from "../pages/notifications/NotificationsPage";
 const AppRouter = () => {
   return (
     <Router>
@@ -23,6 +24,7 @@ const AppRouter = () => {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/fournisseurs" element={<FournisseurPage />} />
           <Route path="/products" element={<ProductPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/cheques" element={<ChequesPage />} />
           <Route path="/clients" element={<ClientsPage />} />
           <Route path="/credits" element={<CreditsPage />} />

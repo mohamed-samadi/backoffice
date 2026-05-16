@@ -96,6 +96,7 @@
 /* ─── ICON BUTTON ─────────────────────────────────────────────────────────── */
 
 .iconButton {
+  position: relative;
   width: 32px;
   height: 32px;
   display: flex;
@@ -136,6 +137,25 @@
 .notificationButton:hover {
   background-color: var(--color-accent);
   color: white;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-red);
+  color: white;
+  border: 2px solid var(--color-surface);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  line-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ─── USER BUTTON ─────────────────────────────────────────────────────────── */

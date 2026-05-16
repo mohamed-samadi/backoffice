@@ -12,6 +12,7 @@ use App\Models\Client;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Artisan;
 class TaskController extends Controller
 {
     /**
@@ -122,6 +123,7 @@ class TaskController extends Controller
     {
         $task = Task::create($request->validated());
         $task->load(['category:id,name,color', 'client:id,nom_complet', 'user:id,name']);
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -168,6 +170,7 @@ class TaskController extends Controller
 
         $task->update($data);
         $task->load(['category:id,name,color', 'client:id,nom_complet', 'user:id,name']);
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -182,6 +185,7 @@ class TaskController extends Controller
     public function destroy(Task $task): JsonResponse
     {
         $task->delete();
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -214,6 +218,7 @@ class TaskController extends Controller
 
         $task->update($data);
         $task->load(['category:id,name,color', 'client:id,nom_complet', 'user:id,name']);
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -270,5 +275,10 @@ class TaskController extends Controller
             ],
             'message' => "Tâches de la catégorie {$taskCategory->name}",
         ], 200);
+    }
+
+    private function refreshNotifications(): void
+    {
+        Artisan::call('app:check-notifications');
     }
 }

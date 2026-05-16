@@ -11,7 +11,7 @@ use App\Http\Controllers\TaskCategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ChequeController ;
 use App\Http\Controllers\CreditController;
-
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CompanyController;
 
 /*
@@ -92,3 +92,12 @@ Route::apiResource('documents', DocumentController::class)
 // ROUTES COMPANY
 // ============================================================================
 Route::apiResource('/companies', CompanyController::class);
+// ─── Notifications ────────────────────────────────────────────────────────
+Route::prefix('notifications')->group(function () {
+    Route::get('/',            [NotificationController::class, 'index']);
+    Route::get('/count',       [NotificationController::class, 'count']);
+    Route::post('/read-all',   [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/',         [NotificationController::class, 'destroyAll']);
+    Route::post('/{id}/read',  [NotificationController::class, 'markAsRead']);
+    Route::delete('/{id}',     [NotificationController::class, 'destroy']);
+});

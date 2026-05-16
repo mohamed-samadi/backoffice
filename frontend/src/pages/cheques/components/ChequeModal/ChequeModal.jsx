@@ -1,9 +1,17 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import styles from "./ChequeModal.module.css";
-
+import  ImageViewer from "../../../../components/common/imageviewer/ImageViewer";
 const XIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+const ExpandIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="15 3 21 3 21 9"/>
+    <polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/>
+    <line x1="3" y1="21" x2="10" y2="14"/>
   </svg>
 );
 const SaveIcon = () => (
@@ -168,7 +176,7 @@ export default function ChequeModal({
       {children ?? <span className={styles.viewEmpty}>—</span>}
     </div>
   );
-
+const [viewerOpen, setViewerOpen] = useState(false);
   const statutMeta = STATUT_OPTIONS.find((s) => s.value === form.statut);
 
   /* ── Render ───────────────────────────────────────────────────────────── */
@@ -221,8 +229,23 @@ export default function ChequeModal({
             </div>
           ) : initialData?.image ? (
             <div className={styles.fieldGroup}>
-              <span className={styles.label}>Photo du chèque</span>
-              <img src={`${STORAGE_URL}/${initialData.image}`} alt="Chèque" className={styles.imageViewOnly} />
+              <span className={styles.label}>Image</span>
+              <div className={styles.imageViewWrapper}>
+                <img
+                  src={`${STORAGE_URL}/${initialData.image}`}
+                  alt={form.nom}
+                  className={styles.imageViewOnly}
+                />
+                <button
+                  type="button"
+                  className={styles.expandBtn}
+                  onClick={() => setViewerOpen(true)}
+                  title="Voir en plein écran"
+                >
+                  <ExpandIcon />
+                  Voir en plein écran
+                </button>
+              </div>
             </div>
           ) : null}
 
@@ -428,7 +451,13 @@ export default function ChequeModal({
             </button>
           </div>
         )}
-
+        {viewerOpen && (
+  <ImageViewer
+    src={`${STORAGE_URL}/${initialData.image}`}
+    alt={`Chèque ${initialData.numero_cheque}`}
+    onClose={() => setViewerOpen(false)}
+  />
+)}
       </div>
     </div>
   );

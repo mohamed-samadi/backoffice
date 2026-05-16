@@ -1,4 +1,6 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useNotifications } from "../../hooks/useNotifications";
 import styles from "./Topbar.module.css";
 
 const PAGE_TITLES = {
@@ -25,7 +27,13 @@ const PAGE_TITLES = {
 
 const Topbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { nonLuesCount, fetchNotificationsCount } = useNotifications();
   const title = PAGE_TITLES[location.pathname] || "Dashboard";
+
+  useEffect(() => {
+    fetchNotificationsCount().catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={styles.topbar}>
@@ -42,8 +50,14 @@ const Topbar = () => {
         <button
           className={`${styles.iconButton} ${styles.notificationButton}`}
           title="Notifications"
+          onClick={() => navigate("/notifications")}
         >
           🔔
+          {nonLuesCount > 0 && (
+            <span className={styles.notificationBadge}>
+              {nonLuesCount > 99 ? "99+" : nonLuesCount}
+            </span>
+          )}
         </button>
         <button
           className={`${styles.iconButton} ${styles.userButton}`}

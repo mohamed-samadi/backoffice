@@ -1,0 +1,82 @@
+@import "../../../styles/tokens.css";
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex; flex-direction: column;
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ─── Toolbar ────────────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3) var(--space-5);
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0; z-index: 1;
+  backdrop-filter: blur(12px);
+}
+.toolbarTitle {
+  font-size: var(--font-size-sm); color: rgba(255, 255, 255, 0.7);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 300px;
+}
+.toolbarActions {
+  display: flex; align-items: center; gap: var(--gap-xs);
+}
+.toolBtn {
+  width: 36px; height: 36px; border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all var(--transition-fast);
+}
+.toolBtn:hover { background: rgba(255, 255, 255, 0.15); color: #fff; border-color: rgba(255,255,255,.2); }
+.toolBtnClose:hover { background: rgba(239, 68, 68, 0.3); border-color: rgba(239, 68, 68, 0.5); color: #ff6b6b; }
+.zoomLabel {
+  font-size: var(--font-size-xs); color: rgba(255, 255, 255, 0.6);
+  min-width: 40px; text-align: center; font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-medium);
+}
+.separator {
+  width: 1px; height: 24px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 var(--gap-xs);
+}
+
+/* ─── Canvas ─────────────────────────────────────────────────────────────── */
+.canvas {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; cursor: grab; user-select: none;
+  position: relative;
+}
+.canvasDragging { cursor: grabbing; }
+
+.image {
+  max-width: 90vw; max-height: 80vh;
+  object-fit: contain;
+  transition: transform .15s ease;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+}
+.canvasDragging .image { transition: none; }
+
+/* ─── Hint ───────────────────────────────────────────────────────────────── */
+.hint {
+  text-align: center; padding: var(--space-3);
+  font-size: var(--font-size-xs); color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+/* ─── Touch support ──────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .toolbarTitle { display: none; }
+  .hint         { display: none; }
+  .image        { max-width: 98vw; max-height: 85vh; }
+}

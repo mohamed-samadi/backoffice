@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useProducts } from "../../hooks/useProducts";
 import { useCategories } from "../../hooks/useCategories";
 import { useFournisseur } from "../../hooks/useFournisseur";
+import { useNotifications } from "../../hooks/useNotifications";
 import PageHeader from "../../components/common/PageHeader";
 import DataTable from "../../components/common/DataTable";
 import FilterPanel from "../../components/common/FilterPanel";
@@ -10,6 +11,8 @@ import ProductStats from "./components/ProductStats/ProductStats";
 import styles from "./ProductsPage.module.css";
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
+
+
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -132,6 +135,7 @@ export default function ProductsPage() {
 
   const { activeList, fetchActiveCategories } = useCategories();
   const { activeList: activeListfournisseur, fetchActiveFournisseurs } = useFournisseur();
+  const { fetchNotificationsCount } = useNotifications();
 
   const [filters,       setFilters]       = useState({ per_page: "10", sort_by: "created_at" });
   const [modal,         setModal]         = useState({ open: false, mode: null, data: null });
@@ -182,6 +186,7 @@ export default function ProductsPage() {
       }
       closeModal();
       await load(pagination.currentPage);
+      await fetchNotificationsCount();
     } catch (err) {
       const msg = err?.errors
         ? Object.values(err.errors).flat().join(" — ")
@@ -205,6 +210,7 @@ export default function ProductsPage() {
       const maxPage    = Math.max(1, Math.ceil(newTotal / perPage));
       const targetPage = Math.min(pagination.currentPage, maxPage);
       await load(targetPage);
+      await fetchNotificationsCount();
     } catch (err) {
       setDeleteConfirm(null);
       notify("error", err?.message || "Erreur lors de la suppression.", 5000);

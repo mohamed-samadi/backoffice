@@ -7,6 +7,7 @@ import documentsReducer from "../features/documents/slice/documentsSlice";
 import chequesReducer from "../features/cheques/slice/chequesSlice";
 import clientsReducer from "../features/clients/slice/clientsSlice";
 import creditsReducer from "../features/credits/slice/creditsSlice";
+import notificationsReducer from "../features/notifications/slice/notificationsSlice";
 export const store = configureStore({
   reducer: {
     categories: categoriesReducer,
@@ -16,7 +17,8 @@ export const store = configureStore({
     tasks: tasksReducer,
         cheques:    chequesReducer,
     documents: documentsReducer,
-    credits: creditsReducer
+    credits: creditsReducer,
+     notifications: notificationsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

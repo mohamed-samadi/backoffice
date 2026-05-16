@@ -11,6 +11,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class ProductController extends Controller
 {
@@ -121,6 +122,7 @@ class ProductController extends Controller
         });
 
         $product->load(['category:id,name', 'fournisseur:id,nom']);
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -169,6 +171,7 @@ class ProductController extends Controller
         });
 
         $product->load(['category:id,name', 'fournisseur:id,nom']);
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -189,6 +192,7 @@ class ProductController extends Controller
             }
             $product->delete();
         });
+        $this->refreshNotifications();
 
         return response()->json([
             'success' => true,
@@ -299,5 +303,10 @@ class ProductController extends Controller
         return response()->json([
             'sku' => $sku
         ]);
+    }
+
+    private function refreshNotifications(): void
+    {
+        Artisan::call('app:check-notifications');
     }
 }
