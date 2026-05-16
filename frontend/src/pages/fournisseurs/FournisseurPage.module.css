@@ -55,7 +55,15 @@
   color: var(--color-text-dim);
   letter-spacing: var(--letter-spacing-wide);
 }
+.contactLink {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  text-decoration: none;
+}
 
+.contactLink:hover {
+  text-decoration: underline;
+}
 /* ─── Cell: ICE ──────────────────────────────────────────────────────────── */
 .iceCode {
   font-family: var(--font-mono);

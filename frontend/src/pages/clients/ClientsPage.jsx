@@ -6,7 +6,7 @@ import FilterPanel from "../../components/common/FilterPanel";
 import ClientModal from "./components/ClientModal/ClientModal";
 import ClientStats from "./components/ClientStats/ClientStats";
 import styles from "./ClientsPage.module.css";
-
+import {formatWhatsappPhone} from "../../utils/formatWhatsappPhone";
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -32,7 +32,7 @@ const EyeIcon = () => (
   </svg>
 );
 
-/* ── Constantes ──────────────────────────────────────────────────────────── */
+
 const FILTER_FIELDS = [
   { key: "search",   label: "Recherche",  type: "text",   placeholder: "Nom, entreprise, email…" },
   { key: "statut",   label: "Statut",     type: "select",
@@ -74,12 +74,26 @@ const COLUMNS = [
       </div>
     ),
   },
-  {
-    key: "telephone", label: "Téléphone", width: "16%",
-    render: (val) => val
-      ? <a href={`tel:${val}`} className={styles.contactLink}>{val}</a>
-      : <span className={styles.empty}>—</span>,
-  },
+{
+  key: "telephone",
+  label: "Téléphone",
+  width: "16%",
+
+  render: (val) => val ? (
+
+    <a
+      href={`https://wa.me/${formatWhatsappPhone(val)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.contactLink}
+    >
+      {val}
+    </a>
+
+  ) : (
+    <span className={styles.empty}>—</span>
+  ),
+},
   {
     key: "email", label: "Email", width: "22%",
     render: (val) => val

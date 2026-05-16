@@ -6,6 +6,7 @@ import FilterPanel from "../../components/common/FilterPanel";
 import FournisseurModal from "./components/FournisseurModal/FournisseurModal";
 import FournisseurStats from "./components/FournisseurStats/FournisseurStats";
 import styles from "./FournisseurPage.module.css";
+import {formatWhatsappPhone} from "../../utils/formatWhatsappPhone";
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const PlusIcon = () => (
@@ -125,12 +126,32 @@ const COLUMNS = [
         <span className={styles.empty}>—</span>
       ),
   },
+  // {
+  //   key: "telephone",
+  //   label: "Téléphone",
+  //   width: "13%",
+  //   render: (val) => val || <span className={styles.empty}>—</span>,
+  // },
   {
-    key: "telephone",
-    label: "Téléphone",
-    width: "13%",
-    render: (val) => val || <span className={styles.empty}>—</span>,
-  },
+  key: "telephone",
+  label: "Téléphone",
+  width: "13%",
+
+  render: (val) => val ? (
+
+    <a
+      href={`https://wa.me/${formatWhatsappPhone(val)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.contactLink}
+    >
+      {val}
+    </a>
+
+  ) : (
+    <span className={styles.empty}>—</span>
+  ),
+},
   {
     key: "ville",
     label: "Ville",

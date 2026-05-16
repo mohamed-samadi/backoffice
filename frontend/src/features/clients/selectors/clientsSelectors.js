@@ -1,68 +1,66 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SELECTORS — clients
+// Règle appliquée :
+//   • Extraction simple  → selector basique  (state) => state.x
+//   • Transformation     → createSelector    (nouvel objet / array / logique)
 // ─────────────────────────────────────────────────────────────────────────────
 import { createSelector } from "@reduxjs/toolkit";
 
-// ── Data principale (liste paginée) ──────────────────────────────────────────
-export const selectClientsData = (state) => state?.clients?.data || [];
-export const selectCurrentClient = (state) => state?.clients?.current || null;
+// ── Extraction simple (scalaires / références directes) ──────────────────────
+// Pas de createSelector : retourne directement la valeur du store.
 
-// ── Liste active légère (selects — chèques, tâches, documents…) ──────────────
-export const selectActiveClients = (state) =>
-  state?.clients?.activeClients || [];
+export const selectClientsData    = (state) => state?.clients?.data          ?? [];
+export const selectCurrentClient  = (state) => state?.clients?.current       ?? null;
+export const selectActiveClients  = (state) => state?.clients?.activeClients ?? [];
+export const selectClientsError   = (state) => state?.clients?.error         ?? null;
+export const selectClientsSuccess = (state) => state?.clients?.success       ?? false;
 
-// ── Stats (retournées par index()) ────────────────────────────────────────────
-export const selectClientsStats = (state) =>
-  state?.clients?.stats || {
-    total: 0,
-    actifs: 0,
-    inactifs: 0,
-  };
+// ── Loading granulaire (scalaires booléens) ───────────────────────────────────
+export const selectClientFetchLoading       = (state) => state?.clients?.loadingStates?.fetch        ?? false;
+export const selectClientFetchOneLoading    = (state) => state?.clients?.loadingStates?.fetchOne     ?? false;
+export const selectClientCreateLoading      = (state) => state?.clients?.loadingStates?.create       ?? false;
+export const selectClientUpdateLoading      = (state) => state?.clients?.loadingStates?.update       ?? false;
+export const selectClientDeleteLoading      = (state) => state?.clients?.loadingStates?.delete       ?? false;
+export const selectClientFetchActiveLoading = (state) => state?.clients?.loadingStates?.fetchActive  ?? false;
 
-// ── Pagination ────────────────────────────────────────────────────────────────
-export const selectClientsPagination = (state) => ({
-  currentPage: state?.clients?.meta?.current_page || 1,
-  lastPage: state?.clients?.meta?.last_page || 1,
-  total: state?.clients?.meta?.total || 0,
-  perPage: state?.clients?.meta?.per_page || 10,
-});
+// ── Transformation → createSelector ──────────────────────────────────────────
 
-export const selectClientsTotal = (state) => {
-  const metaTotal = state?.clients?.meta?.total;
-  return metaTotal !== undefined ? metaTotal : selectClientsData(state).length;
-};
+// Stats : retourne un objet fallback si stats est undefined → doit être memoizé
+export const selectClientsStats = createSelector(
+  [(state) => state?.clients?.stats],
+  (stats) => stats ?? { total: 0, actifs: 0, inactifs: 0 },
+);
 
-// ── Loading granulaire ────────────────────────────────────────────────────────
-export const selectClientsLoadingStates = (state) =>
-  state?.clients?.loadingStates || {};
-export const selectClientFetchLoading = (state) =>
-  state?.clients?.loadingStates?.fetch || false;
-export const selectClientFetchOneLoading = (state) =>
-  state?.clients?.loadingStates?.fetchOne || false;
-export const selectClientCreateLoading = (state) =>
-  state?.clients?.loadingStates?.create || false;
-export const selectClientUpdateLoading = (state) =>
-  state?.clients?.loadingStates?.update || false;
-export const selectClientDeleteLoading = (state) =>
-  state?.clients?.loadingStates?.delete || false;
-export const selectClientFetchActiveLoading = (state) =>
-  state?.clients?.loadingStates?.fetchActive || false;
+// Pagination : construit un nouvel objet à partir de meta → doit être memoizé
+export const selectClientsPagination = createSelector(
+  [(state) => state?.clients?.meta],
+  (meta) => ({
+    currentPage: meta?.current_page ?? 1,
+    lastPage:    meta?.last_page    ?? 1,
+    total:       meta?.total        ?? 0,
+    perPage:     meta?.per_page     ?? 10,
+  }),
+);
 
-// Global : true si n'importe quelle opération tourne
-export const selectClientsLoading = (state) =>
-  Object.values(state?.clients?.loadingStates || {}).some(Boolean);
+// Total : combine deux sources → doit être memoizé
+export const selectClientsTotal = createSelector(
+  [
+    (state) => state?.clients?.meta?.total,
+    (state) => state?.clients?.data,
+  ],
+  (metaTotal, data) => metaTotal ?? (data?.length ?? 0),
+);
 
-// ── Error / Success ───────────────────────────────────────────────────────────
-export const selectClientsError = (state) => state?.clients?.error || null;
-export const selectClientsSuccess = (state) => state?.clients?.success || false;
+// Loading global : .some() dérive une valeur booléenne → doit être memoizé
+export const selectClientsLoading = createSelector(
+  [(state) => state?.clients?.loadingStates],
+  (ls) => Object.values(ls ?? {}).some(Boolean),
+);
 
-// ── Utilitaires ───────────────────────────────────────────────────────────────
-export const selectClientById = (state, id) =>
-  selectClientsData(state).find((c) => c.id === id) || null;
-
-// ✅ Memoized: only returns new array if data changes or filter result changes
-export const selectClientsActifs = createSelector([selectClientsData], (data) =>
-  data.filter((c) => c.statut === "active"),
+// Filtres dérivés : .filter() retourne un nouveau tableau → doit être memoizé
+export const selectClientsActifs = createSelector(
+  [selectClientsData],
+  (data) => data.filter((c) => c.statut === "active"),
 );
 
 export const selectClientsInactifs = createSelector(
@@ -70,8 +68,24 @@ export const selectClientsInactifs = createSelector(
   (data) => data.filter((c) => c.statut === "inactive"),
 );
 
-// ── Aliases ───────────────────────────────────────────────────────────────────
-export const selectClients = selectClientsData;
+// ── Utilitaires ───────────────────────────────────────────────────────────────
+
+// Selector factory : une instance memoizée par id (évite le cache partagé)
+// Usage dans un composant :
+//   const selectClient = useMemo(() => makeSelectClientById(id), [id]);
+//   const client = useSelector(selectClient);
+export const makeSelectClientById = (id) =>
+  createSelector(
+    [selectClientsData],
+    (data) => data.find((c) => c.id === id) ?? null,
+  );
+
+// Version simple pour les usages ponctuels hors useSelector
+export const selectClientById = (state, id) =>
+  selectClientsData(state).find((c) => c.id === id) ?? null;
+
+// ── Aliases (rétrocompatibilité) ──────────────────────────────────────────────
+export const selectClients       = selectClientsData;
 export const selectClientLoading = selectClientsLoading;
-export const selectClientError = selectClientsError;
+export const selectClientError   = selectClientsError;
 export const selectClientSuccess = selectClientsSuccess;
