@@ -10,6 +10,7 @@ import {
   FaCog,
   FaFileAlt,
   FaCreditCard,
+  FaBuilding,
 } from "react-icons/fa";
 
 const NAV_ITEMS = [
@@ -35,7 +36,12 @@ const NAV_ITEMS = [
   { label: "Chèques", path: "/cheques", icon: FaCreditCard },
   {label : "Crédits", path: "/credits", icon: FaCreditCard },
   { label: "", separator: true },
+
   { label : 'notifications', path: "/notifications", icon: FaTags },
+
+  { label: "Configuration", category: true },
+  { label: "Mon entreprise", path: "/companies", icon: FaBuilding },
+
   { label: "Paramètres", path: "/settings", icon: FaCog },
 ];
 const Sidebar = () => {

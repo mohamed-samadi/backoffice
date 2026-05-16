@@ -1,0 +1,127 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.editBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-accent);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.editBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cancelBtn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.mainCard {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.toast {
+  position: fixed;
+  bottom: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+  animation: slideInUp 0.3s ease;
+  z-index: 999;
+}
+
+.toast--success {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+.toast--error {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.toastDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--space-4);
+    gap: var(--space-4);
+  }
+
+  .mainCard {
+    padding: var(--space-4);
+  }
+
+  .toast {
+    left: var(--space-4);
+    right: var(--space-4);
+  }
+}

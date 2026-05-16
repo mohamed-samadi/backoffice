@@ -8,6 +8,7 @@ import chequesReducer from "../features/cheques/slice/chequesSlice";
 import clientsReducer from "../features/clients/slice/clientsSlice";
 import creditsReducer from "../features/credits/slice/creditsSlice";
 import notificationsReducer from "../features/notifications/slice/notificationsSlice";
+import companiesReducer from "../features/companies/slice/companiesSlice";
 export const store = configureStore({
   reducer: {
     categories: categoriesReducer,
@@ -15,10 +16,11 @@ export const store = configureStore({
     fournisseur: fournisseurReducer,
     clients: clientsReducer,
     tasks: tasksReducer,
-        cheques:    chequesReducer,
+    cheques: chequesReducer,
     documents: documentsReducer,
     credits: creditsReducer,
      notifications: notificationsReducer,
+    companies: companiesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
