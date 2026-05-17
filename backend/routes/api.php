@@ -13,6 +13,7 @@ use App\Http\Controllers\ChequeController ;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/dashboard', [DashboardController::class, 'index']);
 
 // ============================================================================
 // ROUTES FOURNISSEUR

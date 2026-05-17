@@ -9,8 +9,10 @@ import clientsReducer from "../features/clients/slice/clientsSlice";
 import creditsReducer from "../features/credits/slice/creditsSlice";
 import notificationsReducer from "../features/notifications/slice/notificationsSlice";
 import companiesReducer from "../features/companies/slice/companiesSlice";
+import dashboardReducer from "../features/dashboard/slice/dashboardSlice";
 export const store = configureStore({
   reducer: {
+    dashboard: dashboardReducer,
     categories: categoriesReducer,
     products: productsReducer,
     fournisseur: fournisseurReducer,
