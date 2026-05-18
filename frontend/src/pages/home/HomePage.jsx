@@ -246,7 +246,7 @@ const HomePage = () => {
             </span>
           </div>
           <div className={styles.chartBox}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={310} minWidth={0} minHeight={260}>
               <AreaChart data={revenueChartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
@@ -282,7 +282,7 @@ const HomePage = () => {
             <FaFileInvoice />
           </div>
           <div className={styles.pieBox}>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={310} minWidth={0} minHeight={260}>
               <PieChart>
                 <Pie
                   data={documentChartData}
@@ -313,7 +313,7 @@ const HomePage = () => {
           <span className={styles.panelValue}>{formatNumber(tasks?.total)} taches</span>
         </div>
         <div className={styles.chartBoxSmall}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={230} minWidth={0} minHeight={220}>
             <BarChart data={taskChartData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid stroke="#1e2230" vertical={false} />
               <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
