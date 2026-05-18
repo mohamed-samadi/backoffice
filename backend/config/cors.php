@@ -1,25 +1,35 @@
 <?php
 
+$envOrigins = env('CORS_ALLOWED_ORIGINS');
+
+// Ensure each origin is a clean single-line string (no CR/LF) to avoid
+// Symfony's "Header may not contain more than a single header" exception.
+$allowedOrigins = $envOrigins
+    ? array_values(array_filter(array_map(
+        static fn ($origin) => trim(str_replace(["\r", "\n"], '', (string) $origin)),
+        preg_split('/[\s,]+/', (string) $envOrigins, -1, PREG_SPLIT_NO_EMPTY) ?: []
+    )))
+    : [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173',
+    ];
+
 return [
 
     /*
     |--------------------------------------------------------------------------
     | Cross-Origin Resource Sharing (CORS) Configuration
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
-    |
-    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-    |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // ✅ أضفنا مسارات الـ login والـ logout لحمايتها من الـ CORS أيضاً
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // ✅ التعديل الجوهري: كل رابط أصبح عنصراً مستقلاً ونظيفاً تماماً بدون أسطر خفية
+    'allowed_origins' => $allowedOrigins,
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +39,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

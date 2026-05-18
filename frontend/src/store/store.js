@@ -10,6 +10,7 @@ import creditsReducer from "../features/credits/slice/creditsSlice";
 import notificationsReducer from "../features/notifications/slice/notificationsSlice";
 import companiesReducer from "../features/companies/slice/companiesSlice";
 import dashboardReducer from "../features/dashboard/slice/dashboardSlice";
+import authReducer from "../features/auth/slice/authSlice";
 export const store = configureStore({
   reducer: {
     dashboard: dashboardReducer,
@@ -23,6 +24,7 @@ export const store = configureStore({
     credits: creditsReducer,
      notifications: notificationsReducer,
     companies: companiesReducer,
+    auth : authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

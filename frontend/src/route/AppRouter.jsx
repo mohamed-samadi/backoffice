@@ -15,10 +15,14 @@ import ClientsPage from "../pages/clients/ClientsPage";
 import CreditsPage from "../pages/credits/CreditsPage";
 import NotificationsPage from "../pages/notifications/NotificationsPage";
 import CompanyPage from "../pages/companies/CompanyPage";
+import AuthGuard from "./AuthGuard";
+import LoginPage from "../pages/login/LoginPage.jsx";
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
+         <Route path="/login" element={<LoginPage />} />
+          <Route element={<AuthGuard />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
@@ -39,6 +43,7 @@ const AppRouter = () => {
           <Route path="/document/:id" element={<DocumentDetailPage mode="view" />} />
           <Route path="/companies" element={<CompanyPage />} />
         </Route>
+          </Route>
       </Routes>
     </Router>
   );

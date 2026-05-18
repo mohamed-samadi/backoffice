@@ -37,7 +37,7 @@ Schema::create('companies', function (Blueprint $table) {
 
 
     // Branding
-    $table->string('')->nullable();
+    $table->string('logo_path')->nullable();
 
     // Status
     $table->boolean('is_active')->default(true);
