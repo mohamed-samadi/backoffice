@@ -100,9 +100,11 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('web')
     // ─── DOCUMENTS ──────────────────────────────────────────────────────────
     Route::get('/documents/generate-sku', [DocumentController::class, 'generateSku']);
     Route::get('documents/stats', [DocumentController::class, 'stats'])->withoutMiddleware('throttle:api');
+    Route::get('documents/stats/global', [DocumentController::class, 'globalStats'])->withoutMiddleware('throttle:api');
     Route::apiResource('documents', DocumentController::class)->withoutMiddleware('throttle:api');
 
     // ─── COMPANIES ──────────────────────────────────────────────────────────
+    Route::get('/companies/logo', [CompanyController::class, 'logo']);
     Route::apiResource('/companies', CompanyController::class);
 
     // ─── NOTIFICATIONS ──────────────────────────────────────────────────────

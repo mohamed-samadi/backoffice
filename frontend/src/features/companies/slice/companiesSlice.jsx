@@ -22,6 +22,17 @@ const initialState = {
     success: false,
 };
 
+  const normalizeCompaniesList = (payload) => {
+    const hasDataKey = payload && Object.prototype.hasOwnProperty.call(payload, "data");
+    const data = hasDataKey ? payload.data : payload ?? [];
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    return data ? [data] : [];
+  };
+
 const companiesSlice = createSlice({
   name: "companies",
   initialState,
@@ -45,7 +56,7 @@ const companiesSlice = createSlice({
         })
         .addCase(fetchCompanies.fulfilled, (state, action) => {
             state.loadingStates.fetch = false;
-            state.data = action.payload?.data || [];
+          state.data = normalizeCompaniesList(action.payload);
         }
         )
         .addCase(fetchCompanies.rejected, (state, action) => {
@@ -75,7 +86,14 @@ const companiesSlice = createSlice({
         )
         .addCase(createCompany.fulfilled, (state, action) => {
             state.loadingStates.create = false;
-            state.data.push(action.payload);
+          const company = action.payload?.data ?? action.payload;
+
+          if (Array.isArray(state.data)) {
+            state.data.push(company);
+          } else {
+            state.data = company ? [company] : [];
+          }
+
             state.success = true;
         }
         )
@@ -91,12 +109,19 @@ const companiesSlice = createSlice({
         )
         .addCase(updateCompany.fulfilled, (state, action) => {
             state.loadingStates.update = false;
-            const index = state.data.findIndex((company) => company.id === action.payload.id);
-            if (index !== -1) {
-                state.data[index] = action.payload;
+          const company = action.payload?.data ?? action.payload;
+          const companies = Array.isArray(state.data) ? state.data : normalizeCompaniesList(state.data);
+          const index = companies.findIndex((item) => item.id === company?.id);
+
+          if (index !== -1) {
+            companies[index] = company;
+          } else if (company) {
+            companies.push(company);
             }   
-            if (state.current?.id === action.payload.id) {
-                state.current = action.payload;
+          state.data = companies;
+
+            if (state.current?.id === company?.id) {
+            state.current = company;
             }   
             state.success = true;
         }   
@@ -113,9 +138,10 @@ const companiesSlice = createSlice({
         )
         .addCase(deleteCompany.fulfilled, (state, action) => {
             state.loadingStates.delete = false;
-            state.data = state.data.filter((company) => company.id !== action
-.payload);
-            if (state.current?.id === action.payload) {
+          const companyId = action.payload?.data?.id ?? action.payload;
+          const companies = Array.isArray(state.data) ? state.data : normalizeCompaniesList(state.data);
+          state.data = companies.filter((company) => company.id !== companyId);
+            if (state.current?.id === companyId) {
                 state.current = null;
             }   
             state.success = true;

@@ -29,6 +29,18 @@ export const fetchStats = createAsyncThunk(
   }
 );
 
+export const fetchGlobalStats = createAsyncThunk(
+  "documents/fetchGlobalStats",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await documentsApi.getGlobalStats();
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
+  }
+);
+
 export const fetchDocumentById = createAsyncThunk(
   "documents/fetchDocumentById",
   async (id, { rejectWithValue }) => {

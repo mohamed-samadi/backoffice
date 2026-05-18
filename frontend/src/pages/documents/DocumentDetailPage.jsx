@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import { useDocuments } from "../../hooks/useDocuments";
 import DocumentForm from "./components/DocumentForm/DocumentForm";
-import GeneratePdfButton from "../../components/documents/GeneratePdfButton/GeneratePdfButton";
+// import GeneratePdfButton from "../../components/documents/GeneratePdfButton/GeneratePdfButton";
 import styles from "./DocumentDetailPage.module.css";
 
 export default function DocumentDetailPage({ mode = "view" }) {
@@ -194,7 +194,7 @@ export default function DocumentDetailPage({ mode = "view" }) {
             </button>
             {mode === "view" && documentData && (
               <>
-                <GeneratePdfButton document={documentData} className={styles.primaryBtn} />
+                {/* <GeneratePdfButton document={documentData} className={styles.primaryBtn} /> */}
                 <button className={styles.editBtn} type="button" onClick={handleEdit}>
                   Modifier
                 </button>

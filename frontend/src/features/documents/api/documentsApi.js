@@ -2,6 +2,7 @@ import api from "../../api/api";
 export const documentsApi = {
   getAll: (params = {}) => api.get("/documents", { params }),
   getStats: (params = {}) => api.get("/documents/stats", { params }),
+  getGlobalStats: () => api.get("/documents/stats/global"),
   getActiveClients: () => api.get("/clients/active"),
   getSelectableProducts: (params = {}) =>
     api.get("/products", {

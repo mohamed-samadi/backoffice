@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import styles from "./Sidebar.module.css";
@@ -15,6 +15,14 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 import { logout } from "../../features/auth/slice/authSlice";
+import { getApiUrl } from "../../api/config";
+
+const resolveLogoPathToUrl = (logoPath) => {
+  if (!logoPath) return null;
+  if (/^https?:\/\//i.test(logoPath)) return logoPath;
+  if (logoPath.startsWith("/storage")) return `${getApiUrl()}${logoPath}`;
+  return `${getApiUrl()}/storage/${logoPath}`;
+};
 
 const NAV_ITEMS = [
   { label: "Tableau de bord", path: "/home", icon: FaChartLine },
@@ -49,9 +57,44 @@ const NAV_ITEMS = [
 ];
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const [company, setCompany] = useState(null);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCompany = async () => {
+      try {
+        const response = await fetch(`${getApiUrl()}/api/companies`, {
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (!response.ok) return;
+
+        const result = await response.json();
+        if (!active) return;
+
+        setCompany(result?.data ?? null);
+      } catch {
+        if (active) {
+          setCompany(null);
+        }
+      }
+    };
+
+    loadCompany();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const companyLogoUrl = resolveLogoPathToUrl(company?.logo_path);
 
   const handleLogout = async () => {
     try {
@@ -65,11 +108,17 @@ const Sidebar = () => {
   return (
     <div className={`${styles.sidebar} ${!isOpen ? styles.collapsed : ""}`}>
       <div className={styles.header} onClick={() => setIsOpen(!isOpen)}>
-        <div className={styles.logo}>B</div>
+        <div className={styles.logo}>
+          {companyLogoUrl ? (
+            <img src={companyLogoUrl} alt={company?.nom || "Logo de l'entreprise"} className={styles.logoImage} />
+          ) : (
+            <span>B</span>
+          )}
+        </div>
         {isOpen && (
           <div className={styles.logoText}>
-            <div className={styles.logoTitle}>BizOS</div>
-            <div className={styles.logoSubtitle}>v2 · ERP</div>
+            <div className={styles.logoTitle}>{company?.nom || "Mon Entreprise"}</div>
+            <div className={styles.logoSubtitle}>{company?.email || "Entrepreneur · Tanger"}</div>
           </div>
         )}
       </div>
@@ -123,8 +172,8 @@ const Sidebar = () => {
       {/* Footer */}
       {isOpen && (
         <div className={styles.footer}>
-          <div className={styles.footerTitle}>Mon Entreprise</div>
-          <div className={styles.footerSub}>Entrepreneur · Tanger</div>
+          <div className={styles.footerTitle}>{company?.nom || "Mon Entreprise"}</div>
+          <div className={styles.footerSub}>{company?.ville || company?.pays || "Entreprise"}</div>
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   fetchDocuments,
   fetchStats,
+  fetchGlobalStats,
   fetchDocumentById,
   createDocument,
   updateDocument,
@@ -27,9 +28,30 @@ const initialState = {
     total_ttc: 0,
     reste_a_payer: 0,
   },
+  globalStats: {
+    total: 0,
+    by_type: {
+      factures: 0,
+      devis: 0,
+      bon_livraison: 0,
+    },
+    by_payment_status: {
+      payes: 0,
+      partiels: 0,
+      impayes: 0,
+    },
+    amounts: {
+      total_ht: 0,
+      total_tva: 0,
+      total_ttc: 0,
+      montant_paye: 0,
+      reste_a_payer: 0,
+    },
+  },
   loadingStates: {
     fetch: false,
     fetchStats: false,
+    fetchGlobalStats: false,
     fetchOne: false,
     create: false,
     update: false,
@@ -87,6 +109,20 @@ const documentsSlice = createSlice({
       })
       .addCase(fetchStats.rejected, (state, action) => {
         state.loadingStates.fetchStats = false;
+        state.error = action.payload;
+      });
+
+    builder
+      .addCase(fetchGlobalStats.pending, (state) => {
+        state.loadingStates.fetchGlobalStats = true;
+        state.error = null;
+      })
+      .addCase(fetchGlobalStats.fulfilled, (state, action) => {
+        state.loadingStates.fetchGlobalStats = false;
+        state.globalStats = action.payload || state.globalStats;
+      })
+      .addCase(fetchGlobalStats.rejected, (state, action) => {
+        state.loadingStates.fetchGlobalStats = false;
         state.error = action.payload;
       });
 

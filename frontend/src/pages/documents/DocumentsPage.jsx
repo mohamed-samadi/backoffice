@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import DataTable from "../../components/common/DataTable";
@@ -36,6 +36,8 @@ const TrashIcon = () => (
         <path d="M9 6V4h6v2" />
     </svg>
 );
+
+const StatIcon = ({ children }) => <span className={styles.statIcon}>{children}</span>;
 
 const FILTER_FIELDS = [
     { key: "search", label: "Recherche", type: "text", placeholder: "Numéro, client, statut…" },
@@ -191,10 +193,14 @@ export default function DocumentsPage() {
     const {
         documents,
         stats,
+        globalStats,
         fetchLoading,
+        fetchStatsLoading,
+        fetchGlobalStatsLoading,
         deleteLoading,
         fetchDocuments,
         fetchStats,
+        fetchGlobalStats,
         deleteDocument,
         currentPage,
         lastPage,
@@ -218,6 +224,10 @@ export default function DocumentsPage() {
         fetchDocuments(params);
     }, [filters, currentPageLocal, fetchDocuments]);
 
+    useEffect(() => {
+        fetchGlobalStats();
+    }, [fetchGlobalStats]);
+
     // Fetch stats when search or type changes (not paginated)
     useEffect(() => {
         const statsParams = {};
@@ -226,6 +236,59 @@ export default function DocumentsPage() {
         
         fetchStats(statsParams);
     }, [filters.search, filters.type, fetchStats]);
+
+    const documentStats = useMemo(() => {
+        const typeStats = globalStats?.by_type || {};
+        const paymentStats = globalStats?.by_payment_status || {};
+        const amounts = globalStats?.amounts || {};
+        const total = Number(globalStats?.total || 0);
+        const paidAmount = Number(amounts.montant_paye || 0);
+        const totalTtc = Number(amounts.total_ttc || 0);
+        const paidRatio = totalTtc > 0 ? Math.min(Math.round((paidAmount / totalTtc) * 100), 100) : 0;
+
+        return {
+            total,
+            typeStats,
+            paymentStats,
+            amounts,
+            paidRatio,
+        };
+    }, [globalStats]);
+
+    const statCards = [
+        {
+            key: "total",
+            label: "Documents",
+            value: documentStats.total,
+            meta: `${documentStats.typeStats.factures || 0} factures · ${documentStats.typeStats.devis || 0} devis`,
+            icon: "#",
+            tone: "accent",
+        },
+        {
+            key: "total_ttc",
+            label: "Total TTC",
+            value: currency(documentStats.amounts.total_ttc),
+            meta: `${currency(documentStats.amounts.total_ht)} HT`,
+            icon: "MAD",
+            tone: "green",
+        },
+        {
+            key: "paid",
+            label: "Montant payé",
+            value: currency(documentStats.amounts.montant_paye),
+            meta: `${documentStats.paidRatio}% encaissé`,
+            icon: "%",
+            tone: "cyan",
+        },
+        {
+            key: "due",
+            label: "Reste à payer",
+            value: currency(documentStats.amounts.reste_a_payer),
+            meta: `${documentStats.paymentStats.impayes || 0} impayés · ${documentStats.paymentStats.partiels || 0} partiels`,
+            icon: "!",
+            tone: "red",
+        },
+    ];
 
     const handleFilterChange = (nextFilters) => {
         const shouldResetPage =
@@ -271,6 +334,11 @@ export default function DocumentsPage() {
 
         try {
             await deleteDocument(deleteConfirm.id);
+            fetchGlobalStats();
+            const statsParams = {};
+            if (filters.search) statsParams.search = filters.search;
+            if (filters.type) statsParams.type = filters.type;
+            fetchStats(statsParams);
             setDeleteConfirm(null);
             notify("success", `Document ${deleteConfirm.numero} supprimé avec succès.`);
         } catch (error) {
@@ -300,24 +368,49 @@ export default function DocumentsPage() {
                 }
             />
 
-            <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Total</span>
-                    <strong className={styles.statValue}>{stats.total}</strong>
+            <section className={styles.statsPanel} aria-label="Statistiques globales des documents">
+                <div className={styles.statsHeader}>
+                    <div>
+                        <p className={styles.statsKicker}>Vue globale</p>
+                        <h2 className={styles.statsTitle}>Statistiques des documents en base</h2>
+                    </div>
+                    {(fetchGlobalStatsLoading || fetchStatsLoading) && (
+                        <span className={styles.statsLoading}>Actualisation...</span>
+                    )}
                 </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Factures</span>
-                    <strong className={styles.statValue}>{stats.factures}</strong>
+
+                <div className={styles.statsGrid}>
+                    {statCards.map((card) => (
+                        <article className={`${styles.statCard} ${styles[`statCard--${card.tone}`]}`} key={card.key}>
+                            <div className={styles.statTop}>
+                                <span className={styles.statLabel}>{card.label}</span>
+                                <StatIcon>{card.icon}</StatIcon>
+                            </div>
+                            <strong className={styles.statValue}>{card.value}</strong>
+                            <span className={styles.statMeta}>{card.meta}</span>
+                        </article>
+                    ))}
                 </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Devis</span>
-                    <strong className={styles.statValue}>{stats.devis}</strong>
+
+                <div className={styles.statsBreakdown}>
+                    <div className={styles.breakdownGroup}>
+                        <span className={styles.breakdownLabel}>Types</span>
+                        <span>Factures <strong>{documentStats.typeStats.factures || 0}</strong></span>
+                        <span>Devis <strong>{documentStats.typeStats.devis || 0}</strong></span>
+                        <span>Bons livraison <strong>{documentStats.typeStats.bon_livraison || 0}</strong></span>
+                    </div>
+                    <div className={styles.breakdownGroup}>
+                        <span className={styles.breakdownLabel}>Paiements</span>
+                        <span>Payés <strong>{documentStats.paymentStats.payes || 0}</strong></span>
+                        <span>Partiels <strong>{documentStats.paymentStats.partiels || 0}</strong></span>
+                        <span>Impayés <strong>{documentStats.paymentStats.impayes || 0}</strong></span>
+                    </div>
+                    <div className={styles.breakdownGroup}>
+                        <span className={styles.breakdownLabel}>TVA</span>
+                        <span>Total TVA <strong>{currency(documentStats.amounts.total_tva)}</strong></span>
+                    </div>
                 </div>
-                <div className={styles.statCard}>
-                    <span className={styles.statLabel}>Reste à payer</span>
-                    <strong className={styles.statValue}>{currency(stats.reste_a_payer)}</strong>
-                </div>
-            </div>
+            </section>
 
             <FilterPanel
                 filters={filters}
@@ -328,6 +421,16 @@ export default function DocumentsPage() {
                 }}
                 filterFields={FILTER_FIELDS}
             />
+
+            {(filters.search || filters.type) && (
+                <div className={styles.filteredStats}>
+                    <span>Résultat filtré</span>
+                    <strong>{stats.total || 0}</strong>
+                    <span>{stats.factures || 0} factures</span>
+                    <span>{stats.devis || 0} devis</span>
+                    <span>{currency(stats.reste_a_payer)} reste à payer</span>
+                </div>
+            )}
 
             <div >
                 <section className={styles.tableSection}>

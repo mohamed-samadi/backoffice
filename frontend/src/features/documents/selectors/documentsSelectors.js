@@ -11,6 +11,8 @@ export const selectDocumentFetchLoading = (state) =>
   state?.documents?.loadingStates?.fetch || false;
 export const selectDocumentFetchStatsLoading = (state) =>
   state?.documents?.loadingStates?.fetchStats || false;
+export const selectDocumentFetchGlobalStatsLoading = (state) =>
+  state?.documents?.loadingStates?.fetchGlobalStats || false;
 export const selectDocumentFetchOneLoading = (state) =>
   state?.documents?.loadingStates?.fetchOne || false;
 export const selectDocumentCreateLoading = (state) =>
@@ -40,6 +42,28 @@ export const selectDocumentsStats = (state) =>
     impayes: 0,
     total_ttc: 0,
     reste_a_payer: 0,
+  };
+
+export const selectDocumentsGlobalStats = (state) =>
+  state?.documents?.globalStats || {
+    total: 0,
+    by_type: {
+      factures: 0,
+      devis: 0,
+      bon_livraison: 0,
+    },
+    by_payment_status: {
+      payes: 0,
+      partiels: 0,
+      impayes: 0,
+    },
+    amounts: {
+      total_ht: 0,
+      total_tva: 0,
+      total_ttc: 0,
+      montant_paye: 0,
+      reste_a_payer: 0,
+    },
   };
 
 export const selectDocumentsTotal = (state) =>

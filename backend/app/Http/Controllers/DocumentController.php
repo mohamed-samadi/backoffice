@@ -118,6 +118,53 @@ class DocumentController extends Controller
         ], 200);
     }
 
+    public function globalStats(): JsonResponse
+    {
+        $baseQuery = Document::query();
+
+        $total = (clone $baseQuery)->count();
+        $factures = (clone $baseQuery)->where('type', 'facture')->count();
+        $devis = (clone $baseQuery)->where('type', 'devis')->count();
+        $bonLivraison = (clone $baseQuery)->where('type', 'bon_livraison')->count();
+
+        $payes = (clone $baseQuery)->whereIn('statut_paiement', ['payé', 'paye'])->count();
+        $partiels = (clone $baseQuery)->where('statut_paiement', 'partiel')->count();
+        $impayes = (clone $baseQuery)->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
+
+        $totals = (clone $baseQuery)->select(
+            DB::raw('SUM(total_ht) as total_ht'),
+            DB::raw('SUM(total_tva) as total_tva'),
+            DB::raw('SUM(total_ttc) as total_ttc'),
+            DB::raw('SUM(montant_paye) as montant_paye'),
+            DB::raw('SUM(reste_a_payer) as reste_a_payer')
+        )->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total' => $total,
+                'by_type' => [
+                    'factures' => $factures,
+                    'devis' => $devis,
+                    'bon_livraison' => $bonLivraison,
+                ],
+                'by_payment_status' => [
+                    'payes' => $payes,
+                    'partiels' => $partiels,
+                    'impayes' => $impayes,
+                ],
+                'amounts' => [
+                    'total_ht' => (float) ($totals->total_ht ?? 0),
+                    'total_tva' => (float) ($totals->total_tva ?? 0),
+                    'total_ttc' => (float) ($totals->total_ttc ?? 0),
+                    'montant_paye' => (float) ($totals->montant_paye ?? 0),
+                    'reste_a_payer' => (float) ($totals->reste_a_payer ?? 0),
+                ],
+            ],
+            'message' => 'Statistiques globales des documents'
+        ], 200);
+    }
+
     public function show(Document $document): JsonResponse
     {
         $document->load('client', 'documentLines.product', 'payments');

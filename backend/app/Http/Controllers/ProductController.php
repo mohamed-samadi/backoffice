@@ -114,6 +114,10 @@ class ProductController extends Controller
 
             // Stocker l'image AVANT le create() → une seule requête SQL
             if ($request->hasFile('image')) {
+                // Ensure the storage directory exists (public disk)
+                Storage::disk('public')->makeDirectory('products');
+
+                // Store the uploaded file into storage/app/public/products
                 $data['image'] = $request->file('image')
                     ->store('products', 'public');
             }

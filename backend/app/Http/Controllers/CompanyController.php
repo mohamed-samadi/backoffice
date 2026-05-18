@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateCompanyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
@@ -30,6 +31,31 @@ class CompanyController extends Controller
     }
 
     /**
+     * Return the logo for the first company.
+     */
+    public function logo()
+    {
+        $company = Company::first();
+
+        if (!$company || !$company->logo_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Logo introuvable'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'company_id' => $company->id,
+                'logo_path' => $company->logo_path,
+                'logo_url' => Storage::disk('public')->url($company->logo_path),
+            ],
+            'message' => 'Logo récupéré avec succès'
+        ], 200);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -45,6 +71,12 @@ class CompanyController extends Controller
         $data = $request->validated();
 
         try {
+            // Handle logo upload if provided
+            if ($request->hasFile('logo')) {
+                Storage::disk('public')->makeDirectory('companies');
+                $data['logo_path'] = $request->file('logo')->store('companies', 'public');
+            }
+
             $company = Company::create($data);
 
             return response()->json([
@@ -98,6 +130,16 @@ class CompanyController extends Controller
 
         try {
             $company = Company::findOrFail($id);
+            // Handle logo replacement
+            if ($request->hasFile('logo')) {
+                // delete previous logo if exists
+                if ($company->logo_path) {
+                    Storage::disk('public')->delete($company->logo_path);
+                }
+                Storage::disk('public')->makeDirectory('companies');
+                $data['logo_path'] = $request->file('logo')->store('companies', 'public');
+            }
+
             $company->update($data);
 
             return response()->json([

@@ -10,6 +10,7 @@ export default function CompanyPage() {
     updateCompany,
     clearError,
     clearSuccess,
+    resetCurrent,
     fetchCompanies,
     companies,
     error,
@@ -27,14 +28,20 @@ export default function CompanyPage() {
     const loadCompany = async () => {
       setLoading(true);
       try {
-        await fetchCompanies();
+        const result = await fetchCompanies();
+        const hasCompany = Boolean(result?.data);
+
+        if (!hasCompany) {
+          resetCurrent();
+          setMode("view");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadCompany();
-  }, [fetchCompanies]);
+  }, [fetchCompanies, resetCurrent]);
   useEffect(() => {
     if (success) {
       notify(

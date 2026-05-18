@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchDocuments,
   fetchStats,
+  fetchGlobalStats,
   fetchDocumentById,
   createDocument,
   updateDocument,
@@ -12,10 +13,12 @@ import {
   selectDocumentsData,
   selectCurrentDocument,
   selectDocumentsStats,
+  selectDocumentsGlobalStats,
   selectDocumentsTotal,
   selectDocumentsLoading,
   selectDocumentFetchLoading,
   selectDocumentFetchStatsLoading,
+  selectDocumentFetchGlobalStatsLoading,
   selectDocumentFetchOneLoading,
   selectDocumentCreateLoading,
   selectDocumentUpdateLoading,
@@ -39,6 +42,7 @@ export const useDocuments = () => {
   const documents = useSelector(selectDocumentsData);
   const current = useSelector(selectCurrentDocument);
   const stats = useSelector(selectDocumentsStats);
+  const globalStats = useSelector(selectDocumentsGlobalStats);
   const total = useSelector(selectDocumentsTotal);
   const error = useSelector(selectDocumentsError);
   const success = useSelector(selectDocumentsSuccess);
@@ -50,6 +54,7 @@ export const useDocuments = () => {
   const loading = useSelector(selectDocumentsLoading);
   const fetchLoading = useSelector(selectDocumentFetchLoading);
   const fetchStatsLoading = useSelector(selectDocumentFetchStatsLoading);
+  const fetchGlobalStatsLoading = useSelector(selectDocumentFetchGlobalStatsLoading);
   const fetchOneLoading = useSelector(selectDocumentFetchOneLoading);
   const createLoading = useSelector(selectDocumentCreateLoading);
   const updateLoading = useSelector(selectDocumentUpdateLoading);
@@ -61,6 +66,10 @@ export const useDocuments = () => {
   );
   const fetchStatsAction = useCallback(
     (params) => dispatch(fetchStats(params)).unwrap(),
+    [dispatch]
+  );
+  const fetchGlobalStatsAction = useCallback(
+    () => dispatch(fetchGlobalStats()).unwrap(),
     [dispatch]
   );
   const fetchDocumentByIdAction = useCallback(
@@ -87,6 +96,7 @@ export const useDocuments = () => {
     documents,
     current,
     stats,
+    globalStats,
     total,
     error,
     success,
@@ -97,12 +107,14 @@ export const useDocuments = () => {
     loading,
     fetchLoading,
     fetchStatsLoading,
+    fetchGlobalStatsLoading,
     fetchOneLoading,
     createLoading,
     updateLoading,
     deleteLoading,
     fetchDocuments: fetchDocumentsAction,
     fetchStats: fetchStatsAction,
+    fetchGlobalStats: fetchGlobalStatsAction,
     fetchDocumentById: fetchDocumentByIdAction,
     createDocument: createDocumentAction,
     updateDocument: updateDocumentAction,
