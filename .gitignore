@@ -8,7 +8,7 @@ backend/vendor/
 
 # Docker
 docker-compose.override.yml
-.dockerignore
+docker-login-cookies.txt
 
 # IDE & Editor
 .vscode/

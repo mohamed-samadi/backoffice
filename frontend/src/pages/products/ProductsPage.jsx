@@ -154,7 +154,6 @@ export default function ProductsPage() {
       ? { ...f, options: activeList.map((c) => ({ value: String(c.id), label: c.name })) }
       : f
   );
-  console.log("Active products:", products)  ;
   /* ── Fetch ────────────────────────────────────────────────────────────── */
   const load = useCallback(
     (page = 1) => fetchProducts({ ...filters, page }),

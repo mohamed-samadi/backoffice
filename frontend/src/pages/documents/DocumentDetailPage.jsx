@@ -180,7 +180,6 @@ export default function DocumentDetailPage({ mode = "view" }) {
     }
   };
 
-  //   if (!documentData) {
   //     console.warn('No document data available for export');
   //     return;
   //   }  
@@ -303,6 +302,7 @@ export default function DocumentDetailPage({ mode = "view" }) {
                 <button className={styles.editBtn} type="button" onClick={handleEdit}>
                   Modifier
                 </button>
+              
               </>
             )}
           </div>

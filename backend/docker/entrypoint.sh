@@ -1,31 +1,30 @@
-#!/bin/bash
+#!/usr/bin/env sh
 set -e
 
-echo "🚀 Application Laravel"
-echo "====================="
+cd /var/www/html
 
-echo "⏳ Attente de la base de données..."
-until nc -z db 3306 2>/dev/null; do
-  echo "  ⏳ MySQL pas encore prête..."
-  sleep 2
-done
-echo "✅ MySQL prête"
+mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R ug+rw storage bootstrap/cache
 
-echo "🔄 Lancement des migrations..."
-php artisan migrate --force
-echo "✅ Migrations terminées"
+if [ ! -f .env ] && [ -f .env.example ]; then
+  cp .env.example .env
+fi
 
-echo "🔗 Configuration des liens symboliques..."
-php artisan storage:link --quiet 2>/dev/null || true
-echo "✅ Liens symboliques OK"
+if [ "${RUN_COMPOSER_INSTALL:-false}" = "true" ] || [ ! -f vendor/autoload.php ]; then
+  composer install --no-interaction --prefer-dist
+fi
 
-echo "💾 Cache des configs..."
-php artisan config:cache 2>/dev/null || true
-php artisan route:cache 2>/dev/null || true
-echo "✅ Cache OK"
+php artisan storage:link --quiet || true
+php artisan config:clear --quiet || true
+php artisan cache:clear --quiet || true
 
-echo ""
-echo "✨ Application prête !"
-echo ""
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+  php artisan migrate --force
+fi
+
+if [ "${RUN_SEEDERS:-true}" = "true" ]; then
+  php artisan db:seed --force
+fi
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

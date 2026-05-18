@@ -1,42 +1,53 @@
 FROM php:8.2-fpm-alpine
 
-# Install required PHP extensions and dependencies
 RUN apk add --no-cache \
-    git curl zip unzip netcat-openbsd \
-    libpng-dev oniguruma-dev libxml2-dev libzip-dev \
-    nginx supervisor \
-    && docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
+    bash \
+    curl \
+    freetype-dev \
+    git \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libzip-dev \
+    nginx \
+    oniguruma-dev \
+    supervisor \
+    unzip \
+    zip \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install \
     bcmath \
+    exif \
     gd \
+    mbstring \
+    pcntl \
+    pdo_mysql \
     zip
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy project files
+COPY composer.json composer.lock* ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --no-scripts \
+    --optimize-autoloader
+
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer dump-autoload --optimize \
+  && mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+  && chown -R www-data:www-data storage bootstrap/cache \
+  && chmod -R ug+rw storage bootstrap/cache
 
-# Set permissions for Laravel
-RUN chmod -R 775 storage bootstrap/cache \
-    && mkdir -p storage/app/public \
-    && chown -R www-data:www-data /var/www/html
-
-# Copy Docker configuration
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint
 
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint
 
 EXPOSE 80
 
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint"]

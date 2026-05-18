@@ -29,7 +29,6 @@ const MapPinIcon = () => (
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 export default function FournisseurStats({ globalstats}) {
-  console.log("FournisseurStats rendered with globalstats:", globalstats);
   const stats = useMemo(() => {
     return [
       {

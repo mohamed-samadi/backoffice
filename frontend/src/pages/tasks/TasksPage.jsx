@@ -276,7 +276,6 @@ export default function TasksPage() {
     updateTaskStatus,
     updateStatusLoading,
   } = useTasks();
-  console.log(tasks);
   const [filters, setFilters] = useState({
     per_page: "10",
     sort_by: "created_at",

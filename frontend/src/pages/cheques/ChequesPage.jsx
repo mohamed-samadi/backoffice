@@ -321,7 +321,7 @@ export default function ChequesPage() {
   useEffect(() => {
     fetchBanques();
   }, []); // eslint-disable-line
-  console.log(cheques)
+
   /* ── Notification ─────────────────────────────────────────────────────── */
   const notify = useCallback((type, message, duration = 3500) => {
     setNotification({ type, message });

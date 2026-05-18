@@ -10,7 +10,7 @@ export function getApiUrl() {
     return window.__VITE_API_URL__;
   }
 
-  return "/api";
+  return "";
 }
 
 export function buildApiUrl(endpoint) {

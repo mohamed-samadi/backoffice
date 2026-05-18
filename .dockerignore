@@ -1,0 +1,13 @@
+.git
+.idea
+.vscode
+node_modules
+vendor
+storage/logs/*
+**/.env
+**/node_modules
+**/vendor
+**/dist
+**/build
+**/.DS_Store
+**/Thumbs.db

@@ -165,7 +165,7 @@ export default function ProductModal({
   useEffect(() => {
     if (!form.type || isEdit) return;
 
-    fetch(`http://localhost:8000/api/products/generate-sku?type=${form.type}`)
+    fetch(`/api/products/generate-sku?type=${form.type}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.sku) {

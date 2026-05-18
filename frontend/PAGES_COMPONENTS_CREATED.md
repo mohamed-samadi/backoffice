@@ -75,7 +75,6 @@ Tableau dynamique avec pagination et actions
   ]}
   data={data}
   loading={false}
-  onRowClick={(row) => console.log(row)}
   actions={[
     { key: "edit", label: "Éditer", onClick: handleEdit },
     { key: "delete", label: "Supprimer", onClick: handleDelete },
