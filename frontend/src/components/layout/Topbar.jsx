@@ -23,6 +23,7 @@ const PAGE_TITLES = {
   "/analytics": "Analyse",
   "/client360": "Vue Client 360°",
   "/cashflow": "Trésorerie",
+  "/profile": "Profil utilisateur",
 };
 
 const Topbar = () => {
@@ -55,6 +56,7 @@ const Topbar = () => {
         <button
           className={`${styles.iconButton} ${styles.userButton}`}
           title="Profil utilisateur"
+          onClick={() => navigate("/profile")}
         >
           E
         </button>

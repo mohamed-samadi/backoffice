@@ -15,6 +15,7 @@ import ClientsPage from "../pages/clients/ClientsPage";
 import CreditsPage from "../pages/credits/CreditsPage";
 import NotificationsPage from "../pages/notifications/NotificationsPage";
 import CompanyPage from "../pages/companies/CompanyPage";
+import UserProfilePage from "../pages/profile/UserProfilePage";
 import AuthGuard from "./AuthGuard";
 import LoginPage from "../pages/login/LoginPage.jsx";
 const AppRouter = () => {
@@ -42,6 +43,7 @@ const AppRouter = () => {
           <Route path="/documents/:id" element={<DocumentDetailPage mode="view" />} />
           <Route path="/document/:id" element={<DocumentDetailPage mode="view" />} />
           <Route path="/companies" element={<CompanyPage />} />
+          <Route path="/profile" element={<UserProfilePage />} />
         </Route>
           </Route>
       </Routes>

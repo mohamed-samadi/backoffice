@@ -61,6 +61,7 @@ export const authApi = {
   login: (credentials) => api.post("/login", credentials),
   logout: () => api.post("/logout"),
   me: () => api.get("/me"),
+  updateProfile: (payload) => api.put("/me", payload),
 };
 
 export default api;

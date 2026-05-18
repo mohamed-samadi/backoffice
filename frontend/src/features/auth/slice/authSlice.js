@@ -44,6 +44,22 @@ export const fetchMe = createAsyncThunk(
   }
 );
 
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await authApi.updateProfile(payload);
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.response?.data?.errors ||
+        "Erreur lors de la mise a jour du profil."
+      );
+    }
+  }
+);
+
 // ── Slice ─────────────────────────────────────────────────────────────────
 const authSlice = createSlice({
   name: "auth",
@@ -105,6 +121,22 @@ const authSlice = createSlice({
         state.isInitializing = false;
         state.isAuthenticated= false;
         state.user           = null;
+      });
+
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

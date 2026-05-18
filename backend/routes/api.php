@@ -38,6 +38,7 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('web')
 
     // ─── مسارات المستخدم والتحقق من الجلسة ───────────────────────────────────
     Route::get('/me', [AuthController::class, 'me'])->middleware('web');       // جلب بيانات المستخدم الحالي
+    Route::put('/me', [AuthController::class, 'updateProfile'])->middleware('web');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('web'); // تسجيل الخروج
     
     // المسار القديم الذي يأتي مع لارافيل (يمكنك تركه أو حذفه لأن /me تعوضه)
