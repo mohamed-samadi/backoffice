@@ -2,45 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Company;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
-use Illuminate\Http\Request;
+use App\Models\Company;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    private function unauthenticatedResponse(): JsonResponse
     {
-      
-        //get the first company (assuming there's only one)
-        $companies = Company::first();
-
-
         return response()->json([
-            'success' => true,
-            'data' => $companies,
-            'message' => 'Sociétés récupérées avec succès'
-        ], 
-        200);
+            'success' => false,
+            'message' => 'Non autorise. Veuillez vous connecter.',
+        ], 401);
+    }
+
+    private function forbiddenResponse(): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vous ne pouvez pas acceder a cette societe.',
+        ], 403);
+    }
+
+    private function userCompany(Request $request): ?Company
+    {
+        return $request->user()?->company;
+    }
+
+    private function ownsCompany(Request $request, string|int $companyId): bool
+    {
+        $userCompanyId = $request->user()?->company_id;
+
+        return $userCompanyId !== null && (int) $userCompanyId === (int) $companyId;
     }
 
     /**
-     * Return the logo for the first company.
+     * Display the authenticated user's company.
      */
-    public function logo()
+    public function index(Request $request): JsonResponse
     {
-        $company = Company::first();
+        if (!$request->user()) {
+            return $this->unauthenticatedResponse();
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->userCompany($request),
+            'message' => 'Societe recuperee avec succes',
+        ], 200);
+    }
+
+    /**
+     * Return the authenticated user's company logo.
+     */
+    public function logo(Request $request): JsonResponse
+    {
+        if (!$request->user()) {
+            return $this->unauthenticatedResponse();
+        }
+
+        $company = $this->userCompany($request);
 
         if (!$company || !$company->logo_path) {
             return response()->json([
                 'success' => false,
-                'message' => 'Logo introuvable'
+                'message' => 'Logo introuvable',
             ], 404);
         }
 
@@ -51,27 +81,31 @@ class CompanyController extends Controller
                 'logo_path' => $company->logo_path,
                 'logo_url' => Storage::disk('public')->url($company->logo_path),
             ],
-            'message' => 'Logo récupéré avec succès'
+            'message' => 'Logo recupere avec succes',
         ], 200);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Store a company and attach it to the authenticated user.
      */
-    public function create()
+    public function store(StoreCompanyRequest $request): JsonResponse
     {
-        // Not used for API-based controllers.
-    }
+        $user = $request->user();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCompanyRequest $request)
-    {
+        if (!$user) {
+            return $this->unauthenticatedResponse();
+        }
+
+        if ($user->company_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Votre utilisateur est deja associe a une societe.',
+            ], 409);
+        }
+
         $data = $request->validated();
 
         try {
-            // Handle logo upload if provided
             if ($request->hasFile('logo')) {
                 Storage::disk('public')->makeDirectory('companies');
                 $data['logo_path'] = $request->file('logo')->store('companies', 'public');
@@ -79,63 +113,78 @@ class CompanyController extends Controller
 
             $company = Company::create($data);
 
+            $user->company()->associate($company);
+            $user->save();
+
             return response()->json([
                 'success' => true,
                 'data' => $company,
-                'message' => 'Société créée avec succès'
+                'message' => 'Societe creee avec succes',
             ], 201);
-        } catch (\Exception $e) {
-            Log::error('Company store failed', ['error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Company store failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de la société'
+                'message' => 'Erreur lors de la creation de la societe',
             ], 500);
         }
     }
 
     /**
-     * Display the specified resource.
+     * Display the authenticated user's company when the requested id matches.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id): JsonResponse
     {
-        try {
-            $company = Company::findOrFail($id);
-            return response()->json([
-                'success' => true,
-                'data' => $company,
-                'message' => 'Société récupérée avec succès'
-            ], 200);
-        } catch (\Exception $e) {
+        if (!$request->user()) {
+            return $this->unauthenticatedResponse();
+        }
+
+        if (!$this->ownsCompany($request, $id)) {
+            return $this->forbiddenResponse();
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->userCompany($request),
+            'message' => 'Societe recuperee avec succes',
+        ], 200);
+    }
+
+    /**
+     * Update the authenticated user's company.
+     */
+    public function update(UpdateCompanyRequest $request, string $id): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return $this->unauthenticatedResponse();
+        }
+
+        if (!$this->ownsCompany($request, $id)) {
+            return $this->forbiddenResponse();
+        }
+
+        $data = $request->validated();
+        $company = $this->userCompany($request);
+
+        if (!$company) {
             return response()->json([
                 'success' => false,
-                'message' => 'Société introuvable'
+                'message' => 'Societe introuvable',
             ], 404);
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        // Not used for API-based controllers.
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCompanyRequest $request, string $id)
-    {
-        $data = $request->validated();
 
         try {
-            $company = Company::findOrFail($id);
-            // Handle logo replacement
             if ($request->hasFile('logo')) {
-                // delete previous logo if exists
                 if ($company->logo_path) {
                     Storage::disk('public')->delete($company->logo_path);
                 }
+
                 Storage::disk('public')->makeDirectory('companies');
                 $data['logo_path'] = $request->file('logo')->store('companies', 'public');
             }
@@ -144,36 +193,71 @@ class CompanyController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $company,
-                'message' => 'Société mise à jour avec succès'
+                'data' => $company->fresh(),
+                'message' => 'Societe mise a jour avec succes',
             ], 200);
-        } catch (\Exception $e) {
-            Log::error('Company update failed', ['id' => $id, 'error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Company update failed', [
+                'company_id' => $id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la mise à jour de la société'
+                'message' => 'Erreur lors de la mise a jour de la societe',
             ], 500);
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the authenticated user's company and detach it from the user.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        $user = $request->user();
+
+        if (!$user) {
+            return $this->unauthenticatedResponse();
+        }
+
+        if (!$this->ownsCompany($request, $id)) {
+            return $this->forbiddenResponse();
+        }
+
+        $company = $this->userCompany($request);
+
+        if (!$company) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Societe introuvable',
+            ], 404);
+        }
+
         try {
-            $company = Company::findOrFail($id);
+            if ($company->logo_path) {
+                Storage::disk('public')->delete($company->logo_path);
+            }
+
+            $user->company()->dissociate();
+            $user->save();
+
             $company->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Société supprimée avec succès'
+                'message' => 'Societe supprimee avec succes',
             ], 200);
-        } catch (\Exception $e) {
-            Log::error('Company delete failed', ['id' => $id, 'error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Company delete failed', [
+                'company_id' => $id,
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la suppression de la société'
+                'message' => 'Erreur lors de la suppression de la societe',
             ], 500);
         }
     }

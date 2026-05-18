@@ -105,8 +105,10 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('web')
     Route::apiResource('documents', DocumentController::class)->withoutMiddleware('throttle:api');
 
     // ─── COMPANIES ──────────────────────────────────────────────────────────
-    Route::get('/companies/logo', [CompanyController::class, 'logo']);
-    Route::apiResource('/companies', CompanyController::class);
+    Route::middleware('web')->group(function () {
+        Route::get('/companies/logo', [CompanyController::class, 'logo']);
+        Route::apiResource('/companies', CompanyController::class);
+    });
 
     // ─── NOTIFICATIONS ──────────────────────────────────────────────────────
     Route::prefix('notifications')->group(function () {

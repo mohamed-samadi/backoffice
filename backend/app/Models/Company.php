@@ -55,7 +55,7 @@ class Company extends Model
         'is_active' => 'boolean',
     ];
 
-    public function user()
+    public function users()
     {
         return $this->hasMany(User::class) ;
     }
