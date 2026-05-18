@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./Sidebar.module.css";
 import {
   FaChartLine,
@@ -16,6 +16,8 @@ import {
 } from "react-icons/fa";
 import { logout } from "../../features/auth/slice/authSlice";
 import { getApiUrl } from "../../api/config";
+import { fetchCompanies } from "../../features/companies/thunk/companiesThunk";
+import { selectCompaniesData } from "../../features/companies/selectors/companiesSelectors";
 
 const resolveLogoPathToUrl = (logoPath) => {
   if (!logoPath) return null;
@@ -57,42 +59,17 @@ const NAV_ITEMS = [
 ];
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [company, setCompany] = useState(null);
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const companies = useSelector(selectCompaniesData);
+  const company = Array.isArray(companies) ? companies[0] : companies;
 
   useEffect(() => {
-    let active = true;
-
-    const loadCompany = async () => {
-      try {
-        const response = await fetch(`${getApiUrl()}/api/companies`, {
-          headers: {
-            Accept: "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) return;
-
-        const result = await response.json();
-        if (!active) return;
-
-        setCompany(result?.data ?? null);
-      } catch {
-        if (active) {
-          setCompany(null);
-        }
-      }
-    };
-
-    loadCompany();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (!company) {
+      dispatch(fetchCompanies());
+    }
+  }, [company, dispatch]);
 
   const companyLogoUrl = resolveLogoPathToUrl(company?.logo_path);
 

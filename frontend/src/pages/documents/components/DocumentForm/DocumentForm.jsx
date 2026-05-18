@@ -9,9 +9,17 @@ const DOCUMENT_TYPES = [
 ];
 
 const PAYMENT_STATUS_OPTIONS = [
-  { value: "payé", label: "Payé" },
+  { value: "paye", label: "Payé" },
   { value: "partial", label: "Partiel" },
   { value: "non_paye", label: "Impayé" },
+];
+
+const PAYMENT_CONDITIONS_OPTIONS = [
+  { value: "comptant", label: "Comptant" },
+  { value: "net_7", label: "Net 7 jours" },
+  { value: "net_15", label: "Net 15 jours" },
+  { value: "net_30", label: "Net 30 jours" },
+  { value: "fin_de_mois", label: "Fin de mois" },
 ];
 
 const STATUT_OPTIONS = [
@@ -19,6 +27,39 @@ const STATUT_OPTIONS = [
   { value: "envoyé", label: "Envoyé" },
   { value: "accepté", label: "Accepté" },
 ];
+
+const DOCUMENT_TYPE_CONFIG = {
+  facture: {
+    dateCreationLabel: "Date facture",
+    secondaryDateField: "date_echeance",
+    secondaryDateLabel: "Échéance",
+    showSecondaryDate: true,
+    showPayment: true,
+    showPaymentConditions: true,
+    showFinancialLines: true,
+    showFinancialSummary: true,
+  },
+  devis: {
+    dateCreationLabel: "Date devis",
+    secondaryDateField: "date_validite",
+    secondaryDateLabel: "Validité",
+    showSecondaryDate: true,
+    showPayment: false,
+    showPaymentConditions: true,
+    showFinancialLines: true,
+    showFinancialSummary: true,
+  },
+  bon_livraison: {
+    dateCreationLabel: "Date livraison",
+    secondaryDateField: "date_livraison",
+    secondaryDateLabel: "Livraison",
+    showSecondaryDate: true,
+    showPayment: false,
+    showPaymentConditions: false,
+    showFinancialLines: false,
+    showFinancialSummary: false,
+  },
+};
 
 const currency = (value) =>
   Number(value || 0).toLocaleString("fr-FR", {
@@ -40,14 +81,14 @@ const toDateInputValue = (value) => {
   return String(value).split("T")[0];
 };
 
-const createEmptyLine = () => ({
+const createEmptyLine = (order = 1) => ({
   product_id: "",
   description: "",
   quantite: "1",
   prix_unitaire_ht: "",
   remise: "0",
   tva: "20",
-  ordre: "0",
+  ordre: String(order),
 });
 
 const createEmptyForm = () => ({
@@ -56,10 +97,13 @@ const createEmptyForm = () => ({
   type: "facture",
   date_creation: toDateInputValue(new Date().toISOString()),
   date_validite: "",
+  date_echeance: "",
+  date_livraison: "",
   statut: "brouillon",
   montant_paye: "0",
   statut_paiement: "non_paye",
-  lines: [createEmptyLine()],
+  conditions_paiement: "",
+  lines: [createEmptyLine(1)],
 });
 
 const normalizeLine = (line, index = 0) => ({
@@ -78,18 +122,24 @@ const normalizeForm = (documentData) => ({
   type: documentData?.type ?? "facture",
   date_creation: toDateInputValue(documentData?.date_creation),
   date_validite: toDateInputValue(documentData?.date_validite),
+  date_echeance: toDateInputValue(documentData?.date_echeance),
+  date_livraison: toDateInputValue(documentData?.date_livraison),
   statut: documentData?.statut ?? "brouillon",
   montant_paye: String(documentData?.montant_paye ?? "0"),
   statut_paiement: documentData?.statut_paiement ?? "non_paye",
+  conditions_paiement: documentData?.conditions_paiement ?? "",
   lines: Array.isArray(documentData?.documentLines || documentData?.document_lines)
     ? (documentData.documentLines || documentData.document_lines).map((line, index) =>
         normalizeLine(line, index)
       )
-    : [createEmptyLine()],
+    : [createEmptyLine(1)],
 });
 
 const getClientLabel = (client) =>
   client?.nom_entreprise || client?.nom_complet || client?.email || client?.telephone || "Client";
+
+const getDocumentTypeLabel = (value) =>
+  DOCUMENT_TYPES.find((type) => type.value === value)?.label || value || "Document";
 
 const getProductLabel = (product) =>
   product?.nom ? `${product.nom} · ${currency(product.prix_unitaire_ht)}` : "Produit";
@@ -102,6 +152,19 @@ const formatPaymentLabel = (value) => {
   return value || "—";
 };
 
+const formatPaymentConditionLabel = (value) => {
+  const match = PAYMENT_CONDITIONS_OPTIONS.find((option) => option.value === value);
+  return match ? match.label : value || "—";
+};
+
+const getSecondaryDateInfo = (documentData) => {
+  const config = DOCUMENT_TYPE_CONFIG[documentData?.type] || DOCUMENT_TYPE_CONFIG.facture;
+  return {
+    label: config.secondaryDateLabel || "Date",
+    value: documentData?.[config.secondaryDateField],
+  };
+};
+
 export default function DocumentForm({
   mode = "view",
   initialData = null,
@@ -109,14 +172,14 @@ export default function DocumentForm({
   saving = false,
   onSubmit,
   onCancel,
-  onEdit,
+  onSuccess,
 }) {
   const isView = mode === "view";
   const isEdit = mode === "edit";
 
   const [form, setForm] = useState(createEmptyForm);
   const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState("");
+  const [notification, setNotification] = useState(null);
   const [clients, setClients] = useState([]);
   const [products, setProducts] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
@@ -127,6 +190,11 @@ export default function DocumentForm({
   const [productDropdownOpenIndex, setProductDropdownOpenIndex] = useState(null);
   const [productSearchByLine, setProductSearchByLine] = useState({});
   const productDropdownRefs = useRef([]);
+  const typeConfig = DOCUMENT_TYPE_CONFIG[form.type] || DOCUMENT_TYPE_CONFIG.facture;
+  const showPaymentFields = typeConfig.showPayment;
+  const showPaymentConditions = typeConfig.showPaymentConditions;
+  const showFinancialLines = typeConfig.showFinancialLines;
+  const showFinancialSummary = typeConfig.showFinancialSummary;
 
   useEffect(() => {
     let active = true;
@@ -162,6 +230,7 @@ export default function DocumentForm({
     };
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (initialData) {
       setForm(normalizeForm(initialData));
@@ -169,7 +238,7 @@ export default function DocumentForm({
       setForm(createEmptyForm());
     }
     setErrors({});
-    setSubmitError("");
+    setNotification(null);
   }, [initialData, mode]);
 
   useEffect(() => {
@@ -187,6 +256,7 @@ export default function DocumentForm({
       return next;
     });
   }, [form.lines, products]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -286,15 +356,45 @@ export default function DocumentForm({
     if (errors.client_id) {
       setErrors((previous) => ({ ...previous, client_id: null }));
     }
-    setSubmitError("");
   };
 
   const handleFieldChange = (field, value) => {
-    setForm((previous) => ({ ...previous, [field]: value }));
+    setForm((previous) => {
+      const next = { ...previous, [field]: value };
+
+      if (field === "type") {
+        const nextConfig = DOCUMENT_TYPE_CONFIG[value] || DOCUMENT_TYPE_CONFIG.facture;
+
+        next.date_validite = value === "devis" ? previous.date_validite : "";
+        next.date_echeance = value === "facture" ? previous.date_echeance : "";
+        next.date_livraison = value === "bon_livraison" ? previous.date_livraison : "";
+
+        if (!nextConfig.showPayment) {
+          next.montant_paye = "0";
+          next.statut_paiement = "non_paye";
+        } else if (!next.statut_paiement) {
+          next.statut_paiement = "non_paye";
+        }
+
+        if (!nextConfig.showPaymentConditions) {
+          next.conditions_paiement = "";
+        }
+
+        if (!nextConfig.showFinancialLines) {
+          next.lines = next.lines.map((line) => ({
+            ...line,
+            prix_unitaire_ht: "0",
+            remise: "0",
+            tva: "0",
+          }));
+        }
+      }
+
+      return next;
+    });
     if (errors[field]) {
       setErrors((previous) => ({ ...previous, [field]: null }));
     }
-    setSubmitError("");
   };
 
   const handleLineChange = (index, field, value) => {
@@ -316,17 +416,18 @@ export default function DocumentForm({
       lines[index] = currentLine;
       return { ...previous, lines };
     });
-    setSubmitError("");
   };
 
   const handleProductSelect = (index, product) => {
     setForm((previous) => {
       const lines = [...previous.lines];
+      const nextConfig = DOCUMENT_TYPE_CONFIG[previous.type] || DOCUMENT_TYPE_CONFIG.facture;
       lines[index] = {
         ...lines[index],
         product_id: String(product.id),
-        prix_unitaire_ht: String(product.prix_unitaire_ht ?? ""),
-        tva: String(product.tva ?? 20),
+        prix_unitaire_ht: nextConfig.showFinancialLines ? String(product.prix_unitaire_ht ?? "") : "0",
+        remise: nextConfig.showFinancialLines ? lines[index].remise : "0",
+        tva: nextConfig.showFinancialLines ? String(product.tva ?? 20) : "0",
         description: lines[index].description || product.description || product.nom || "",
       };
       return { ...previous, lines };
@@ -336,7 +437,7 @@ export default function DocumentForm({
       [index]: getProductLabel(product),
     }));
     setProductDropdownOpenIndex(null);
-    setSubmitError("");
+    setNotification(null);
   };
 
   const handleProductSearchChange = (index, value) => {
@@ -348,7 +449,17 @@ export default function DocumentForm({
 
   const getFilteredProducts = (index) => {
     const query = String(productSearchByLine[index] || "").trim().toLowerCase();
+    const selectedProductIds = new Set(
+      form.lines
+        .map((line, currentIndex) => (currentIndex === index ? null : String(line.product_id || "")))
+        .filter(Boolean)
+    );
+
     const results = products.filter((product) => {
+      if (selectedProductIds.has(String(product.id))) {
+        return false;
+      }
+
       if (!query) return true;
 
       return [
@@ -368,16 +479,21 @@ export default function DocumentForm({
   const addLine = () => {
     setForm((previous) => ({
       ...previous,
-      lines: [...previous.lines, createEmptyLine()],
+      lines: [...previous.lines, createEmptyLine(previous.lines.length + 1)],
     }));
   };
 
   const removeLine = (index) => {
     setForm((previous) => {
-      const lines = previous.lines.filter((_, currentIndex) => currentIndex !== index);
+      const lines = previous.lines
+        .filter((_, currentIndex) => currentIndex !== index)
+        .map((line, currentIndex) => ({
+          ...line,
+          ordre: String(currentIndex + 1),
+        }));
       return {
         ...previous,
-        lines: lines.length > 0 ? lines : [createEmptyLine()],
+        lines: lines.length > 0 ? lines : [createEmptyLine(1)],
       };
     });
     setProductDropdownOpenIndex(null);
@@ -398,20 +514,27 @@ export default function DocumentForm({
     if (!form.client_id) nextErrors.client_id = "Le client est obligatoire";
     if (!form.numero?.trim()) nextErrors.numero = "Le numéro est obligatoire";
     if (!form.type) nextErrors.type = "Le type est obligatoire";
-    if (!form.statut_paiement) nextErrors.statut_paiement = "Le statut de paiement est obligatoire";
+    if (showPaymentFields && !form.statut_paiement) nextErrors.statut_paiement = "Le statut de paiement est obligatoire";
     if (!form.lines.length) nextErrors.lines = "Ajoutez au moins une ligne";
 
     form.lines.forEach((line, index) => {
       if (!line.product_id) nextErrors[`line-${index}-product_id`] = "Sélectionnez un produit";
       if (!line.quantite || Number(line.quantite) <= 0)
         nextErrors[`line-${index}-quantite`] = "Quantité invalide";
-      if (line.prix_unitaire_ht === "" || Number(line.prix_unitaire_ht) < 0)
-        nextErrors[`line-${index}-prix_unitaire_ht`] = "Prix invalide";
-      if (line.tva === "" || Number(line.tva) < 0)
-        nextErrors[`line-${index}-tva`] = "TVA invalide";
+      if (showFinancialLines) {
+        if (line.prix_unitaire_ht === "" || Number(line.prix_unitaire_ht) < 0)
+          nextErrors[`line-${index}-prix_unitaire_ht`] = "Prix invalide";
+        if (line.tva === "" || Number(line.tva) < 0)
+          nextErrors[`line-${index}-tva`] = "TVA invalide";
+      }
     });
 
     return nextErrors;
+  };
+
+  const notify = (type, message, duration = 3500) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), duration);
   };
 
   const handleSubmit = async (event) => {
@@ -420,6 +543,7 @@ export default function DocumentForm({
     const nextErrors = validate();
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
+      notify("error", "Tous les champs obligatoires doivent être remplis et les valeurs doivent être valides.", 5000);
       return;
     }
 
@@ -428,25 +552,39 @@ export default function DocumentForm({
       numero: form.numero.trim(),
       type: form.type,
       date_creation: form.date_creation || null,
-      date_validite: form.date_validite || null,
+      date_validite: form.type === "devis" ? form.date_validite || null : null,
+      date_echeance: form.type === "facture" ? form.date_echeance || null : null,
+      date_livraison: form.type === "bon_livraison" ? form.date_livraison || null : null,
       statut: form.statut || null,
-      montant_paye: Number(form.montant_paye || 0),
-      statut_paiement: form.statut_paiement,
+      montant_paye: showPaymentFields ? Number(form.montant_paye || 0) : 0,
+      statut_paiement: showPaymentFields ? form.statut_paiement : "non_paye",
+      conditions_paiement: showPaymentConditions ? form.conditions_paiement || null : null,
       lines: form.lines.map((line, index) => ({
         product_id: Number(line.product_id),
         description: line.description?.trim() || null,
         quantite: Number(line.quantite || 0),
-        prix_unitaire_ht: Number(line.prix_unitaire_ht || 0),
-        remise: Number(line.remise || 0),
-        tva: Number(line.tva || 0),
+        prix_unitaire_ht: showFinancialLines ? Number(line.prix_unitaire_ht || 0) : 0,
+        remise: showFinancialLines ? Number(line.remise || 0) : 0,
+        tva: showFinancialLines ? Number(line.tva || 0) : 0,
         ordre: Number(line.ordre || index),
       })),
     };
 
     try {
-      await onSubmit(payload);
+      const result = await onSubmit(payload);
+      // Use message from backend API response
+      const successMessage = result?.message || (mode === "create" ? "Document créé avec succès." : "Document mis à jour avec succès.");
+      notify("success", successMessage);
+      
+      // Call onSuccess callback with documentId to trigger navigation
+      if (onSuccess && result?.documentId) {
+        setTimeout(() => onSuccess(result.documentId), 500);
+      }
     } catch (error) {
-      setSubmitError(error?.message || "Une erreur est survenue pendant l'enregistrement.");
+      const msg = error?.errors
+        ? Object.values(error.errors).flat().join(" — ")
+        : error?.message || "Une erreur est survenue pendant l'enregistrement.";
+      notify("error", msg, 5000);
     }
   };
 
@@ -465,11 +603,16 @@ export default function DocumentForm({
   if (isView && initialData) {
     const documentLines = initialData.documentLines || initialData.document_lines || [];
     const documentPayments = initialData.payments || [];
+    const secondaryDate = getSecondaryDateInfo(initialData);
+    const detailConfig = DOCUMENT_TYPE_CONFIG[initialData.type] || DOCUMENT_TYPE_CONFIG.facture;
+    const showFinancialDetails = detailConfig.showFinancialSummary;
+    const showPaymentDetails = detailConfig.showPayment;
 
     return (
       <div className={styles.viewer}>
         <div className={styles.hero}>
           <div>
+            <div className={styles.documentKicker}>{getDocumentTypeLabel(initialData.type)}</div>
             <div className={styles.documentNumber}>{initialData.numero}</div>
             <div className={styles.documentMeta}>{getClientLabel(initialData.client)}</div>
           </div>
@@ -479,14 +622,14 @@ export default function DocumentForm({
           </div>
         </div>
 
-        <div className={styles.summaryGrid}>
+        <div className={`${styles.summaryGrid} ${!showFinancialDetails ? styles.summaryGridCompact : ""}`}>
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>Date création</span>
             <strong className={styles.summaryValue}>{formatDate(initialData.date_creation)}</strong>
           </div>
           <div className={styles.summaryCard}>
-            <span className={styles.summaryLabel}>Date validité</span>
-            <strong className={styles.summaryValue}>{formatDate(initialData.date_validite)}</strong>
+            <span className={styles.summaryLabel}>{secondaryDate.label}</span>
+            <strong className={styles.summaryValue}>{formatDate(secondaryDate.value)}</strong>
           </div>
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>Montant payé</span>
@@ -495,6 +638,12 @@ export default function DocumentForm({
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>Statut paiement</span>
             <strong className={styles.summaryValue}>{formatPaymentLabel(initialData.statut_paiement)}</strong>
+          </div>
+          <div className={styles.summaryCard}>
+            <span className={styles.summaryLabel}>Conditions de paiement</span>
+            <strong className={styles.summaryValue}>
+              {formatPaymentConditionLabel(initialData.conditions_paiement)}
+            </strong>
           </div>
           <div className={styles.summaryCard}>
             <span className={styles.summaryLabel}>HT</span>
@@ -555,7 +704,7 @@ export default function DocumentForm({
           )}
         </div>
 
-        <div className={styles.section}>
+        <div className={`${styles.section} ${!showPaymentDetails ? styles.hiddenSection : ""}`}>
           <h3>Paiements</h3>
           {documentPayments.length > 0 ? (
             <div className={styles.paymentsList}>
@@ -577,8 +726,14 @@ export default function DocumentForm({
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      {submitError && <div className={styles.alert}>{submitError}</div>}
+    <>
+      {notification && (
+        <div className={`${styles.toast} ${styles[`toast--${notification.type}`]}`}>
+          <span className={styles.toastDot} />
+          {notification.message}
+        </div>
+      )}
+      <form className={styles.form} onSubmit={handleSubmit}>
 
       <div className={styles.formGrid}>
         <section className={styles.sectionCard}>
@@ -683,7 +838,7 @@ export default function DocumentForm({
             </label>
 
             <label className={styles.field}>
-              <span className={styles.label}>Date création</span>
+              <span className={styles.label}>{typeConfig.dateCreationLabel}</span>
               <input
                 className={styles.input}
                 type="date"
@@ -693,16 +848,18 @@ export default function DocumentForm({
               />
             </label>
 
-            <label className={styles.field}>
-              <span className={styles.label}>Date validité</span>
-              <input
-                className={styles.input}
-                type="date"
-                value={form.date_validite}
-                onChange={(event) => handleFieldChange("date_validite", event.target.value)}
-                disabled={saving}
-              />
-            </label>
+            {typeConfig.showSecondaryDate && (
+              <label className={styles.field}>
+                <span className={styles.label}>{typeConfig.secondaryDateLabel}</span>
+                <input
+                  className={styles.input}
+                  type="date"
+                  value={form[typeConfig.secondaryDateField] || ""}
+                  onChange={(event) => handleFieldChange(typeConfig.secondaryDateField, event.target.value)}
+                  disabled={saving}
+                />
+              </label>
+            )}
 
             <label className={styles.field}>
               <span className={styles.label}>Statut</span>
@@ -720,35 +877,59 @@ export default function DocumentForm({
               </select>
             </label>
 
-            <label className={styles.field}>
-              <span className={styles.label}>Montant payé</span>
-              <input
-                className={styles.input}
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.montant_paye}
-                onChange={(event) => handleFieldChange("montant_paye", event.target.value)}
-                disabled={saving}
-              />
-            </label>
+            {showPaymentFields && (
+              <>
+                <label className={styles.field}>
+                  <span className={styles.label}>Montant payé</span>
+                  <input
+                    className={styles.input}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.montant_paye}
+                    onChange={(event) => handleFieldChange("montant_paye", event.target.value)}
+                    disabled={saving}
+                  />
+                </label>
 
-            <label className={styles.field}>
-              <span className={styles.label}>Statut paiement</span>
-              <select
-                className={styles.input}
-                value={form.statut_paiement}
-                onChange={(event) => handleFieldChange("statut_paiement", event.target.value)}
-                disabled={saving}
-              >
-                {PAYMENT_STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {errors.statut_paiement && <span className={styles.error}>{errors.statut_paiement}</span>}
-            </label>
+                <label className={styles.field}>
+                  <span className={styles.label}>Statut paiement</span>
+                  <select
+                    className={styles.input}
+                    value={form.statut_paiement}
+                    onChange={(event) => handleFieldChange("statut_paiement", event.target.value)}
+                    disabled={saving}
+                  >
+                    {PAYMENT_STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.statut_paiement && <span className={styles.error}>{errors.statut_paiement}</span>}
+                </label>
+              </>
+            )}
+
+            {showPaymentConditions && (
+              <label className={styles.field}>
+                <span className={styles.label}>Conditions de paiement</span>
+                <input
+                  className={styles.input}
+                  type="text"
+                  list="payment-conditions-options"
+                  value={form.conditions_paiement}
+                  onChange={(event) => handleFieldChange("conditions_paiement", event.target.value)}
+                  disabled={saving}
+                  placeholder="Choisir ou saisir une condition"
+                />
+                <datalist id="payment-conditions-options">
+                  {PAYMENT_CONDITIONS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.label} />
+                  ))}
+                </datalist>
+              </label>
+            )}
           </div>
         </section>
 
@@ -891,50 +1072,54 @@ export default function DocumentForm({
                       )}
                     </label>
 
-                    <label className={styles.field}>
-                      <span className={styles.label}>Prix HT</span>
-                      <input
-                        className={styles.input}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={line.prix_unitaire_ht}
-                        onChange={(event) => handleLineChange(index, "prix_unitaire_ht", event.target.value)}
-                        disabled={saving}
-                      />
-                      {errors[`line-${index}-prix_unitaire_ht`] && (
-                        <span className={styles.error}>{errors[`line-${index}-prix_unitaire_ht`]}</span>
-                      )}
-                    </label>
+                    {showFinancialLines && (
+                      <>
+                        <label className={styles.field}>
+                          <span className={styles.label}>Prix HT</span>
+                          <input
+                            className={styles.input}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={line.prix_unitaire_ht}
+                            onChange={(event) => handleLineChange(index, "prix_unitaire_ht", event.target.value)}
+                            disabled={saving}
+                          />
+                          {errors[`line-${index}-prix_unitaire_ht`] && (
+                            <span className={styles.error}>{errors[`line-${index}-prix_unitaire_ht`]}</span>
+                          )}
+                        </label>
 
-                    <label className={styles.field}>
-                      <span className={styles.label}>Remise</span>
-                      <input
-                        className={styles.input}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={line.remise}
-                        onChange={(event) => handleLineChange(index, "remise", event.target.value)}
-                        disabled={saving}
-                      />
-                    </label>
+                        <label className={styles.field}>
+                          <span className={styles.label}>Remise</span>
+                          <input
+                            className={styles.input}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={line.remise}
+                            onChange={(event) => handleLineChange(index, "remise", event.target.value)}
+                            disabled={saving}
+                          />
+                        </label>
 
-                    <label className={styles.field}>
-                      <span className={styles.label}>TVA %</span>
-                      <input
-                        className={styles.input}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={line.tva}
-                        onChange={(event) => handleLineChange(index, "tva", event.target.value)}
-                        disabled={saving}
-                      />
-                      {errors[`line-${index}-tva`] && (
-                        <span className={styles.error}>{errors[`line-${index}-tva`]}</span>
-                      )}
-                    </label>
+                        <label className={styles.field}>
+                          <span className={styles.label}>TVA %</span>
+                          <input
+                            className={styles.input}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={line.tva}
+                            onChange={(event) => handleLineChange(index, "tva", event.target.value)}
+                            disabled={saving}
+                          />
+                          {errors[`line-${index}-tva`] && (
+                            <span className={styles.error}>{errors[`line-${index}-tva`]}</span>
+                          )}
+                        </label>
+                      </>
+                    )}
 
                     <label className={styles.field}>
                       <span className={styles.label}>Ordre</span>
@@ -949,10 +1134,12 @@ export default function DocumentForm({
                       />
                     </label>
 
-                    <div className={styles.totalPreview}>
-                      <span className={styles.totalPreviewLabel}>Total ligne</span>
-                      <strong className={styles.totalPreviewValue}>{currency(lineTtc)}</strong>
-                    </div>
+                    {showFinancialLines && (
+                      <div className={styles.totalPreview}>
+                        <span className={styles.totalPreviewLabel}>Total ligne</span>
+                        <strong className={styles.totalPreviewValue}>{currency(lineTtc)}</strong>
+                      </div>
+                    )}
                   </div>
                 </article>
               );
@@ -961,23 +1148,32 @@ export default function DocumentForm({
         </section>
       </div>
 
-      <section className={styles.summaryBar}>
+      <section className={`${styles.summaryBar} ${!showFinancialSummary ? styles.summaryBarCompact : ""}`}>
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Client</span>
           <strong className={styles.summaryValue}>{selectedClient ? getClientLabel(selectedClient) : "—"}</strong>
         </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryLabel}>Total HT</span>
-          <strong className={styles.summaryValue}>{currency(totals.total_ht)}</strong>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryLabel}>Total TVA</span>
-          <strong className={styles.summaryValue}>{currency(totals.total_tva)}</strong>
-        </div>
-        <div className={styles.summaryItem}>
-          <span className={styles.summaryLabel}>Total TTC</span>
-          <strong className={styles.summaryValue}>{currency(totals.total_ttc)}</strong>
-        </div>
+        {showFinancialSummary ? (
+          <>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Total HT</span>
+              <strong className={styles.summaryValue}>{currency(totals.total_ht)}</strong>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Total TVA</span>
+              <strong className={styles.summaryValue}>{currency(totals.total_tva)}</strong>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Total TTC</span>
+              <strong className={styles.summaryValue}>{currency(totals.total_ttc)}</strong>
+            </div>
+          </>
+        ) : (
+          <div className={styles.summaryItem}>
+            <span className={styles.summaryLabel}>Lignes</span>
+            <strong className={styles.summaryValue}>{form.lines.length}</strong>
+          </div>
+        )}
       </section>
 
       <div className={styles.actions}>
@@ -988,6 +1184,7 @@ export default function DocumentForm({
           {isEdit ? "Mettre à jour" : "Créer le document"}
         </button>
       </div>
-    </form>
+      </form>
+    </>
   );
 }

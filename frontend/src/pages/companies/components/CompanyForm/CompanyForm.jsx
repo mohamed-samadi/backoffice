@@ -15,6 +15,8 @@ const createEmptyForm = () => ({
   email: "",
   ice: "",
   registre_commerce: "",
+  bank: "",
+  iban: "",
   logo_path: "",
 });
 
@@ -30,6 +32,8 @@ const normalizeForm = (data) => ({
   email: data?.email ?? "",
   ice: data?.ice ?? "",
   registre_commerce: data?.registre_commerce ?? "",
+  bank: data?.bank ?? "",
+  iban: data?.iban ?? "",
   logo_path: data?.logo_path ?? "",
 });
 
@@ -201,6 +205,7 @@ export default function CompanyForm({
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (initialData) {
       setForm(normalizeForm(initialData));
@@ -213,6 +218,7 @@ export default function CompanyForm({
     setTouched({});
     setLogoFile(null);
   }, [initialData, mode]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -321,6 +327,11 @@ export default function CompanyForm({
           <ViewRow label="Pays" value={initialData.pays} />
         </ViewSection>
 
+        <ViewSection title="Banque">
+          <ViewRow label="Banque" value={initialData.bank} />
+          <ViewRow label="IBAN" value={initialData.iban} />
+        </ViewSection>
+
         <ViewSection  title="Branding">
           <div className={`${styles.viewRow} ${styles.viewRowFull}`}>
             <span className={styles.viewLabel}>Logo</span>
@@ -396,6 +407,17 @@ export default function CompanyForm({
             </Field>
             <Field label="Pays" error={errors.pays}>
               <TextInput {...fieldProps("pays")} placeholder="Maroc" />
+            </Field>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Banque">
+          <div className={styles.fieldsGrid}>
+            <Field label="Banque" error={errors.bank}>
+              <TextInput {...fieldProps("bank")} placeholder="Ex : Attijariwafa Bank" />
+            </Field>
+            <Field label="IBAN" error={errors.iban}>
+              <TextInput {...fieldProps("iban")} placeholder="MA64 ..." />
             </Field>
           </div>
         </SectionCard>

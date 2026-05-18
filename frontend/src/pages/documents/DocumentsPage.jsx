@@ -66,9 +66,9 @@ const FILTER_FIELDS = [
         label: "Paiement",
         type: "select",
         options: [
-            { value: "payé", label: "Payé" },
-            { value: "partiel", label: "Partiel" },
-            { value: "impaye", label: "Impayé" },
+            { value: "paye", label: "Payé" },
+            { value: "partial", label: "Partiel" },
+            { value: "non_paye", label: "Impayé" },
         ],
     },
     {
@@ -102,18 +102,79 @@ const getClientName = (client) => client?.nom_complet || client?.nom_entreprise 
 
 const getClientEntreprise = (client) => client?.nom_entreprise || "—";
 
+const DOCUMENT_TYPE_LABELS = {
+    facture: "Facture",
+    devis: "Devis",
+    bon_livraison: "Bon livraison",
+};
+
+const normalizeStatusKey = (value) =>
+    String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+const getDocumentStatus = (value) => {
+    const key = normalizeStatusKey(value);
+    const statuses = {
+        brouillon: { label: "Brouillon", className: styles.badgeBrouillon },
+        envoye: { label: "Envoye", className: styles.badgeEnvoye },
+        accepte: { label: "Accepte", className: styles.badgeAccepte },
+        annule: { label: "Annule", className: styles.badgeNeutral },
+    };
+
+    return statuses[key] || { label: value || "—", className: styles.badgeNeutral };
+};
+
+const getPaymentStatus = (value, row) => {
+    if (row.type !== "facture") {
+        return { label: "Non applicable", className: styles.badgeMuted };
+    }
+
+    const key = normalizeStatusKey(value);
+    const statuses = {
+        paye: { label: "Paye", className: styles.badgePaye },
+        paid: { label: "Paye", className: styles.badgePaye },
+        partiel: { label: "Partiel", className: styles.badgePartiel },
+        partial: { label: "Partiel", className: styles.badgePartiel },
+        non_paye: { label: "Non paye", className: styles.badgeImpaye },
+        impaye: { label: "Impaye", className: styles.badgeImpaye },
+        unpaid: { label: "Non paye", className: styles.badgeImpaye },
+    };
+
+    return statuses[key] || { label: value || "Non paye", className: styles.badgeNeutral };
+};
+
+const getDocumentDateInfo = (document) => {
+    if (document?.type === "facture") {
+        return { label: "Échéance", value: document.date_echeance || document.date_validite };
+    }
+
+    if (document?.type === "bon_livraison") {
+        return { label: "Livraison", value: document.date_livraison || document.date_creation };
+    }
+
+    return { label: "Validité", value: document?.date_validite };
+};
+
 const COLUMNS = [
     {
         key: "numero",
-        label: "Num",
-        width: "10%",
-        render: (val) => <span className={styles.nameText}>{val}</span>,
+        label: "Document",
+        width: "12%",
+        render: (val, row) => (
+            <div className={styles.documentCell}>
+                <span className={styles.nameText}>{val}</span>
+                <span className={styles.nameSubtext}>{formatDate(row.created_at || row.date_creation)}</span>
+            </div>
+        ),
     },
     {
         key: "type",
         label: "Type",
         width: "10%",
-        render: (val) => <span className={styles.clientText}>{val || "—"}</span>,
+        render: (val) => <span className={styles.typeBadge}>{DOCUMENT_TYPE_LABELS[val] || val || "—"}</span>,
     },
     {
         key: "client",
@@ -129,32 +190,30 @@ const COLUMNS = [
     {
         key: "date_creation",
         label: "Date",
-        width: "10%",
+        width: "11%",
         render: (val) => <span className={styles.dateText}>{formatDate(val)}</span>,
     },
     {
-        key: "date_validite",
-        label: "Echeance",
-        width: "10%",
-        render: (val) => <span className={styles.dateText}>{formatDate(val)}</span>,
-    },
-    {
-        key: "total_ht",
-        label: "HT",
-        width: "10%",
-        render: (val) => <span className={styles.amount}>{currency(val)}</span>,
-    },
-    {
-        key: "total_tva",
-        label: "TVA",
-        width: "10%",
-        render: (val) => <span className={styles.amount}>{currency(val)}</span>,
+        key: "date_context",
+        label: "Échéance / livraison",
+        width: "13%",
+        render: (_, row) => {
+            const info = getDocumentDateInfo(row);
+            return (
+                <div>
+                    <div className={styles.dateText}>{formatDate(info.value)}</div>
+                    <div className={styles.nameSubtext}>{info.label}</div>
+                </div>
+            );
+        },
     },
     {
         key: "total_ttc",
-        label: "TTC",
+        label: "Total",
         width: "10%",
-        render: (val) => <span className={styles.amount}>{currency(val)}</span>,
+        render: (val, row) => (
+            <span className={styles.amount}>{row.type === "bon_livraison" ? "—" : currency(val)}</span>
+        ),
     },
    
     {
@@ -174,19 +233,47 @@ const COLUMNS = [
    
     {
         key: "statut_paiement",
-        label: "paiement",
+        label: "Paiement",
         width: "12%",
       // statut_paiement column
-            render: (val) => {
+            render: (val, row) => {
+            if (row.type === "bon_livraison") {
+                return <span className={styles.badgeNeutral}>—</span>;
+            }
             const map = {
                 "paye":   styles.badgePaye,
                 "partiel":  styles.badgePartiel,
+                "partial":  styles.badgePartiel,
                 "non_paye": styles.badgeImpaye,
             };
             return <span className={map[val] || styles.badgeNeutral}>{val || "—"}</span>;
             },
     },
 ];
+
+const DISPLAY_COLUMNS = COLUMNS.map((column) => {
+    if (column.key === "statut") {
+        return {
+            ...column,
+            render: (val) => {
+                const status = getDocumentStatus(val);
+                return <span className={status.className}>{status.label}</span>;
+            },
+        };
+    }
+
+    if (column.key === "statut_paiement") {
+        return {
+            ...column,
+            render: (val, row) => {
+                const status = getPaymentStatus(val, row);
+                return <span className={status.className}>{status.label}</span>;
+            },
+        };
+    }
+
+    return column;
+});
 
 export default function DocumentsPage() {
     const navigate = useNavigate();
@@ -434,8 +521,15 @@ export default function DocumentsPage() {
 
             <div >
                 <section className={styles.tableSection}>
+                    <div className={styles.tableHeader}>
+                        <div>
+                            <p className={styles.tableKicker}>Registre</p>
+                            <h2>Documents</h2>
+                        </div>
+                        <span className={styles.tableCount}>{totalDocuments} document{totalDocuments !== 1 ? "s" : ""}</span>
+                    </div>
                     <DataTable
-                        columns={COLUMNS}
+                        columns={DISPLAY_COLUMNS}
                         data={documents}
                         loading={fetchLoading}
                         actions={tableActions}

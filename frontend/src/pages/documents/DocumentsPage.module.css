@@ -160,8 +160,57 @@
 /* ─── Table section ──────────────────────────────────────────────────────── */
 .tableSection {
   background: var(--color-surface); border: var(--border);
-  border-radius: var(--radius-2xl); box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-lg);
   overflow: hidden;
+}
+
+.tableHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--gap-md);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--border);
+  background: var(--color-bg);
+}
+
+.tableHeader h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.tableKicker {
+  margin: 0 0 2px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+}
+
+.tableCount {
+  display: inline-flex;
+  align-items: center;
+  padding: .35rem .7rem;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  border: 1px solid rgba(79,127,255,.18);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.tableSection :global(table) {
+  min-width: 980px;
+}
+
+.tableSection :global(tbody tr) {
+  background: var(--color-surface);
+}
+
+.tableSection :global(tbody tr:hover) {
+  background: rgba(79,127,255,.06);
 }
 
 /* ─── Detail panel ───────────────────────────────────────────────────────── */
@@ -234,7 +283,8 @@
 .detailTypeBadge, .detailStatusBadge,
 .badgeSuccess, .badgeWarning, .badgeNeutral,
 .badgeBrouillon, .badgeEnvoye, .badgeAccepte,
-.badgePaye, .badgePartiel, .badgeImpaye {
+.badgePaye, .badgePartiel, .badgeImpaye, .badgeMuted,
+.typeBadge {
   display: inline-flex; align-items: center; gap: 5px;
   border-radius: 999px; padding: 0.35rem 0.65rem;
   font-size: var(--font-size-xs); font-weight: var(--font-weight-bold);
@@ -245,7 +295,8 @@
 .detailTypeBadge::before, .detailStatusBadge::before,
 .badgeSuccess::before, .badgeWarning::before, .badgeNeutral::before,
 .badgeBrouillon::before, .badgeEnvoye::before, .badgeAccepte::before,
-.badgePaye::before, .badgePartiel::before, .badgeImpaye::before {
+.badgePaye::before, .badgePartiel::before, .badgeImpaye::before,
+.badgeMuted::before, .typeBadge::before {
   content: "";
   width: 5px; height: 5px; border-radius: 50%;
   background: currentColor; flex-shrink: 0;
@@ -268,6 +319,8 @@
 .badgeSuccess { background: var(--color-green-soft); color: var(--color-green); border: 1px solid rgba(34,197,94,.25); }
 .badgeWarning { background: var(--color-amber-soft); color: var(--color-amber); border: 1px solid rgba(245,158,11,.25); }
 .badgeNeutral { background: var(--color-surface-hover); color: var(--color-text-muted); border: var(--border); }
+.badgeMuted { background: transparent; color: var(--color-text-muted); border: var(--border); opacity: .72; }
+.typeBadge { background: rgba(79,127,255,.1); color: var(--color-accent); border: 1px solid rgba(79,127,255,.22); }
 
 /* ─── Detail grid ────────────────────────────────────────────────────────── */
 .detailGrid {
@@ -325,6 +378,13 @@
 .clientInfo { min-width: 0; }
 
 /* ─── Cell text classes ──────────────────────────────────────────────────── */
+.documentCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .clientName, .nameText {
   font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
   color: var(--color-text);
@@ -504,6 +564,7 @@
   .statsPanel { padding: var(--space-4); }
   .statsHeader { flex-direction: column; gap: var(--gap-sm); }
   .statsGrid { grid-template-columns: 1fr; }
+  .tableHeader { align-items: flex-start; flex-direction: column; }
   .detailHero { flex-direction: column; }
   .detailBadges { align-items: flex-start; }
   .confirmActions { flex-direction: column; align-items: stretch; }

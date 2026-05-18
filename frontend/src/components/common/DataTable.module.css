@@ -21,13 +21,13 @@
 }
 
 .table th {
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   text-align: left;
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: var(--letter-spacing-wider);
 }
 
 .table tbody tr {
@@ -45,9 +45,10 @@
 }
 
 .table td {
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   color: var(--color-text);
   font-size: var(--font-size-sm);
+  vertical-align: middle;
 }
 
 .actionsCell {
@@ -61,8 +62,11 @@
 }
 
 .actionBtn {
-
-  padding: var(--space-2) var(--space-3);
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-bg);
