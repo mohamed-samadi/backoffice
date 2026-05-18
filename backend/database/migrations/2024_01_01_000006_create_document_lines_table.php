@@ -13,11 +13,11 @@ return new class extends Migration
             $table->unsignedBigInteger('document_id');
             $table->unsignedBigInteger('product_id');
             $table->decimal('quantite', 10, 2);
-            $table->decimal('prix_unitaire_ht', 10, 2);
+            $table->decimal('prix_unitaire_ht', 10, 2)->default(0);
             $table->decimal('remise', 10, 2)->default(0);
-            $table->decimal('tva', 5, 2);
-            $table->decimal('total_ht', 12, 2);
-            $table->decimal('total_ttc', 12, 2);
+            $table->decimal('tva', 5, 2)->default(0);
+            $table->decimal('total_ht', 12, 2)->default(0);
+            $table->decimal('total_ttc', 12, 2)->default(0);
             $table->integer('ordre')->default(0);
             $table->timestamps();
 

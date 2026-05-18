@@ -94,8 +94,8 @@ class DocumentController extends Controller
         $factures = (clone $query)->where('type', 'facture')->count();
         $devis = (clone $query)->where('type', 'devis')->count();
         $bon_livraison = (clone $query)->where('type', 'bon_livraison')->count();
-        $payes = (clone $query)->whereIn('statut_paiement', ['payé', 'paye'])->count();
-        $impayes = (clone $query)->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
+        $payes = (clone $query)->where('type', 'facture')->whereIn('statut_paiement', ['payé', 'paye'])->count();
+        $impayes = (clone $query)->where('type', 'facture')->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
         
         $totals = (clone $query)->select(
             DB::raw('SUM(total_ttc) as total_ttc'),
@@ -127,9 +127,9 @@ class DocumentController extends Controller
         $devis = (clone $baseQuery)->where('type', 'devis')->count();
         $bonLivraison = (clone $baseQuery)->where('type', 'bon_livraison')->count();
 
-        $payes = (clone $baseQuery)->whereIn('statut_paiement', ['payé', 'paye'])->count();
-        $partiels = (clone $baseQuery)->where('statut_paiement', 'partiel')->count();
-        $impayes = (clone $baseQuery)->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
+        $payes = (clone $baseQuery)->where('type', 'facture')->whereIn('statut_paiement', ['payé', 'paye'])->count();
+        $partiels = (clone $baseQuery)->where('type', 'facture')->whereIn('statut_paiement', ['partiel', 'partial'])->count();
+        $impayes = (clone $baseQuery)->where('type', 'facture')->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
 
         $totals = (clone $baseQuery)->select(
             DB::raw('SUM(total_ht) as total_ht'),

@@ -25,6 +25,8 @@ class UpdateCompanyRequest extends FormRequest
             'ice' => 'nullable|string|max:50|unique:companies,ice,' . $this->route('company'),
             'registre_commerce' => 'nullable|string|max:50|unique:companies,registre_commerce,' . $this->route('company'),
             'identifiant_fiscal' => 'nullable|string|max:50|unique:companies,identifiant_fiscal,' . $this->route('company'),
+            'bank' => 'nullable|string|max:191',
+            'iban' => 'nullable|string|max:100',
             'logo_path' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             

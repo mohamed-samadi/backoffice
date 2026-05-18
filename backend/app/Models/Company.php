@@ -34,6 +34,10 @@ class Company extends Model
         'registre_commerce',
         'identifiant_fiscal',
 
+        // Bank info
+        'bank',
+        'iban',
+
         // Branding
         'logo_path',
 

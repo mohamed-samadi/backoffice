@@ -35,6 +35,10 @@ Schema::create('companies', function (Blueprint $table) {
     $table->string('registre_commerce', 50)->nullable()->unique();
     $table->string('identifiant_fiscal', 50)->nullable()->unique(); // IF (added)
 
+    // Bank info
+    $table->string('bank', 191)->nullable();
+    $table->string('iban', 100)->nullable();
+
 
     // Branding
     $table->string('logo_path')->nullable();
