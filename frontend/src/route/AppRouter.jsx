@@ -25,7 +25,7 @@ const AppRouter = () => {
           <Route element={<AuthGuard />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/dashboard" element={<HomePage />} />
 
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/fournisseurs" element={<FournisseurPage />} />

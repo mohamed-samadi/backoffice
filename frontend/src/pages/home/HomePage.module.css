@@ -1,0 +1,387 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+  color: var(--color-text);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.header h1,
+.panel h2,
+.errorState h2 {
+  letter-spacing: 0;
+}
+
+.header p {
+  margin-top: var(--space-2);
+  color: #b8c2d6;
+  font-size: var(--font-size-md);
+}
+
+.eyebrow {
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+}
+
+.refreshButton,
+.errorState button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  color: #fff;
+  background: var(--color-accent);
+  box-shadow: 0 10px 24px rgba(79, 127, 255, 0.22);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.metricCard,
+.panel {
+  background: linear-gradient(180deg, #141821 0%, #101219 100%);
+  border: 1px solid #2b3242;
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+
+.metricCard {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  min-width: 0;
+  padding: var(--space-5);
+}
+
+.metricIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: var(--radius-md);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.metricCard div {
+  min-width: 0;
+}
+
+.metricLabel {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+}
+
+.metricCard strong {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+  line-height: 1.2;
+}
+
+.metricCard small,
+.userRow small,
+.stockItem small {
+  color: #9aa7bd;
+}
+
+.alertStrip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.alertStrip div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  color: #d8deea;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.24);
+}
+
+.alertStrip svg {
+  color: var(--color-amber);
+  flex: 0 0 auto;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.panel {
+  min-width: 0;
+  padding: var(--space-5);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.panelHeader svg {
+  color: #9aa7bd;
+}
+
+.panelValue {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+
+.chartBox,
+.chartBoxSmall,
+.pieBox {
+  width: 100%;
+  min-width: 0;
+}
+
+.chartBox {
+  height: 310px;
+}
+
+.chartBoxSmall {
+  height: 230px;
+}
+
+.pieBox {
+  height: 310px;
+}
+
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.userRow,
+.stockItem div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 680px;
+}
+
+.table td,
+.table th {
+  white-space: nowrap;
+}
+
+.badge,
+.pending {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-cyan);
+  background: var(--color-cyan-soft);
+}
+
+.userRow {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border);
+}
+
+.userRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.userRow div {
+  min-width: 0;
+}
+
+.userRow strong,
+.userRow small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--color-purple);
+  font-weight: var(--font-weight-bold);
+}
+
+.verified {
+  margin-left: auto;
+  color: var(--color-green);
+}
+
+.pending {
+  margin-left: auto;
+  color: var(--color-amber);
+  background: var(--color-amber-soft);
+}
+
+.stockGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.stockItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid #263044;
+  border-radius: var(--radius-md);
+  background: #0c0f15;
+}
+
+.stockItem strong,
+.stockItem small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stockItem div {
+  justify-content: space-between;
+}
+
+.loadingState,
+.errorState,
+.emptyState,
+.emptyCell {
+  color: #9aa7bd;
+}
+
+.loadingState,
+.errorState {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 260px;
+  padding: var(--space-6);
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.errorState {
+  justify-content: space-between;
+}
+
+.errorState svg {
+  flex: 0 0 auto;
+  color: var(--color-amber);
+}
+
+.emptyState,
+.emptyCell {
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1180px) {
+  .metricsGrid,
+  .alertStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stockGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .refreshButton {
+    width: 100%;
+  }
+
+  .metricsGrid,
+  .alertStrip,
+  .stockGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .chartBox,
+  .pieBox {
+    height: 260px;
+  }
+
+  .chartBoxSmall {
+    height: 220px;
+  }
+
+  .metricCard {
+    padding: var(--space-4);
+  }
+
+  .errorState {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

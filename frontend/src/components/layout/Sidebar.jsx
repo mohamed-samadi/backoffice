@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import styles from "./Sidebar.module.css";
 import {
   FaChartLine,
@@ -11,7 +12,9 @@ import {
   FaFileAlt,
   FaCreditCard,
   FaBuilding,
+  FaSignOutAlt,
 } from "react-icons/fa";
+import { logout } from "../../features/auth/slice/authSlice";
 
 const NAV_ITEMS = [
   { label: "Tableau de bord", path: "/home", icon: FaChartLine },
@@ -24,7 +27,7 @@ const NAV_ITEMS = [
 
   { label: "", separator: true },
   { label: "Tâches", path: "/tasks", icon: FaFileAlt },
-  {label: "Catégories de tâches", path: "/task-categories", icon: FaTags },
+  { label: "Catégories de tâches", path: "/task-categories", icon: FaTags },
   { label: "Gestion Stock", category: true },
   { label: "products", path: "/products", icon: FaBox },
   { label: "Catégories", path: "/categories", icon: FaTags },
@@ -32,12 +35,12 @@ const NAV_ITEMS = [
   { label: "Finance", category: true },
   { label: "Documents", path: "/documents", icon: FaFileAlt },
   { label: "Paiements", path: "/payments", icon: FaCreditCard },
- 
+
   { label: "Chèques", path: "/cheques", icon: FaCreditCard },
-  {label : "Crédits", path: "/credits", icon: FaCreditCard },
+  { label: "Crédits", path: "/credits", icon: FaCreditCard },
   { label: "", separator: true },
 
-  { label : 'notifications', path: "/notifications", icon: FaTags },
+  { label: "notifications", path: "/notifications", icon: FaTags },
 
   { label: "Configuration", category: true },
   { label: "Mon entreprise", path: "/companies", icon: FaBuilding },
@@ -47,6 +50,17 @@ const NAV_ITEMS = [
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+    } catch {
+      // Même si l'API échoue, on force la déconnexion locale + redirection
+    }
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className={`${styles.sidebar} ${!isOpen ? styles.collapsed : ""}`}>
@@ -92,27 +106,25 @@ const Sidebar = () => {
         })}
       </nav>
 
+      <div className={styles.bottomActions}>
+        <button
+          type="button"
+          className={styles.logoutBtn}
+          onClick={handleLogout}
+          title="Déconnexion"
+        >
+          <span className={styles.navIcon}>
+            <FaSignOutAlt size={20} />
+          </span>
+          {isOpen && <span className={styles.navLabel}>Déconnexion</span>}
+        </button>
+      </div>
+
       {/* Footer */}
       {isOpen && (
-        <div
-          style={{
-            padding: "var(--space-4)",
-            borderTop: `1px solid var(--color-border)`,
-            fontSize: "var(--font-size-xs)",
-            color: "var(--color-text-muted)",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              fontWeight: "var(--font-weight-bold)",
-              color: "var(--color-text)",
-              marginBottom: 4,
-            }}
-          >
-            Mon Entreprise
-          </div>
-          <div>Entrepreneur · Tanger</div>
+        <div className={styles.footer}>
+          <div className={styles.footerTitle}>Mon Entreprise</div>
+          <div className={styles.footerSub}>Entrepreneur · Tanger</div>
         </div>
       )}
     </div>
