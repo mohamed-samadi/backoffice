@@ -39,14 +39,7 @@ const Topbar = () => {
     <div className={styles.topbar}>
       <div className={styles.title}>{title}</div>
       <div className={styles.actions}>
-        <div className={styles.searchBox}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Search…"
-          />
-        </div>
+   
         <button
           className={`${styles.iconButton} ${styles.notificationButton}`}
           title="Notifications"

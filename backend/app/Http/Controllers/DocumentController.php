@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Document;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Requests\UpdateDocumentRequest;
+use App\Models\Document;
+use App\Models\Product;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DocumentController extends Controller
 {
@@ -23,7 +24,7 @@ class DocumentController extends Controller
 
         $query = Document::with([
             'client',
-            'documentLines.product'
+            'documentLines.product',
         ]);
 
         if ($search !== '') {
@@ -40,15 +41,15 @@ class DocumentController extends Controller
         }
 
         if ($type !== '') {
-            $query->where('type', '=', $type);
+            $query->where('type', $type);
         }
 
         if ($statut !== '') {
-            $query->where('statut', '=', $statut);
+            $query->where('statut', $statut);
         }
 
         if ($statutPaiement !== '') {
-            $query->where('statut_paiement', '=', $statutPaiement);
+            $query->where('statut_paiement', $statutPaiement);
         }
 
         $documents = $query->orderBy('id', 'desc')->paginate($perPage);
@@ -62,7 +63,7 @@ class DocumentController extends Controller
                 'total' => $documents->total(),
                 'per_page' => $documents->perPage(),
             ],
-            'message' => 'Documents récupérés avec succès'
+            'message' => 'Documents recuperes avec succes',
         ], 200);
     }
 
@@ -87,16 +88,17 @@ class DocumentController extends Controller
         }
 
         if ($type !== '') {
-            $query->where('type', '=', $type);
+            $query->where('type', $type);
         }
 
         $total = $query->count();
         $factures = (clone $query)->where('type', 'facture')->count();
         $devis = (clone $query)->where('type', 'devis')->count();
-        $bon_livraison = (clone $query)->where('type', 'bon_livraison')->count();
-        $payes = (clone $query)->where('type', 'facture')->whereIn('statut_paiement', ['payé', 'paye'])->count();
-        $impayes = (clone $query)->where('type', 'facture')->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
-        
+        $bonLivraison = (clone $query)->where('type', 'bon_livraison')->count();
+        $paidStatuses = ['paye', 'payé', 'payÃ©'];
+        $payes = (clone $query)->where('type', 'facture')->whereIn('statut_paiement', $paidStatuses)->count();
+        $impayes = (clone $query)->where('type', 'facture')->whereNotIn('statut_paiement', $paidStatuses)->count();
+
         $totals = (clone $query)->select(
             DB::raw('SUM(total_ttc) as total_ttc'),
             DB::raw('SUM(reste_a_payer) as reste_a_payer')
@@ -108,13 +110,13 @@ class DocumentController extends Controller
                 'total' => $total,
                 'factures' => $factures,
                 'devis' => $devis,
-                'bon_livraison' => $bon_livraison,
+                'bon_livraison' => $bonLivraison,
                 'payes' => $payes,
                 'impayes' => $impayes,
                 'total_ttc' => (float) ($totals->total_ttc ?? 0),
                 'reste_a_payer' => (float) ($totals->reste_a_payer ?? 0),
             ],
-            'message' => 'Statistiques des documents'
+            'message' => 'Statistiques des documents',
         ], 200);
     }
 
@@ -127,9 +129,10 @@ class DocumentController extends Controller
         $devis = (clone $baseQuery)->where('type', 'devis')->count();
         $bonLivraison = (clone $baseQuery)->where('type', 'bon_livraison')->count();
 
-        $payes = (clone $baseQuery)->where('type', 'facture')->whereIn('statut_paiement', ['payé', 'paye'])->count();
+        $paidStatuses = ['paye', 'payé', 'payÃ©'];
+        $payes = (clone $baseQuery)->where('type', 'facture')->whereIn('statut_paiement', $paidStatuses)->count();
         $partiels = (clone $baseQuery)->where('type', 'facture')->whereIn('statut_paiement', ['partiel', 'partial'])->count();
-        $impayes = (clone $baseQuery)->where('type', 'facture')->whereNotIn('statut_paiement', ['payé', 'paye'])->count();
+        $impayes = (clone $baseQuery)->where('type', 'facture')->whereNotIn('statut_paiement', $paidStatuses)->count();
 
         $totals = (clone $baseQuery)->select(
             DB::raw('SUM(total_ht) as total_ht'),
@@ -161,175 +164,163 @@ class DocumentController extends Controller
                     'reste_a_payer' => (float) ($totals->reste_a_payer ?? 0),
                 ],
             ],
-            'message' => 'Statistiques globales des documents'
+            'message' => 'Statistiques globales des documents',
         ], 200);
     }
 
     public function show(Document $document): JsonResponse
     {
         $document->load('client', 'documentLines.product', 'payments');
+
         return response()->json([
             'success' => true,
             'data' => $document,
-            'message' => 'Document récupéré avec succès'
+            'message' => 'Document recupere avec succes',
         ], 200);
     }
 
     public function store(StoreDocumentRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
+            $lines = $data['lines'] ?? [];
 
-        $lines = $data['lines'];
-        $document = DB::transaction(function () use ($data, $lines) {
-            unset($data['lines']);
+            $document = DB::transaction(function () use ($data, $lines) {
+                unset($data['lines']);
 
-            $document = Document::create($data);
+                $this->ensureProductsExist($lines);
 
-            $totalHt = 0;
-            $totalTva = 0;
-            $totalTtc = 0;
+                $document = Document::create($data);
+                $totals = $this->syncDocumentLines($document, $lines);
 
-            foreach ($lines as $line) {
-                $quantite = (float) ($line['quantite'] ?? 0);
-                $prix = (float) ($line['prix_unitaire_ht'] ?? 0);
-                $remise = (float) ($line['remise'] ?? 0);
-                $tva = (float) ($line['tva'] ?? 0);
-
-                $lineHt = max(($quantite * $prix) - $remise, 0);
-                $lineTvaAmount = $lineHt * ($tva / 100);
-                $lineTtc = $lineHt + $lineTvaAmount;
-
-                $totalHt += $lineHt;
-                $totalTva += $lineTvaAmount;
-                $totalTtc += $lineTtc;
-
-                $document->documentLines()->create([
-                    'product_id' => $line['product_id'],
-                    'description' => $line['description'] ?? null,
-                    'quantite' => $quantite,
-                    'prix_unitaire_ht' => $prix,
-                    'remise' => $remise,
-                    'tva' => $tva,
-                    'total_ht' => $lineHt,
-                    'total_ttc' => $lineTtc,
-                    'ordre' => $line['ordre'] ?? 0,
-                ]);
-            }
-
-            $document->update([
-                'total_ht' => $totalHt,
-                'total_tva' => $totalTva,
-                'total_ttc' => $totalTtc,
-                'reste_a_payer' => $totalTtc - ($document->montant_paye ?? 0),
-            ]);
-
-            return $document;
-        });
-
-        $document->load('documentLines.product', 'client');
-
-        return response()->json([
-            'success' => true,
-            'data' => $document,
-            'message' => 'Document créé avec succès'
-        ], 201);
-    }
-
-public function update(UpdateDocumentRequest $request, Document $document): JsonResponse
-{
-    try {
-        $data = $request->validated();
-
-        $lines = $data['lines'] ?? null;
-        if ($lines) {
-            unset($data['lines']);
-        }
-
-        DB::transaction(function () use ($document, $data, $lines) {
-            // update document fields
-            $document->update($data);
-
-            if ($lines !== null) {
-                // replace lines and recalc totals
-                $document->documentLines()->delete();
-
-                $totalHt = 0;
-                $totalTva = 0;
-                $totalTtc = 0;
-
-                foreach ($lines as $line) {
-                    $quantite = (float) ($line['quantite'] ?? 0);
-                    $prix = (float) ($line['prix_unitaire_ht'] ?? 0);
-                    $remise = (float) ($line['remise'] ?? 0);
-                    $tva = (float) ($line['tva'] ?? 0);
-
-                    $lineHt = max(($quantite * $prix) - $remise, 0);
-                    $lineTvaAmount = $lineHt * ($tva / 100);
-                    $lineTtc = $lineHt + $lineTvaAmount;
-
-                    $totalHt += $lineHt;
-                    $totalTva += $lineTvaAmount;
-                    $totalTtc += $lineTtc;
-
-                    $document->documentLines()->create([
-                        'product_id' => $line['product_id'],
-                        'description' => $line['description'] ?? null,
-                        'quantite' => $quantite,
-                        'prix_unitaire_ht' => $prix,
-                        'remise' => $remise,
-                        'tva' => $tva,
-                        'total_ht' => $lineHt,
-                        'total_ttc' => $lineTtc,
-                        'ordre' => $line['ordre'] ?? 0,
-                    ]);
+                if ($document->type === 'facture') {
+                    $this->applyStockMovement($lines, -1);
                 }
 
                 $document->update([
-                    'total_ht' => $totalHt,
-                    'total_tva' => $totalTva,
-                    'total_ttc' => $totalTtc,
-                    'reste_a_payer' => $totalTtc - ($document->montant_paye ?? 0),
+                    'total_ht' => $totals['total_ht'],
+                    'total_tva' => $totals['total_tva'],
+                    'total_ttc' => $totals['total_ttc'],
+                    'reste_a_payer' => max($totals['total_ttc'] - (float) ($document->montant_paye ?? 0), 0),
                 ]);
-            } elseif (array_key_exists('montant_paye', $data)) {
-                $document->update([
-                    'reste_a_payer' => max((float) ($document->total_ttc ?? 0) - (float) ($document->montant_paye ?? 0), 0),
-                ]);
-            }
-        });
 
-        $document->load('documentLines.product', 'client');
+                return $document;
+            });
 
-        return response()->json([
-            'success' => true,
-            'data' => $document,
-            'message' => 'Document mis à jour avec succès'
-        ], 200);
+            $document->load('documentLines.product', 'client');
 
-    } catch (\Exception $e) {
-        Log::error('Document update failed', ['id' => $document->id ?? null, 'error' => $e->getMessage()]);
+            return response()->json([
+                'success' => true,
+                'data' => $document,
+                'message' => 'Document cree avec succes',
+            ], 201);
+        } catch (\Throwable $e) {
+            Log::error('Document store failed', [
+                'error' => $e->getMessage(),
+                'payload' => $request->except(['lines']),
+            ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Erreur lors de la mise à jour'
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => $e instanceof \InvalidArgumentException
+                    ? $e->getMessage()
+                    : 'Erreur lors de la creation du document',
+            ], $e instanceof \InvalidArgumentException ? 422 : 500);
+        }
     }
-}
+
+    public function update(UpdateDocumentRequest $request, Document $document): JsonResponse
+    {
+        try {
+            $data = $request->validated();
+            $oldType = $document->type;
+            $oldLines = $document->documentLines()
+                ->select('product_id', 'quantite')
+                ->get()
+                ->map(fn ($line) => [
+                    'product_id' => $line->product_id,
+                    'quantite' => $line->quantite,
+                ])
+                ->all();
+
+            $lines = $data['lines'] ?? null;
+            if ($lines !== null) {
+                unset($data['lines']);
+            }
+
+            DB::transaction(function () use ($document, $data, $lines, $oldType, $oldLines) {
+                $document->update($data);
+
+                if ($lines !== null) {
+                    $this->ensureProductsExist($lines);
+
+                    if ($oldType === 'facture') {
+                        $this->applyStockMovement($oldLines, 1);
+                    }
+
+                    $document->documentLines()->delete();
+                    $totals = $this->syncDocumentLines($document, $lines);
+
+                    if ($document->type === 'facture') {
+                        $this->applyStockMovement($lines, -1);
+                    }
+
+                    $document->update([
+                        'total_ht' => $totals['total_ht'],
+                        'total_tva' => $totals['total_tva'],
+                        'total_ttc' => $totals['total_ttc'],
+                        'reste_a_payer' => max($totals['total_ttc'] - (float) ($document->montant_paye ?? 0), 0),
+                    ]);
+                } elseif ($oldType === 'facture' && $document->type !== 'facture') {
+                    $this->applyStockMovement($oldLines, 1);
+                } elseif ($oldType !== 'facture' && $document->type === 'facture') {
+                    $this->applyStockMovement($oldLines, -1);
+                } elseif (array_key_exists('montant_paye', $data)) {
+                    $document->update([
+                        'reste_a_payer' => max((float) ($document->total_ttc ?? 0) - (float) ($document->montant_paye ?? 0), 0),
+                    ]);
+                }
+            });
+
+            $document->load('documentLines.product', 'client');
+
+            return response()->json([
+                'success' => true,
+                'data' => $document,
+                'message' => 'Document mis a jour avec succes',
+            ], 200);
+        } catch (\Throwable $e) {
+            Log::error('Document update failed', [
+                'id' => $document->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e instanceof \InvalidArgumentException
+                    ? $e->getMessage()
+                    : 'Erreur lors de la mise a jour',
+            ], $e instanceof \InvalidArgumentException ? 422 : 500);
+        }
+    }
 
     public function destroy(Document $document): JsonResponse
     {
         $document->delete();
+
         return response()->json([
             'success' => true,
-            'message' => 'Document supprimé avec succès'
+            'message' => 'Document supprime avec succes',
         ], 200);
     }
+
     public function generateSku(Request $request): JsonResponse
     {
         $type = trim((string) $request->get('type', ''));
         if (!in_array($type, ['facture', 'devis', 'bon_livraison'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'Type de document invalide'
+                'message' => 'Type de document invalide',
             ], 400);
         }
 
@@ -345,17 +336,94 @@ public function update(UpdateDocumentRequest $request, Document $document): Json
             $lastNumber = (int) substr($lastDocument->numero, -6);
             $number = $lastNumber + 1;
         } else {
-             $number = 1;
+            $number = 1;
         }
 
-        $sku = $prefix . '-'.date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
+        $sku = $prefix . '-' . date('Y') . '-' . str_pad($number, 6, '0', STR_PAD_LEFT);
 
         return response()->json([
             'success' => true,
             'sku' => $sku,
-            'message' => 'SKU généré avec succès'
+            'message' => 'SKU genere avec succes',
         ], 200);
-
     }
-    
+
+    private function syncDocumentLines(Document $document, array $lines): array
+    {
+        $totalHt = 0;
+        $totalTva = 0;
+        $totalTtc = 0;
+
+        foreach ($lines as $line) {
+            $quantite = (float) ($line['quantite'] ?? 0);
+            $prix = (float) ($line['prix_unitaire_ht'] ?? 0);
+            $remise = (float) ($line['remise'] ?? 0);
+            $tva = (float) ($line['tva'] ?? 0);
+
+            $lineHt = max(($quantite * $prix) - $remise, 0);
+            $lineTvaAmount = $lineHt * ($tva / 100);
+            $lineTtc = $lineHt + $lineTvaAmount;
+
+            $totalHt += $lineHt;
+            $totalTva += $lineTvaAmount;
+            $totalTtc += $lineTtc;
+
+            $document->documentLines()->create([
+                'product_id' => $line['product_id'],
+                'description' => $line['description'] ?? null,
+                'quantite' => $quantite,
+                'prix_unitaire_ht' => $prix,
+                'remise' => $remise,
+                'tva' => $tva,
+                'total_ht' => $lineHt,
+                'total_ttc' => $lineTtc,
+                'ordre' => $line['ordre'] ?? 0,
+            ]);
+        }
+
+        return [
+            'total_ht' => $totalHt,
+            'total_tva' => $totalTva,
+            'total_ttc' => $totalTtc,
+        ];
+    }
+
+    private function applyStockMovement(array $lines, int $direction): void
+    {
+        foreach ($lines as $line) {
+            $productId = $line['product_id'] ?? null;
+            $quantite = (float) ($line['quantite'] ?? 0);
+
+            if (!$productId || $quantite <= 0) {
+                throw new \InvalidArgumentException('Ligne de document invalide pour la mise a jour du stock.');
+            }
+
+            $product = Product::whereKey($productId)->lockForUpdate()->first();
+
+            if (!$product) {
+                throw new \InvalidArgumentException("Produit introuvable: {$productId}");
+            }
+
+            $product->increment('quantite_stock', $direction * $quantite);
+        }
+    }
+
+    private function ensureProductsExist(array $lines): void
+    {
+        $productIds = collect($lines)
+            ->pluck('product_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($productIds->isEmpty()) {
+            throw new \InvalidArgumentException('Aucun produit valide dans les lignes du document.');
+        }
+
+        $existingCount = Product::whereIn('id', $productIds)->count();
+
+        if ($existingCount !== $productIds->count()) {
+            throw new \InvalidArgumentException('Un ou plusieurs produits sont introuvables.');
+        }
+    }
 }
