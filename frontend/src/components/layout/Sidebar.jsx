@@ -8,7 +8,6 @@ import {
   FaTruck,
   FaBox,
   FaTags,
-  FaCog,
   FaFileAlt,
   FaCreditCard,
   FaBuilding,
@@ -27,7 +26,7 @@ const resolveLogoPathToUrl = (logoPath) => {
 };
 
 const NAV_ITEMS = [
-  { label: "Tableau de bord", path: "/home", icon: FaChartLine },
+  { label: "Tableau de bord", path: "/dashboard", icon: FaChartLine },
   { label: "", separator: true },
 
   // --- Partie CRM ---
@@ -44,7 +43,6 @@ const NAV_ITEMS = [
   { label: "", separator: true },
   { label: "Finance", category: true },
   { label: "Documents", path: "/documents", icon: FaFileAlt },
-  { label: "Paiements", path: "/payments", icon: FaCreditCard },
 
   { label: "Chèques", path: "/cheques", icon: FaCreditCard },
   { label: "Crédits", path: "/credits", icon: FaCreditCard },
@@ -55,7 +53,6 @@ const NAV_ITEMS = [
   { label: "Configuration", category: true },
   { label: "Mon entreprise", path: "/companies", icon: FaBuilding },
 
-  { label: "Paramètres", path: "/settings", icon: FaCog },
 ];
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
