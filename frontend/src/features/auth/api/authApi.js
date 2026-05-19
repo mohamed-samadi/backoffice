@@ -59,6 +59,7 @@ export const authApi = {
     }),
 
   login: (credentials) => api.post("/login", credentials),
+  register: (payload) => api.post("/register", payload),
   logout: () => api.post("/logout"),
   me: () => api.get("/me"),
   updateProfile: (payload) => api.put("/me", payload),

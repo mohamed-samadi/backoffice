@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login, clearError } from "../../features/auth/slice/authSlice";
 import styles from "./LoginPage.module.css";
 
@@ -146,9 +146,10 @@ export default function LoginPage() {
         </form>
 
         <p className={styles.footer}>
-          Accès réservé à l'administrateur
+          Pas encore de compte ? <Link to="/register">Creer un utilisateur</Link>
         </p>
       </div>
     </div>
   );
 }
+

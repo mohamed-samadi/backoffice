@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -12,120 +12,107 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    /**
-     * ─── POST /api/login ──────────────────────────────────────────────────
-     * تسجيل دخول المستخدم وتوليد الجلسة
-     */
-    // ─── POST /api/register ───────────────────────────────────────────────
-public function register(Request $request): JsonResponse
-{
-    // 1. التحقق من البيانات المدخلة
-    $data = $request->validate([
-        'name'       => ['required', 'string', 'max:255'],
-        'email'      => ['required', 'string', 'email', 'max:255', 'unique:users'],
-        'password'   => ['required', 'string', 'min:8', 'confirmed'], //Confirmed تعني أنه يجب إرسال حقل password_confirmation
-        'company_id' => ['nullable', 'exists:companies,id'], // التأكد من أن الشركة موجودة في قاعدة البيانات إذا أُرسلت
-    ]);
-
-    // 2. إنشاء المستخدم (التشفيير يتم تلقائياً بفضل الـ Cast في الموديل)
-    $user = User::create($data);
-
-    // 3. تسجيل الدخول تلقائياً بعد التسجيل (اختياري، حسب رغبتك)
-    Auth::login($user);
-    $request->session()->regenerate();
-    return response()->json([
-        'success' => true,
-        'message' => 'تم إنشاء الحساب وتسجيل الدخول بنجاح.',
-        'user'    => [
-            'id'         => $user->id,
-            'name'       => $user->name,
-            'email'      => $user->email,
-            'created_at' => $user->created_at,
-        ],
-    ], 201); // 201 تعني Created
-}
-    public function login(Request $request): JsonResponse
+    public function register(Request $request): JsonResponse
     {
-        // 1. التحقق من المدخلات
-        $credentials = $request->validate([
-            'email'    => ['required', 'email', 'max:255'],
-            'password' => ['required', 'string', 'min:8', 'max:255'],
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'company_id' => ['nullable', 'exists:companies,id'],
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'email.required' => 'L adresse email est obligatoire.',
+            'email.email' => 'L adresse email est invalide.',
+            'email.unique' => 'Cette adresse email est deja utilisee.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'company_id.exists' => 'La societe selectionnee est introuvable.',
         ]);
 
-        // 2. محاولة تسجيل الدخول (Auth::attempt تقوم بالتحقق من الإيميل وتشفير كلمة المرور تلقائياً)
-        if (!Auth::attempt($credentials, remember: $request->boolean('remember', false))) {
-            // إرسال خطأ موحد ومبهم لأسباب أمنية (حتى لا يعرف المخترق هل الإيميل أم كلمة المرور هي الخاطئة)
+        $data['password'] = Hash::make($data['password']);
+
+        $user = User::create($data);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Compte cree avec succes.',
+            'user' => $this->userPayload($user),
+        ], 201);
+    }
+
+    public function login(Request $request): JsonResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'max:255'],
+        ], [
+            'email.required' => 'L adresse email est obligatoire.',
+            'email.email' => 'L adresse email est invalide.',
+            'password.required' => 'Le mot de passe est obligatoire.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+        ]);
+
+        if (!Auth::attempt($credentials, $request->boolean('remember', false))) {
+            if ($this->loginLegacyPlainPasswordUser($request, $credentials)) {
+                /** @var User $user */
+                $user = Auth::user();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Connexion reussie.',
+                    'user' => $this->userPayload($user),
+                ]);
+            }
+
             throw ValidationException::withMessages([
-                'email' => ['البيانات المدخلة غير متطابقة مع سجلاتنا.'],
+                'email' => ['Adresse email ou mot de passe incorrect.'],
             ]);
         }
 
-        // 3. حماية ضد هجمات تثبيت الجلسة (Session Fixation) عبر تجديد معرف الجلسة
         $request->session()->regenerate();
 
-        // 4. جلب بيانات المستخدم المتصل حالياً
         /** @var User $user */
         $user = Auth::user();
 
-        // 5. إرجاع بيانات المستخدم بنجاح
         return response()->json([
             'success' => true,
-            'message' => 'تم تسجيل الدخول بنجاح.',
-            'user'    => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'created_at' => $user->created_at,
-            ],
-        ], 200);
+            'message' => 'Connexion reussie.',
+            'user' => $this->userPayload($user),
+        ]);
     }
 
-    /**
-     * ─── POST /api/logout ─────────────────────────────────────────────────
-     * تسجيل خروج المستخدم وتدمير الجلسة والتوكنز
-     */
     public function logout(Request $request): JsonResponse
     {
-        // 1. تسجيل الخروج من الـ Guard الخاص بـ Web (وهو المستخدم في Sanctum SPA)
         Auth::guard('web')->logout();
 
-        // 2. تدمير الجلسة الحالية وإلغاء صلاحيتها تماماً
         $request->session()->invalidate();
-
-        // 3. تجديد توكن الـ CSRF لحماية الطلبات القادمة
         $request->session()->regenerateToken();
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تسجيل الخروج بنجاح.',
-        ], 200);
+            'message' => 'Deconnexion reussie.',
+        ]);
     }
 
-    /**
-     * ─── GET /api/me ──────────────────────────────────────────────────────
-     * جلب بيانات المستخدم المتصل حالياً (مهمة جداً للـ React لمعرفة حالة الـ Auth عند تحديث الصفحة)
-     */
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        // حماية إضافية في حال تم استدعاء الدالة بدون حماية الـ Middleware
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'غير مصرح بالدخول، يرجى تسجيل الدخول أولاً.',
+                'message' => 'Vous devez etre connecte pour acceder a cette ressource.',
             ], 401);
         }
 
         return response()->json([
             'success' => true,
-            'user'    => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'created_at' => $user->created_at,
-            ],
-        ], 200);
+            'user' => $this->userPayload($user),
+        ]);
     }
 
     public function updateProfile(Request $request): JsonResponse
@@ -135,7 +122,7 @@ public function register(Request $request): JsonResponse
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Non autorise.',
+                'message' => 'Vous devez etre connecte pour modifier votre profil.',
             ], 401);
         }
 
@@ -148,6 +135,13 @@ public function register(Request $request): JsonResponse
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required' => 'Le nom est obligatoire.',
+            'email.required' => 'L adresse email est obligatoire.',
+            'email.email' => 'L adresse email est invalide.',
+            'email.unique' => 'Cette adresse email est deja utilisee.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caracteres.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
 
         $user->name = $data['name'];
@@ -162,12 +156,38 @@ public function register(Request $request): JsonResponse
         return response()->json([
             'success' => true,
             'message' => 'Profil mis a jour avec succes.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'created_at' => $user->created_at,
-            ],
-        ], 200);
+            'user' => $this->userPayload($user),
+        ]);
+    }
+
+    private function userPayload(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'created_at' => $user->created_at,
+        ];
+    }
+
+    private function loginLegacyPlainPasswordUser(Request $request, array $credentials): bool
+    {
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || Hash::isHashed($user->password)) {
+            return false;
+        }
+
+        if (!hash_equals($user->password, $credentials['password'])) {
+            return false;
+        }
+
+        $user->password = Hash::make($credentials['password']);
+        $user->save();
+
+        Auth::login($user, $request->boolean('remember', false));
+        $request->session()->regenerate();
+
+        return true;
     }
 }

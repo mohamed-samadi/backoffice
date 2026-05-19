@@ -44,6 +44,26 @@ export const fetchMe = createAsyncThunk(
   }
 );
 
+export const register = createAsyncThunk(
+  "auth/register",
+  async (payload, { rejectWithValue }) => {
+    try {
+      await authApi.getCsrfCookie();
+      const response = await authApi.register(payload);
+      return response.data.user;
+    } catch (error) {
+      const errors = error.response?.data?.errors;
+      return rejectWithValue(
+        errors?.email?.[0] ||
+        errors?.password?.[0] ||
+        errors?.name?.[0] ||
+        error.response?.data?.message ||
+        "Erreur lors de la creation du compte."
+      );
+    }
+  }
+);
+
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
   async (payload, { rejectWithValue }) => {
@@ -92,6 +112,24 @@ const authSlice = createSlice({
         state.isAuthenticated= false;
         state.user           = null;
         state.error          = action.payload;
+      });
+
+    builder
+      .addCase(register.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.error = action.payload;
       });
 
     // ── logout ───────────────────────────────────────────────

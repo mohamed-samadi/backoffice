@@ -17,12 +17,14 @@ import NotificationsPage from "../pages/notifications/NotificationsPage";
 import CompanyPage from "../pages/companies/CompanyPage";
 import UserProfilePage from "../pages/profile/UserProfilePage";
 import AuthGuard from "./AuthGuard";
-import LoginPage from "../pages/login/LoginPage.jsx";
+import LoginPage from "../pages/login/LoginPage.jsx.jsx";
+import RegisterPage from "../pages/register/RegisterPage";
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
          <Route path="/login" element={<LoginPage />} />
+         <Route path="/register" element={<RegisterPage />} />
           <Route element={<AuthGuard />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
