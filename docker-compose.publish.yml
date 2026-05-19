@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: ${DOCKERHUB_NAMESPACE:-your-dockerhub-username}/backoffice-backend:${IMAGE_TAG:-latest}
+    build:
+      context: ./backend
+
+  frontend:
+    image: ${DOCKERHUB_NAMESPACE:-your-dockerhub-username}/backoffice-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+        VITE_STORAGE_URL: /storage
